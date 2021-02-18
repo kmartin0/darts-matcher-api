@@ -10,14 +10,11 @@ matchesSchemaValidator = {
             _id: {
                 bsonType: 'objectId'
             },
-            player1: {
-                bsonType: 'objectId'
-            },
-            player2: {
-                bsonType: [
-                    'objectId',
-                    'null'
-                ]
+            players: {
+                bsonType: 'array',
+                items: {
+                    bsonType: 'objectId'
+                }
             },
             startDate: {
                 bsonType: 'date'
@@ -41,10 +38,7 @@ matchesSchemaValidator = {
                 ]
             },
             throwFirst: {
-                'enum': [
-                    'player1',
-                    'player2'
-                ]
+                bsonType: 'objectId'
             },
             bestOf: {
                 bsonType: 'object',
@@ -58,126 +52,95 @@ matchesSchemaValidator = {
                 }
             },
             result: {
-                properties: {
-                    winner: {
-                        'enum': [
-                            'player1',
-                            'player2'
-                        ]
-                    },
-                    player1: {
-                        bsonType: 'number'
-                    },
-                    player2: {
-                        bsonType: 'number'
-                    }
-                }
-            },
-            statistics: {
                 bsonType: 'object',
                 properties: {
-                    player1: {
-                        properties: {
-                            average: {
-                                bsonType: 'number'
-                            },
-                            tonPlus: {
-                                bsonType: 'number'
-                            },
-                            tonFourty: {
-                                bsonType: 'number'
-                            },
-                            tonEighty: {
-                                bsonType: 'number'
-                            },
-                            checkoutHighest: {
-                                bsonType: 'number'
-                            },
-                            checkoutTonPlus: {
-                                bsonType: 'number'
-                            },
-                            checkoutPercentage: {
-                                bsonType: 'number'
-                            },
-                            checkoutsMissed: {
-                                bsonType: 'number'
-                            },
-                            checkoutsHit: {
-                                bsonType: 'number'
+                    winner: {
+                        bsonType: 'objectId'
+                    },
+                    players: {
+                        bsonType: 'array',
+                        items: {
+                            properties: {
+                                player: {
+                                    bsonType: 'objectId'
+                                },
+                                score: {
+                                    bsonType: 'number'
+                                }
                             }
                         }
                     },
-                    player2: {
-                        properties: {
-                            average: {
-                                bsonType: 'number'
-                            },
-                            tonPlus: {
-                                bsonType: 'number'
-                            },
-                            tonFourty: {
-                                bsonType: 'number'
-                            },
-                            tonEighty: {
-                                bsonType: 'number'
-                            },
-                            checkoutHighest: {
-                                bsonType: 'number'
-                            },
-                            checkoutTonPlus: {
-                                bsonType: 'number'
-                            },
-                            checkoutPercentage: {
-                                bsonType: 'number'
-                            },
-                            checkoutsMissed: {
-                                bsonType: 'number'
-                            },
-                            checkoutsHit: {
-                                bsonType: 'number'
-                            }
+                }
+            },
+            statistics: {
+                bsonType: 'array',
+                items: {
+                    properties: {
+                        player: {
+                            bsonType: 'objectId'
+                        },
+                        average: {
+                            bsonType: 'number'
+                        },
+                        tonPlus: {
+                            bsonType: 'number'
+                        },
+                        tonFourty: {
+                            bsonType: 'number'
+                        },
+                        tonEighty: {
+                            bsonType: 'number'
+                        },
+                        checkoutHighest: {
+                            bsonType: 'number'
+                        },
+                        checkoutTonPlus: {
+                            bsonType: 'number'
+                        },
+                        checkoutPercentage: {
+                            bsonType: 'number'
+                        },
+                        checkoutsMissed: {
+                            bsonType: 'number'
+                        },
+                        checkoutsHit: {
+                            bsonType: 'number'
                         }
                     }
                 }
             },
             timeline: {
                 bsonType: 'array',
-                properties: {
-                    set: {
-                        bsonType: 'number'
-                    },
-                    leg: {
-                        bsonType: 'number'
-                    },
-                    winner: {
-                        'enum': [
-                            'player1',
-                            'player2'
-                        ]
-                    },
-                    doublesMissed: {
-                        bsonType: 'object',
-                        properties: {
-                            player1: {
-                                bsonType: 'number'
-                            },
-                            player2: {
-                                bsonType: 'number'
-                            }
-                        }
-                    },
-                    matchDart: {
-                        bsonType: 'number'
-                    },
-                    scoring: {
-                        bsonType: 'array',
-                        items: {
-                            properties: {
-                                player1: {
-                                    bsonType: 'number'
-                                },
-                                player2: {
-                                    bsonType: 'number'
+                items: {
+                    properties: {
+                        set: {
+                            bsonType: 'number'
+                        },
+                        leg: {
+                            bsonType: 'number'
+                        },
+                        winner: {
+                            bsonType: 'objectId'
+                        },
+                        dartsUsedFinalThrow: {
+                            bsonType: 'number'
+                        },
+                        players: {
+                            bsonType: 'array',
+                            items: {
+                                properties: {
+                                    player: {
+                                        bsonType: 'objectId'
+                                    },
+                                    doublesMissed: {
+                                        bsonType: 'number'
+                                    },
+                                    scoring: {
+                                        bsonType: 'array',
+                                        items: {
+                                            bsonType: 'number'
+                                        }
+                                    }
                                 }
                             }
                         }

@@ -6,7 +6,3 @@ load(projectPath + "src/main/resources/db/users-create-collection.js")
 load(projectPath + "src/main/resources/db/password-tokens-create-collection.js")
 load(projectPath + "src/main/resources/db/matches-create-collection.js")
 load(projectPath + "src/main/resources/db/insert-test-data.js")
-
-// load("C:/Users/kevin/Documents/git-projects/darts-matcher/src/main/resources/db/run-all.js")
-
-// load("C:/Users/kevin/Documents/git-projects/darts-matcher/src/main/resources/db/insert-test-data.js")

@@ -19,7 +19,7 @@ clientDetailsResult = db.client_details.insert([
 ])
 print(clientDetailsResult)
 
-// // ========================= USERS =========================
+// ========================= USERS =========================
 
 // Create reference user id's
 user1ObjectId = ObjectId()
@@ -67,24 +67,35 @@ print(passwordResult)
 // Insert Matches
 matchesResult = db.matches.insert([
     {
-        "player1": user1ObjectId,
-        "player2": user2ObjectId,
+        "players": [
+            user1ObjectId,
+            user2ObjectId
+        ],
         "startDate": new Date("2021-01-02T14:12:00Z"),
         "endDate": new Date("2021-01-02T14:32:00Z"),
         "gameType": "501",
         "gameStatus": "concluded",
-        "throwFirst": "player1",
+        "throwFirst": user1ObjectId,
         "bestOf": {
             "legs": 3,
             "sets": 1
         },
         "result": {
-            "winner": "player1",
-            "player1": 2,
-            "player2": 1
+            "winner": user1ObjectId,
+            "players": [
+                {
+                    "player": user1ObjectId,
+                    "score": 1
+                },
+                {
+                    "player": user2ObjectId,
+                    "score": 0
+                }
+            ]
         },
-        "statistics": {
-            "player1": {
+        "statistics": [
+            {
+                "player": user1ObjectId,
                 "average": 113,
                 "tonPlus": 3,
                 "tonFourty": 4,
@@ -95,7 +106,8 @@ matchesResult = db.matches.insert([
                 "checkoutsMissed": 5,
                 "checkoutsHit": 2
             },
-            "player2": {
+            {
+                "player": user2ObjectId,
                 "average": 113,
                 "tonPlus": 2,
                 "tonFourty": 0,
@@ -106,74 +118,63 @@ matchesResult = db.matches.insert([
                 "checkoutsMissed": 0,
                 "checkoutsHit": 1
             }
-        },
-        "timeline": [{
-            "set": 1,
-            "leg": 1,
-            "winner": "player1",
-            "doublesMissed": {
-                "player1": 3,
-                "player2": 0
+        ],
+        "timeline": [
+            {
+                "set": 1,
+                "leg": 1,
+                "winner": user1ObjectId,
+                "dartsUsedFinalThrow": 2,
+                "players": [
+                    {
+                        "player": user1ObjectId,
+                        "doublesMissed": 3,
+                        "scoring": [140, 100, 90, 140, 31]
+                    },
+                    {
+                        "player": user2ObjectId,
+                        "doublesMissed": 0,
+                        "scoring": [120, 88, 27, 180]
+                    }
+                ]
             },
-            "matchDart": 2,
-            "scoring": [{
-                "player1": 140,
-                "player2": 120
-            }, {
-                "player1": 100,
-                "player2": 88
-            }, {
-                "player1": 90,
-                "player2": 27
-            }, {
-                "player1": 140,
-                "player2": 180
-            }, {
-                "player1": 31
-            }]
-        }, {
-            "set": 1,
-            "leg": 2,
-            "winner": "player2",
-            "doublesMissed": {
-                "player1": 0,
-                "player2": 0
+            {
+                "set": 1,
+                "leg": 2,
+                "winner": user2ObjectId,
+                "dartsUsedFinalThrow": 3,
+                "players": [
+                    {
+                        "player": user1ObjectId,
+                        "doublesMissed": 0,
+                        "scoring": [140, 100]
+                    },
+                    {
+                        "player": user2ObjectId,
+                        "doublesMissed": 0,
+                        "scoring": [180, 180, 141]
+                    }
+                ]
             },
-            "matchDart": 3,
-            "scoring": [{
-                "player1": 140,
-                "player2": 180
-            }, {
-                "player1": 100,
-                "player2": 180
-            }, {
-                "player2": 141
-            }]
-        }, {
-            "set": 1,
-            "leg": 3,
-            "winner": "player1",
-            "doublesMissed": {
-                "player1": 2,
-                "player2": 0
-            },
-            "matchDart": 2,
-            "scoring": [{
-                "player1": 121,
-                "player2": 120
-            }, {
-                "player1": 180,
-                "player2": 88
-            }, {
-                "player1": 90,
-                "player2": 27
-            }, {
-                "player1": 90,
-                "player2": 43
-            }, {
-                "player1": 20
-            }]
-        }],
+            {
+                "set": 1,
+                "leg": 3,
+                "winner": user1ObjectId,
+                "dartsUsedFinalThrow": 2,
+                "players": [
+                    {
+                        "player": user1ObjectId,
+                        "doublesMissed": 2,
+                        "scoring": [121, 180, 90, 90, 20]
+                    },
+                    {
+                        "player": user2ObjectId,
+                        "doublesMissed": 0,
+                        "scoring": [120, 88, 27, 43]
+                    }
+                ]
+            }
+        ],
         "_class": "Match"
     }
 ])
