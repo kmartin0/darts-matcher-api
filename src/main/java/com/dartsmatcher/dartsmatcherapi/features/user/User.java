@@ -25,7 +25,6 @@ public class User {
 	@MongoId
 	private ObjectId id;
 
-	@Indexed(unique = true)
 	@NotBlank(groups = {Create.class, Update.class})
 	@Length(groups = {Create.class, Update.class}, min = 4, max = 24)
 	@NoWhitespace(groups = {Create.class, Update.class})
@@ -37,7 +36,6 @@ public class User {
 	@NotBlank(groups = {Create.class, Update.class})
 	private String lastName;
 
-	@Indexed(unique = true)
 	@NotBlank(groups = {Create.class, Update.class})
 	@Email(groups = {Create.class, Update.class})
 	private String email;

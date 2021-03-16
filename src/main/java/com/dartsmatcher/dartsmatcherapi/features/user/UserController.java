@@ -5,6 +5,7 @@ import com.dartsmatcher.dartsmatcherapi.features.user.password.change.ChangePass
 import com.dartsmatcher.dartsmatcherapi.features.user.password.forgot.ForgotPasswordDto;
 import com.dartsmatcher.dartsmatcherapi.features.user.password.reset.ResetPasswordDto;
 import com.dartsmatcher.dartsmatcherapi.utils.Endpoints;
+import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,6 +36,14 @@ public class UserController {
 	public User getAuthenticatedUser() {
 
 		return userService.getAuthenticatedUser();
+	}
+
+	@GetMapping(path = Endpoints.GET_USER_BY_ID)
+	@ResponseStatus(HttpStatus.OK)
+	@PreAuthorize("isAuthenticated()")
+	public User getUserById(@PathVariable ObjectId id) {
+
+		return userService.getUser(id);
 	}
 
 	@PutMapping(path = Endpoints.UPDATE_USER)

@@ -10,6 +10,7 @@ import com.dartsmatcher.dartsmatcherapi.features.user.password.reset.PasswordTok
 import com.dartsmatcher.dartsmatcherapi.features.user.password.reset.PasswordTokenRepository;
 import com.dartsmatcher.dartsmatcherapi.features.user.password.reset.ResetPasswordDto;
 import com.dartsmatcher.dartsmatcherapi.utils.MessageResolver;
+import org.bson.types.ObjectId;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -95,6 +97,11 @@ public class UserServiceImpl implements IUserService {
 		} else {
 			throw new AuthenticationCredentialsNotFoundException(messageResolver.getMessage("exception.authentication.credentials.not.found"));
 		}
+	}
+
+	@Override
+	public User getUser(ObjectId userId) {
+		return userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException(User.class, userId));
 	}
 
 	/**

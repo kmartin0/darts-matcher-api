@@ -1,4 +1,4 @@
-package com.dartsmatcher.dartsmatcherapi.utils;
+package com.dartsmatcher.dartsmatcherapi.serializers;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;

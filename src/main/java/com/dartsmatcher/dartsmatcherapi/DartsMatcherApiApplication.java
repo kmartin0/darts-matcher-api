@@ -3,7 +3,7 @@ package com.dartsmatcher.dartsmatcherapi;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-// TODO: Refactor packages, module and configuration name to reflect the pom changes (groupId, artifactId, name)
+// TODO: Copy ConstrainViolationException handler into boilerplate
 @SpringBootApplication
 public class DartsMatcherApiApplication {
 

@@ -4,10 +4,12 @@ import com.dartsmatcher.dartsmatcherapi.features.user.password.change.ChangePass
 import com.dartsmatcher.dartsmatcherapi.features.user.password.forgot.ForgotPasswordDto;
 import com.dartsmatcher.dartsmatcherapi.features.user.password.PasswordDto;
 import com.dartsmatcher.dartsmatcherapi.features.user.password.reset.ResetPasswordDto;
+import org.bson.types.ObjectId;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 @Validated
 public interface IUserService {
@@ -17,6 +19,9 @@ public interface IUserService {
 
 	@PreAuthorize("isAuthenticated()")
 	User getAuthenticatedUser();
+
+	@PreAuthorize("isAuthenticated()")
+	User getUser(@NotNull ObjectId userId);
 
 	@Validated({User.Update.class})
 	@PreAuthorize("isAuthenticated()")

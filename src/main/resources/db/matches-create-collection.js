@@ -11,10 +11,19 @@ matchesSchemaValidator = {
                 bsonType: 'objectId'
             },
             players: {
-                bsonType: 'array',
-                items: {
-                    bsonType: 'objectId'
-                }
+                bsonType: 'object',
+                registered: {
+                    bsonType: 'array',
+                    items: {
+                        bsonType: 'objectId'
+                    }
+                },
+                anonymous: {
+                    bsonType: 'array',
+                    items: {
+                        bsonType: 'string'
+                    }
+                },
             },
             startDate: {
                 bsonType: 'date'
@@ -22,23 +31,23 @@ matchesSchemaValidator = {
             endDate: {
                 bsonType: 'date'
             },
-            gameType: {
+            matchType: {
                 'enum': [
-                    '101',
-                    '201',
-                    '301',
-                    '401',
-                    '501'
+                    'MATCH_101',
+                    'MATCH_201',
+                    'MATCH_301',
+                    'MATCH_401',
+                    'MATCH_501'
                 ]
             },
-            gameStatus: {
+            matchStatus: {
                 'enum': [
-                    'in-play',
-                    'concluded'
+                    'IN_PLAY',
+                    'CONCLUDED'
                 ]
             },
             throwFirst: {
-                bsonType: 'objectId'
+                bsonType: 'objectId|string'
             },
             bestOf: {
                 bsonType: 'object',
@@ -48,28 +57,33 @@ matchesSchemaValidator = {
                     },
                     sets: {
                         bsonType: 'number'
+                    },
+                    type: {
+                        'enum': [
+                            'SETS',
+                            'LEGS'
+                        ]
                     }
                 }
             },
             result: {
-                bsonType: 'object',
-                properties: {
-                    winner: {
-                        bsonType: 'objectId'
-                    },
-                    players: {
-                        bsonType: 'array',
-                        items: {
-                            properties: {
-                                player: {
-                                    bsonType: 'objectId'
-                                },
-                                score: {
-                                    bsonType: 'number'
-                                }
-                            }
+                bsonType: 'array',
+                items: {
+                    properties: {
+                        player: {
+                            bsonType: 'objectId|string'
+                        },
+                        score: {
+                            bsonType: 'number'
+                        },
+                        result: {
+                            'enum': [
+                                'WIN',
+                                'LOSE',
+                                'DRAW'
+                            ]
                         }
-                    },
+                    }
                 }
             },
             statistics: {
@@ -77,7 +91,7 @@ matchesSchemaValidator = {
                 items: {
                     properties: {
                         player: {
-                            bsonType: 'objectId'
+                            bsonType: 'objectId|string'
                         },
                         average: {
                             bsonType: 'number'
@@ -85,7 +99,7 @@ matchesSchemaValidator = {
                         tonPlus: {
                             bsonType: 'number'
                         },
-                        tonFourty: {
+                        tonForty: {
                             bsonType: 'number'
                         },
                         tonEighty: {
@@ -116,29 +130,39 @@ matchesSchemaValidator = {
                         set: {
                             bsonType: 'number'
                         },
-                        leg: {
-                            bsonType: 'number'
-                        },
                         winner: {
-                            bsonType: 'objectId'
+                            bsonType: 'objectId|string'
                         },
-                        dartsUsedFinalThrow: {
-                            bsonType: 'number'
-                        },
-                        players: {
+                        legs: {
                             bsonType: 'array',
                             items: {
                                 properties: {
-                                    player: {
-                                        bsonType: 'objectId'
-                                    },
-                                    doublesMissed: {
+                                    leg: {
                                         bsonType: 'number'
                                     },
-                                    scoring: {
+                                    winner: {
+                                        bsonType: 'objectId|string'
+                                    },
+                                    dartsUsedFinalThrow: {
+                                        bsonType: 'number'
+                                    },
+                                    players: {
                                         bsonType: 'array',
                                         items: {
-                                            bsonType: 'number'
+                                            properties: {
+                                                player: {
+                                                    bsonType: 'objectId|string'
+                                                },
+                                                doublesMissed: {
+                                                    bsonType: 'number'
+                                                },
+                                                scoring: {
+                                                    bsonType: 'array',
+                                                    items: {
+                                                        bsonType: 'number'
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
                                 }
