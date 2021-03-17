@@ -12,10 +12,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Target({ FIELD, METHOD, PARAMETER, ANNOTATION_TYPE })
 @Retention(RUNTIME)
-@Constraint(validatedBy = AnonymousNameValidator.class)
+@Constraint(validatedBy = NoReservedNamesValidator.class)
 @Documented
-public @interface AnonymousName {
-	String message() default "{message.anonymous.name.not.allowed}";
+public @interface NoReservedNames {
+	String message() default "{message.username.not.allowed}";
 	Class<?>[] groups() default { };
 	Class<? extends Payload>[] payload() default { };
 }

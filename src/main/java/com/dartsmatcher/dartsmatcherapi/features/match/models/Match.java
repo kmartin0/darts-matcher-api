@@ -10,9 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
@@ -25,10 +23,6 @@ public class Match {
 
 	@MongoId
 	private ObjectId id;
-
-	@NotNull
-	@Valid
-	private MatchPlayers players;
 
 	@NotNull
 	private LocalDateTime startDate;
@@ -48,17 +42,12 @@ public class Match {
 	@NotNull
 	private MatchBestOf bestOf;
 
+	@NotNull
 	@Valid
-	private ArrayList<PlayerResult> result;
+	private ArrayList<MatchPlayer> players;
 
-	@Valid
-	private ArrayList<MatchPlayerStatistics> statistics;
-
-	@Valid
-	private ArrayList<MatchSet> timeline;
-
-	public void updateResultAndStatistics(Clock clock) {
-		MatchUtils.updateMatchStatisticsAndResult(this, clock);
+	public void updateStatistics() {
+		MatchUtils.updateMatchStatistics(this);
 	}
 
 }

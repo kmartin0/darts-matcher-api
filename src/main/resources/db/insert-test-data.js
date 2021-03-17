@@ -67,119 +67,6 @@ print(passwordResult)
 // Insert Matches
 matchesResult = db.matches.insert([
     {
-        "players": {
-            registered: [
-                user1ObjectId,
-                user2ObjectId
-            ],
-        },
-        "startDate": new Date("2021-01-02T14:12:00Z"),
-        "endDate": new Date("2021-01-02T14:32:00Z"),
-        "matchType": "MATCH_501",
-        "matchStatus": "CONCLUDED",
-        "throwFirst": user1ObjectId,
-        "bestOf": {
-            "legs": 3,
-            "sets": 1,
-            "bestOfType": "LEGS"
-        },
-        "result": [
-            {
-                "player": user1ObjectId,
-                "score": 2,
-                "result": "WIN"
-            },
-            {
-                "player": user2ObjectId,
-                "score": 1,
-                "result": "LOSE"
-            }
-        ],
-        "statistics": [
-            {
-                "player": user1ObjectId,
-                "pointsThrown": 1242,
-                "dartsThrown": 34,
-                "average": 109,
-                "tonPlus": 3,
-                "tonForty": 3,
-                "tonEighty": 1,
-                "checkoutHighest": 31,
-                "checkoutTonPlus": 0,
-                "checkoutPercentage": 28,
-                "checkoutsMissed": 5,
-                "checkoutsHit": 2
-            },
-            {
-                "player": user2ObjectId,
-                "pointsThrown": 1194,
-                "dartsThrown": 33,
-                "average": 108,
-                "tonPlus": 2,
-                "tonForty": 1,
-                "tonEighty": 3,
-                "checkoutHighest": 141,
-                "checkoutTonPlus": 1,
-                "checkoutPercentage": 100,
-                "checkoutsMissed": 0,
-                "checkoutsHit": 1
-            }
-        ],
-        "timeline": [{
-            "set": 1,
-            "winner": user1ObjectId,
-            "legs": [{
-                "leg": 1,
-                "winner": user1ObjectId,
-                "dartsUsedFinalThrow": 2,
-                "players": [{
-                    "player": user1ObjectId,
-                    "doublesMissed": 3,
-                    "scoring": [140, 100, 90, 140, 31]
-                }, {
-                    "player": user2ObjectId,
-                    "doublesMissed": 0,
-                    "scoring": [120, 88, 27, 180]
-                }]
-            }, {
-                "leg": 2,
-                "winner": user2ObjectId,
-                "dartsUsedFinalThrow": 3,
-                "players": [{
-                    "player": user1ObjectId,
-                    "doublesMissed": 0,
-                    "scoring": [140, 100]
-                }, {
-                    "player": user2ObjectId,
-                    "doublesMissed": 0,
-                    "scoring": [180, 180, 141]
-                }]
-            }, {
-                "leg": 3,
-                "winner": user1ObjectId,
-                "dartsUsedFinalThrow": 2,
-                "players": [{
-                    "player": user1ObjectId,
-                    "doublesMissed": 2,
-                    "scoring": [121, 180, 90, 90, 20]
-                }, {
-                    "player": user2ObjectId,
-                    "doublesMissed": 0,
-                    "scoring": [120, 88, 27, 43]
-                }]
-            }]
-        }],
-        "_class": "Match"
-    },
-    {
-        "players": {
-            registered: [
-                user1ObjectId
-            ],
-            anonymous: [
-                'John Doe'
-            ]
-        },
         "startDate": new Date("2021-01-02T14:12:00Z"),
         "endDate": new Date("2021-01-02T14:32:00Z"),
         "matchType": "MATCH_501",
@@ -190,92 +77,94 @@ matchesResult = db.matches.insert([
             "sets": 1,
             "type": "LEGS"
         },
-        "result": [
-            {
-                "player": user1ObjectId,
-                "score": 2,
-                "result": "WIN"
-            },
-            {
-                "player": 'John Doe',
-                "score": 1,
-                "result": "LOSE"
-            }
-        ],
-        "statistics": [
-            {
-                "player": user1ObjectId,
-                "pointsThrown": 1242,
-                "dartsThrown": 34,
-                "average": 109,
-                "tonPlus": 3,
-                "tonForty": 3,
-                "tonEighty": 1,
-                "checkoutHighest": 31,
-                "checkoutTonPlus": 0,
-                "checkoutPercentage": 28,
-                "checkoutsMissed": 5,
-                "checkoutsHit": 2
-            },
-            {
-                "player": 'John Doe',
-                "pointsThrown": 1194,
-                "dartsThrown": 33,
-                "average": 108,
-                "tonPlus": 2,
-                "tonForty": 1,
-                "tonEighty": 3,
-                "checkoutHighest": 141,
-                "checkoutTonPlus": 1,
-                "checkoutPercentage": 100,
-                "checkoutsMissed": 0,
-                "checkoutsHit": 1
-            }
-        ],
-        "timeline": [{
-            "set": 1,
-            "winner": user1ObjectId,
-            "legs": [{
-                "leg": 1,
-                "winner": user1ObjectId,
-                "dartsUsedFinalThrow": 2,
-                "players": [{
-                    "player": user1ObjectId,
-                    "doublesMissed": 3,
-                    "scoring": [140, 100, 90, 140, 31]
-                }, {
-                    "player": 'John Doe',
-                    "doublesMissed": 0,
-                    "scoring": [120, 88, 27, 180]
-                }]
-            }, {
-                "leg": 2,
-                "winner": 'John Doe',
-                "dartsUsedFinalThrow": 3,
-                "players": [{
-                    "player": user1ObjectId,
-                    "doublesMissed": 0,
-                    "scoring": [140, 100]
-                }, {
-                    "player": 'John Doe',
-                    "doublesMissed": 0,
-                    "scoring": [180, 180, 141]
-                }]
-            }, {
-                "leg": 3,
-                "winner": user1ObjectId,
-                "dartsUsedFinalThrow": 2,
-                "players": [{
-                    "player": user1ObjectId,
-                    "doublesMissed": 2,
-                    "scoring": [121, 180, 90, 90, 20]
-                }, {
-                    "player": 'John Doe',
-                    "doublesMissed": 0,
-                    "scoring": [120, 88, 27, 43]
+        "players": {
+            "registered": [
+                {
+                    "playerId": {"$oid":"604746a48cf07360fbb28f05"},
+                    "result": {
+                        "score": 2,
+                        "result": "WIN"
+                    },
+                    "statistics": {
+                        "pointsThrown": 1242,
+                        "dartsThrown": 34,
+                        "average": 109,
+                        "tonPlus": 3,
+                        "tonForty": 3,
+                        "tonEighty": 1,
+                        "checkoutHighest": 31,
+                        "checkoutTonPlus": 0,
+                        "checkoutPercentage": 28,
+                        "checkoutsMissed": 5,
+                        "checkoutsHit": 2
+                    },
+                    "timeline": [{
+                        "set": 1,
+                        "result": "WIN",
+                        "legs": [{
+                            "leg": 1,
+                            "result": "WIN",
+                            "dartsUsedFinalThrow": 2,
+                            "doublesMissed": 3,
+                            "scoring": [140, 100, 90, 140, 31]
+                        }, {
+                            "leg": 2,
+                            "result": "LOSE",
+                            "doublesMissed": 0,
+                            "scoring": [140, 100]
+
+                        }, {
+                            "leg": 3,
+                            "result": "WIN",
+                            "dartsUsedFinalThrow": 2,
+                            "doublesMissed": 2,
+                            "scoring": [121, 180, 90, 90, 20]
+                        }]
+                    }]
+                }
+            ],
+            "anonymous": [{
+                "playerId": "John Doe",
+                "result": {
+                    "score": 1,
+                    "result": "LOSE"
+                },
+                "statistics": {
+                    "pointsThrown": 1194,
+                    "dartsThrown": 33,
+                    "average": 108,
+                    "tonPlus": 2,
+                    "tonForty": 1,
+                    "tonEighty": 3,
+                    "checkoutHighest": 141,
+                    "checkoutTonPlus": 1,
+                    "checkoutPercentage": 100,
+                    "checkoutsMissed": 0,
+                    "checkoutsHit": 1
+                },
+                "timeline": [{
+                    "set": 1,
+                    "result": "LOSE",
+                    "legs": [{
+                        "leg": 1,
+                        "result": "LOSE",
+                        "doublesMissed": 0,
+                        "scoring": [120, 88, 27, 180]
+                    }, {
+                        "leg": 2,
+                        "result": "WIN",
+                        "dartsUsedFinalThrow": 3,
+                        "doublesMissed": 0,
+                        "scoring": [180, 180, 141]
+                    }, {
+                        "leg": 3,
+                        "result": "LOSE",
+                        "doublesMissed": 0,
+                        "scoring": [120, 88, 27, 43]
+                    }]
                 }]
             }]
-        }],
+        },
         "_class": "Match"
     }
 ])

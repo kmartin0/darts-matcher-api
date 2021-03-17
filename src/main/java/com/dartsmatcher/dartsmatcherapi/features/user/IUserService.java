@@ -20,7 +20,7 @@ public interface IUserService {
 	@PreAuthorize("isAuthenticated()")
 	User getAuthenticatedUser();
 
-	@PreAuthorize("isAuthenticated()")
+//	@PreAuthorize("isAuthenticated()")
 	User getUser(@NotNull ObjectId userId);
 
 	@Validated({User.Update.class})

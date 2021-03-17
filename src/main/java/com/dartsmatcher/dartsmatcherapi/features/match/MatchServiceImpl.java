@@ -1,17 +1,18 @@
 package com.dartsmatcher.dartsmatcherapi.features.match;
 
 
-import com.dartsmatcher.dartsmatcherapi.exceptionhandler.exception.ForbiddenException;
 import com.dartsmatcher.dartsmatcherapi.exceptionhandler.exception.ResourceNotFoundException;
 import com.dartsmatcher.dartsmatcherapi.features.match.models.Match;
+import com.dartsmatcher.dartsmatcherapi.features.match.models.MatchPlayer;
 import com.dartsmatcher.dartsmatcherapi.features.user.IUserService;
 import com.dartsmatcher.dartsmatcherapi.features.user.User;
 import com.dartsmatcher.dartsmatcherapi.utils.MessageResolver;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
-import java.time.Clock;
+import javax.validation.Validator;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class MatchServiceImpl implements IMatchService {
@@ -20,14 +21,11 @@ public class MatchServiceImpl implements IMatchService {
 
 	private final IUserService userService;
 
-	private final Clock clock;
-
 	private final MessageResolver messageResolver;
 
-	public MatchServiceImpl(MatchRepository matchRepository, IUserService userService, Clock clock, MessageResolver messageResolver) {
+	public MatchServiceImpl(MatchRepository matchRepository, IUserService userService, MessageResolver messageResolver) {
 		this.matchRepository = matchRepository;
 		this.userService = userService;
-		this.clock = clock;
 		this.messageResolver = messageResolver;
 	}
 
@@ -38,13 +36,13 @@ public class MatchServiceImpl implements IMatchService {
 
 		if (match.getPlayers().getRegistered() != null) {
 			// Check if players exist
-			for (ObjectId playerId : match.getPlayers().getRegistered()) {
-				userService.getUser(playerId);
+			for (MatchPlayer<ObjectId> registeredPlayer : match.getPlayers().getRegistered()) {
+				userService.getUser(registeredPlayer.getPlayerId());
 			}
 		}
 
 		// Add statistics and result.
-		match.updateResultAndStatistics(clock);
+		match.updateStatistics();
 
 		return matchRepository.save(match);
 	}
@@ -84,13 +82,13 @@ public class MatchServiceImpl implements IMatchService {
 
 		if (match.getPlayers().getRegistered() != null) {
 			// Check if players exist
-			for (ObjectId playerId : match.getPlayers().getRegistered()) {
-				userService.getUser(playerId);
+			for (MatchPlayer<ObjectId> matchPlayer : match.getPlayers().getRegistered()) {
+				userService.getUser(matchPlayer.getPlayerId());
 			}
 		}
 
-		// Add statistics and result.
-		match.updateResultAndStatistics(clock);
+		// Add statistics.
+		match.updateStatistics();
 
 		return matchRepository.save(match);
 	}
@@ -103,7 +101,12 @@ public class MatchServiceImpl implements IMatchService {
 
 		// If there are more players in the match only remove the authenticated player. Otherwise remove the match.
 		if (matchToDelete.getPlayers().getRegistered().size() > 1) {
-			matchToDelete.getPlayers().getRegistered().remove(user.getId());
+			ArrayList<MatchPlayer<ObjectId>> newPlayers = matchToDelete.getPlayers().getRegistered()
+					.stream()
+					.filter(registeredMatchPlayer -> !registeredMatchPlayer.getPlayerId().equals(user.getId()))
+					.collect(Collectors.toCollection(ArrayList::new));
+
+			matchToDelete.getPlayers().setRegistered(newPlayers);
 			updateMatch(matchToDelete, matchToDelete.getId());
 		} else matchRepository.delete(matchToDelete);
 	}

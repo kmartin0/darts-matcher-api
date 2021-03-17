@@ -2,6 +2,83 @@
 conn = new Mongo()
 db = conn.getDB("darts-matcher")
 
+
+resultEnum = {
+    'enum': [
+        "WIN",
+        "DRAW",
+        "LOSE"
+    ]
+}
+
+result = {
+    score: {bsonType: 'number'},
+    result: resultEnum
+}
+
+statistics = {
+    average: {
+        bsonType: 'number'
+    },
+    tonPlus: {
+        bsonType: 'number'
+    },
+    tonForty: {
+        bsonType: 'number'
+    },
+    tonEighty: {
+        bsonType: 'number'
+    },
+    checkoutHighest: {
+        bsonType: 'number'
+    },
+    checkoutTonPlus: {
+        bsonType: 'number'
+    },
+    checkoutPercentage: {
+        bsonType: 'number'
+    },
+    checkoutsMissed: {
+        bsonType: 'number'
+    },
+    checkoutsHit: {
+        bsonType: 'number'
+    }
+}
+
+timelineItem = {
+    properties: {
+        set: {
+            bsonType: 'number'
+        },
+        result: resultEnum,
+        legs: {
+            bsonType: 'array',
+            items: {
+                properties: {
+                    leg: {
+                        bsonType: 'number'
+                    },
+                    result: resultEnum,
+                    dartsUsedFinalThrow: {
+                        bsonType: 'number'
+                    },
+
+                    doublesMissed: {
+                        bsonType: 'number'
+                    },
+                    scoring: {
+                        bsonType: 'array',
+                        items: {
+                            bsonType: 'number'
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 // The schema validator for the matches collection
 matchesSchemaValidator = {
     $jsonSchema: {
@@ -9,21 +86,6 @@ matchesSchemaValidator = {
         properties: {
             _id: {
                 bsonType: 'objectId'
-            },
-            players: {
-                bsonType: 'object',
-                registered: {
-                    bsonType: 'array',
-                    items: {
-                        bsonType: 'objectId'
-                    }
-                },
-                anonymous: {
-                    bsonType: 'array',
-                    items: {
-                        bsonType: 'string'
-                    }
-                },
             },
             startDate: {
                 bsonType: 'date'
@@ -47,7 +109,10 @@ matchesSchemaValidator = {
                 ]
             },
             throwFirst: {
-                bsonType: 'objectId|string'
+                bsonType: [
+                    'objectId',
+                    'string'
+                ]
             },
             bestOf: {
                 bsonType: 'object',
@@ -66,105 +131,51 @@ matchesSchemaValidator = {
                     }
                 }
             },
-            result: {
-                bsonType: 'array',
-                items: {
-                    properties: {
-                        player: {
-                            bsonType: 'objectId|string'
-                        },
-                        score: {
-                            bsonType: 'number'
-                        },
-                        result: {
-                            'enum': [
-                                'WIN',
-                                'LOSE',
-                                'DRAW'
-                            ]
+            players: {
+                bsonType: 'object',
+                properties: {
+                    registered: {
+                        bsonType: 'array',
+                        items: {
+                            bsonType: 'object',
+                            properties: {
+                                playerId: {
+                                    bsonType: 'objectId'
+                                },
+                                result: {
+                                    bsonType: 'object',
+                                    properties: result
+                                },
+                                statistics: {
+                                    bsonType: 'object',
+                                    properties: statistics
+                                },
+                                timeline: {
+                                    bsonType: 'array',
+                                    items: timelineItem
+                                }
+                            }
                         }
-                    }
-                }
-            },
-            statistics: {
-                bsonType: 'array',
-                items: {
-                    properties: {
-                        player: {
-                            bsonType: 'objectId|string'
-                        },
-                        average: {
-                            bsonType: 'number'
-                        },
-                        tonPlus: {
-                            bsonType: 'number'
-                        },
-                        tonForty: {
-                            bsonType: 'number'
-                        },
-                        tonEighty: {
-                            bsonType: 'number'
-                        },
-                        checkoutHighest: {
-                            bsonType: 'number'
-                        },
-                        checkoutTonPlus: {
-                            bsonType: 'number'
-                        },
-                        checkoutPercentage: {
-                            bsonType: 'number'
-                        },
-                        checkoutsMissed: {
-                            bsonType: 'number'
-                        },
-                        checkoutsHit: {
-                            bsonType: 'number'
-                        }
-                    }
-                }
-            },
-            timeline: {
-                bsonType: 'array',
-                items: {
-                    properties: {
-                        set: {
-                            bsonType: 'number'
-                        },
-                        winner: {
-                            bsonType: 'objectId|string'
-                        },
-                        legs: {
-                            bsonType: 'array',
-                            items: {
-                                properties: {
-                                    leg: {
-                                        bsonType: 'number'
-                                    },
-                                    winner: {
-                                        bsonType: 'objectId|string'
-                                    },
-                                    dartsUsedFinalThrow: {
-                                        bsonType: 'number'
-                                    },
-                                    players: {
-                                        bsonType: 'array',
-                                        items: {
-                                            properties: {
-                                                player: {
-                                                    bsonType: 'objectId|string'
-                                                },
-                                                doublesMissed: {
-                                                    bsonType: 'number'
-                                                },
-                                                scoring: {
-                                                    bsonType: 'array',
-                                                    items: {
-                                                        bsonType: 'number'
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
+                    },
+                    anonymous: {
+                        bsonType: 'array',
+                        items: {
+                            bsonType: 'object',
+                            properties: {
+                                playerId: {
+                                    bsonType: 'string'
+                                },
+                                result: {
+                                    bsonType: 'object',
+                                    properties: result
+                                },
+                                statistics: {
+                                    bsonType: 'object',
+                                    properties: statistics
+                                },
+                                timeline: {
+                                    bsonType: 'array',
+                                    items: timelineItem
                                 }
                             }
                         }
@@ -179,6 +190,8 @@ matchesSchemaValidator = {
 }
 
 // Create the matches collection and add validator.
-db.createCollection("matches", {
+result = db.createCollection("matches", {
     validator: matchesSchemaValidator
 })
+
+print(result)

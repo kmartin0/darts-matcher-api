@@ -6,17 +6,13 @@ import com.dartsmatcher.dartsmatcherapi.utils.MatchUtils;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
-import java.time.Clock;
-
 @Service
-public class LiveMatchServiceImpl implements ILiveMatchService{
+public class LiveMatchServiceImpl implements ILiveMatchService {
 
 	private final MatchRepository matchRepository;
-	private final Clock clock;
 
-	public LiveMatchServiceImpl(MatchRepository matchRepository, Clock clock) {
+	public LiveMatchServiceImpl(MatchRepository matchRepository) {
 		this.matchRepository = matchRepository;
-		this.clock = clock;
 	}
 
 	@Override
@@ -30,7 +26,7 @@ public class LiveMatchServiceImpl implements ILiveMatchService{
 		if (!matchId.equals(match.getId())) throw new IllegalArgumentException("matchId doesn't equal mapping id.");
 
 		// Update match statistics and result.
-		MatchUtils.updateMatchStatisticsAndResult(match, clock);
+		MatchUtils.updateMatchStatistics(match);
 
 		// Save and return the updated match.
 		return matchRepository.save(match);

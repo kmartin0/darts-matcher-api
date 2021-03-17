@@ -3,7 +3,6 @@ package com.dartsmatcher.dartsmatcherapi.features.match.models;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.bson.types.ObjectId;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -13,16 +12,15 @@ import java.util.ArrayList;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MatchSet {
+public class PlayerSet {
 
 	@Min(1)
 	private int set;
 
-	@NotNull
-	private String winner;
+	private ResultType result;
 
 	@NotNull
 	@Valid
-	private ArrayList<MatchLeg> legs;
+	private ArrayList<PlayerLeg> legs;
 
 }
