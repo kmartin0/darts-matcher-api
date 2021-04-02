@@ -1,6 +1,6 @@
 package com.dartsmatcher.dartsmatcherapi.features.user;
 
-import com.dartsmatcher.dartsmatcherapi.validators.anonymousname.NoReservedNames;
+import com.dartsmatcher.dartsmatcherapi.validators.anonymousname.ValidMatchPlayerIds;
 import com.dartsmatcher.dartsmatcherapi.validators.nowhitespace.NoWhitespace;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -28,7 +28,7 @@ public class User {
 	@NotBlank(groups = {Create.class, Update.class})
 	@Length(groups = {Create.class, Update.class}, min = 4, max = 24)
 	@NoWhitespace(groups = {Create.class, Update.class})
-	@NoReservedNames(groups = {Create.class, Update.class})
+	@ValidMatchPlayerIds(groups = {Create.class, Update.class})
 	private String userName;
 
 	@NotBlank(groups = {Create.class, Update.class})

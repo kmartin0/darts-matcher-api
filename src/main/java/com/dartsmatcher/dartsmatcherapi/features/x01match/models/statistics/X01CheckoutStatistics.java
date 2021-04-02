@@ -1,5 +1,4 @@
-package com.dartsmatcher.dartsmatcherapi.features.match.models;
-
+package com.dartsmatcher.dartsmatcherapi.features.x01match.models.statistics;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,19 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MatchPlayerStatistics {
-
-	private int pointsThrown;
-
-	private int dartsThrown;
-
-	private int average;
-
-	private int tonPlus;
-
-	private int tonForty;
-
-	private int tonEighty;
+public class X01CheckoutStatistics {
 
 	private int checkoutHighest;
 

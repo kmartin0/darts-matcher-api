@@ -2,83 +2,6 @@
 conn = new Mongo()
 db = conn.getDB("darts-matcher")
 
-
-resultEnum = {
-    'enum': [
-        "WIN",
-        "DRAW",
-        "LOSE"
-    ]
-}
-
-result = {
-    score: {bsonType: 'number'},
-    result: resultEnum
-}
-
-statistics = {
-    average: {
-        bsonType: 'number'
-    },
-    tonPlus: {
-        bsonType: 'number'
-    },
-    tonForty: {
-        bsonType: 'number'
-    },
-    tonEighty: {
-        bsonType: 'number'
-    },
-    checkoutHighest: {
-        bsonType: 'number'
-    },
-    checkoutTonPlus: {
-        bsonType: 'number'
-    },
-    checkoutPercentage: {
-        bsonType: 'number'
-    },
-    checkoutsMissed: {
-        bsonType: 'number'
-    },
-    checkoutsHit: {
-        bsonType: 'number'
-    }
-}
-
-timelineItem = {
-    properties: {
-        set: {
-            bsonType: 'number'
-        },
-        result: resultEnum,
-        legs: {
-            bsonType: 'array',
-            items: {
-                properties: {
-                    leg: {
-                        bsonType: 'number'
-                    },
-                    result: resultEnum,
-                    dartsUsedFinalThrow: {
-                        bsonType: 'number'
-                    },
-
-                    doublesMissed: {
-                        bsonType: 'number'
-                    },
-                    scoring: {
-                        bsonType: 'array',
-                        items: {
-                            bsonType: 'number'
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
 // The schema validator for the matches collection
 matchesSchemaValidator = {
     $jsonSchema: {
@@ -95,12 +18,11 @@ matchesSchemaValidator = {
             },
             matchType: {
                 'enum': [
-                    'MATCH_101',
-                    'MATCH_201',
-                    'MATCH_301',
-                    'MATCH_401',
-                    'MATCH_501'
+                    'X01'
                 ]
+            },
+            x01: {
+                bsonType: 'number'
             },
             matchStatus: {
                 'enum': [
@@ -132,50 +54,131 @@ matchesSchemaValidator = {
                 }
             },
             players: {
-                bsonType: 'object',
-                properties: {
-                    registered: {
-                        bsonType: 'array',
-                        items: {
+                bsonType: 'array',
+                items: {
+                    bsonType: 'object',
+                    properties: {
+                        playerId: {
+                            bsonType: ['objectId', 'string']
+                        },
+                        playerType: {
+                            enum: [
+                                'REGISTERED',
+                                'ANONYMOUS'
+                            ]
+                        },
+                        result: {
+                            'enum': [
+                                "WIN",
+                                "DRAW",
+                                "LOSE"
+                            ]
+                        },
+                        statistics: {
                             bsonType: 'object',
                             properties: {
-                                playerId: {
-                                    bsonType: 'objectId'
-                                },
-                                result: {
+                                averageStats: {
                                     bsonType: 'object',
-                                    properties: result
+                                    properties: {
+                                        dartsThrown: {
+                                            bsonType: 'number'
+                                        },
+                                        pointsThrown: {
+                                            bsonType: 'number'
+                                        },
+                                        average: {
+                                            bsonType: 'number'
+                                        },
+                                        dartsThrownFirstNine: {
+                                            bsonType: 'number'
+                                        },
+                                        pointsThrownFirstNine: {
+                                            bsonType: 'number'
+                                        },
+                                        averageFirstNine: {
+                                            bsonType: 'number'
+                                        }
+                                    }
                                 },
-                                statistics: {
+                                scoreStats: {
                                     bsonType: 'object',
-                                    properties: statistics
+                                    properties: {
+                                        tonPlus: {
+                                            bsonType: 'number'
+                                        },
+                                        tonForty: {
+                                            bsonType: 'number'
+                                        },
+                                        tonEighty: {
+                                            bsonType: 'number'
+                                        }
+                                    }
                                 },
-                                timeline: {
-                                    bsonType: 'array',
-                                    items: timelineItem
+                                checkoutStats: {
+                                    bsonType: 'object',
+                                    properties: {
+                                        checkoutHighest: {
+                                            bsonType: 'number'
+                                        },
+                                        checkoutTonPlus: {
+                                            bsonType: 'number'
+                                        },
+                                        checkoutPercentage: {
+                                            bsonType: 'number'
+                                        },
+                                        checkoutsMissed: {
+                                            bsonType: 'number'
+                                        },
+                                        checkoutsHit: {
+                                            bsonType: 'number'
+                                        }
+                                    }
                                 }
                             }
-                        }
-                    },
-                    anonymous: {
-                        bsonType: 'array',
-                        items: {
-                            bsonType: 'object',
-                            properties: {
-                                playerId: {
-                                    bsonType: 'string'
-                                },
-                                result: {
-                                    bsonType: 'object',
-                                    properties: result
-                                },
-                                statistics: {
-                                    bsonType: 'object',
-                                    properties: statistics
-                                },
-                                timeline: {
-                                    bsonType: 'array',
-                                    items: timelineItem
+                        },
+                        timeline: {
+                            bsonType: 'array',
+                            items: {
+                                properties: {
+                                    set: {
+                                        bsonType: 'number'
+                                    },
+                                    result: {
+                                        'enum': [
+                                            "WIN",
+                                            "DRAW",
+                                            "LOSE"
+                                        ]
+                                    },
+                                    legs: {
+                                        bsonType: 'array',
+                                        items: {
+                                            properties: {
+                                                leg: {
+                                                    bsonType: 'number'
+                                                },
+                                                result: {
+                                                    'enum': [
+                                                        "WIN",
+                                                        "DRAW",
+                                                        "LOSE"
+                                                    ]
+                                                },
+                                                dartsUsedFinalThrow: {
+                                                    bsonType: 'number'
+                                                },
+                                                doublesMissed: {
+                                                    bsonType: 'number'
+                                                },
+                                                scoring: {
+                                                    bsonType: 'array',
+                                                    items: {
+                                                        bsonType: 'number'
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }

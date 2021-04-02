@@ -1,6 +1,6 @@
-package com.dartsmatcher.dartsmatcherapi.features.match;
+package com.dartsmatcher.dartsmatcherapi.features.x01match;
 
-import com.dartsmatcher.dartsmatcherapi.features.match.models.Match;
+import com.dartsmatcher.dartsmatcherapi.features.x01match.models.X01Match;
 import com.dartsmatcher.dartsmatcherapi.utils.Endpoints;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
@@ -13,26 +13,25 @@ import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 
 @RestController
-public class MatchController {
+public class X01MatchController {
 
-	private final IMatchService matchService;
+	private final IX01MatchService matchService;
 
-	public MatchController(IMatchService matchService) {
+	public X01MatchController(IX01MatchService matchService) {
 		this.matchService = matchService;
 	}
 
 	@PostMapping(path = Endpoints.SAVE_MATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.CREATED)
 	@PreAuthorize("isAuthenticated()")
-	public Match saveMatch(@Valid @RequestBody Match match) {
+	public X01Match saveMatch(@Valid @RequestBody X01Match x01Match) {
 
-		return matchService.saveMatch(match);
+		return matchService.saveMatch(x01Match);
 	}
 
 	@GetMapping(path = Endpoints.GET_MATCH, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.OK)
-//	@PreAuthorize("isAuthenticated()")
-	public Match getMatch(@PathVariable @NotNull ObjectId matchId) {
+	public X01Match getMatch(@PathVariable @NotNull ObjectId matchId) {
 
 		return matchService.getMatch(matchId);
 	}
@@ -40,7 +39,7 @@ public class MatchController {
 	@GetMapping(path = Endpoints.GET_ALL_USER_MATCHES, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.OK)
 	@PreAuthorize("isAuthenticated()")
-	public ArrayList<Match> getUserMatches() {
+	public ArrayList<X01Match> getUserMatches() {
 
 		return matchService.getAuthenticatedUserMatches();
 	}
@@ -48,9 +47,9 @@ public class MatchController {
 	@PutMapping(path = Endpoints.UPDATE_MATCH, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.CREATED)
 	@PreAuthorize("isAuthenticated()")
-	public Match updateMatch(@Valid @RequestBody Match match, @PathVariable ObjectId matchId) {
+	public X01Match updateMatch(@Valid @RequestBody X01Match x01Match, @PathVariable ObjectId matchId) {
 
-		return matchService.updateMatch(match, matchId);
+		return matchService.updateMatch(x01Match, matchId);
 	}
 
 	@DeleteMapping(path = Endpoints.DELETE_MATCH, produces = MediaType.APPLICATION_JSON_VALUE)

@@ -1,27 +1,20 @@
-package com.dartsmatcher.dartsmatcherapi.features.match.models;
+package com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PlayerLeg {
+public class X01PlayerLeg {
 
-	@Min(1)
-	private int leg;
-
-	private ResultType result;
-
-	@Max(3)
-	private int dartsUsedFinalThrow;
+	@NotNull
+	private String playerId;
 
 	private int doublesMissed;
 

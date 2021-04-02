@@ -1,6 +1,7 @@
 package com.dartsmatcher.dartsmatcherapi.exceptionhandler;
 
 import com.dartsmatcher.dartsmatcherapi.exceptionhandler.exception.ForbiddenException;
+import com.dartsmatcher.dartsmatcherapi.exceptionhandler.exception.InvalidArgumentException;
 import com.dartsmatcher.dartsmatcherapi.exceptionhandler.exception.ResourceAlreadyExistsException;
 import com.dartsmatcher.dartsmatcherapi.exceptionhandler.exception.ResourceNotFoundException;
 import com.dartsmatcher.dartsmatcherapi.exceptionhandler.response.ApiErrorCode;
@@ -143,6 +144,21 @@ public class GlobalExceptionHandler {
 				apiErrorCode,
 				messageResolver.getMessage("exception.invalid.arguments"),
 				errors
+		);
+
+		return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());
+	}
+
+	@ExceptionHandler({InvalidArgumentException.class})
+	public ResponseEntity<ErrorResponse> handleInvalidArgumentException(InvalidArgumentException e) {
+		ApiErrorCode apiErrorCode = ApiErrorCode.INVALID_ARGUMENTS;
+
+		ErrorResponse responseBody = new ErrorResponse(
+				apiErrorCode,
+				messageResolver.getMessage("exception.invalid.arguments"),
+				new HashMap<String, String>() {{
+					put(e.getTarget(), e.getError());
+				}}
 		);
 
 		return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());

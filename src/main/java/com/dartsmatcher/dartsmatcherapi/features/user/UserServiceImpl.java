@@ -101,7 +101,12 @@ public class UserServiceImpl implements IUserService {
 
 	@Override
 	public User getUser(ObjectId userId) {
-		return userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException(User.class, userId));
+		User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException(User.class, userId));
+
+		// Email is removed for anonymous requests.
+		user.setEmail(null);
+
+		return user;
 	}
 
 	/**

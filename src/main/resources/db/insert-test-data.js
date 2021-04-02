@@ -69,7 +69,8 @@ matchesResult = db.matches.insert([
     {
         "startDate": new Date("2021-01-02T14:12:00Z"),
         "endDate": new Date("2021-01-02T14:32:00Z"),
-        "matchType": "MATCH_501",
+        "matchType": "X01",
+        "x01": 501,
         "matchStatus": "CONCLUDED",
         "throwFirst": user1ObjectId,
         "bestOf": {
@@ -77,70 +78,82 @@ matchesResult = db.matches.insert([
             "sets": 1,
             "type": "LEGS"
         },
-        "players": {
-            "registered": [
-                {
-                    "playerId": {"$oid":"604746a48cf07360fbb28f05"},
-                    "result": {
-                        "score": 2,
-                        "result": "WIN"
-                    },
-                    "statistics": {
+        "players": [
+            {
+                "playerId": user1ObjectId,
+                "playerType": 'REGISTERED',
+                "result": "WIN",
+                "statistics": {
+                    "averageStats": {
                         "pointsThrown": 1242,
                         "dartsThrown": 34,
                         "average": 109,
+                        "pointsThrownFirstNine": 961,
+                        "dartsThrownFirstNine": 24,
+                        "averageFirstNine": 120
+                    },
+                    "scoreStats": {
                         "tonPlus": 3,
                         "tonForty": 3,
-                        "tonEighty": 1,
+                        "tonEighty": 1
+                    },
+                    "checkoutStats": {
                         "checkoutHighest": 31,
                         "checkoutTonPlus": 0,
                         "checkoutPercentage": 28,
                         "checkoutsMissed": 5,
                         "checkoutsHit": 2
-                    },
-                    "timeline": [{
-                        "set": 1,
-                        "result": "WIN",
-                        "legs": [{
-                            "leg": 1,
-                            "result": "WIN",
-                            "dartsUsedFinalThrow": 2,
-                            "doublesMissed": 3,
-                            "scoring": [140, 100, 90, 140, 31]
-                        }, {
-                            "leg": 2,
-                            "result": "LOSE",
-                            "doublesMissed": 0,
-                            "scoring": [140, 100]
-
-                        }, {
-                            "leg": 3,
-                            "result": "WIN",
-                            "dartsUsedFinalThrow": 2,
-                            "doublesMissed": 2,
-                            "scoring": [121, 180, 90, 90, 20]
-                        }]
-                    }]
-                }
-            ],
-            "anonymous": [{
-                "playerId": "John Doe",
-                "result": {
-                    "score": 1,
-                    "result": "LOSE"
+                    }
                 },
+                "timeline": [{
+                    "set": 1,
+                    "result": "WIN",
+                    "legs": [{
+                        "leg": 1,
+                        "result": "WIN",
+                        "dartsUsedFinalThrow": 2,
+                        "doublesMissed": 3,
+                        "scoring": [140, 100, 90, 140, 31]
+                    }, {
+                        "leg": 2,
+                        "result": "LOSE",
+                        "doublesMissed": 0,
+                        "scoring": [140, 100]
+
+                    }, {
+                        "leg": 3,
+                        "result": "WIN",
+                        "dartsUsedFinalThrow": 2,
+                        "doublesMissed": 2,
+                        "scoring": [121, 180, 90, 90, 20]
+                    }]
+                }]
+            },
+            {
+                "playerId": "Jane Doe",
+                "playerType": 'ANONYMOUS',
+                "result": "LOSE",
                 "statistics": {
-                    "pointsThrown": 1194,
-                    "dartsThrown": 33,
-                    "average": 108,
-                    "tonPlus": 2,
-                    "tonForty": 1,
-                    "tonEighty": 3,
-                    "checkoutHighest": 141,
-                    "checkoutTonPlus": 1,
-                    "checkoutPercentage": 100,
-                    "checkoutsMissed": 0,
-                    "checkoutsHit": 1
+                    "averageStats": {
+                        "pointsThrown": 1194,
+                        "dartsThrown": 33,
+                        "average": 108,
+                        "pointsThrownFirstNine": 971,
+                        "dartsThrownFirstNine": 27,
+                        "averageFirstNine": 107
+                    },
+                    "scoreStats": {
+                        "tonPlus": 2,
+                        "tonForty": 1,
+                        "tonEighty": 3,
+                    },
+                    "checkoutStats": {
+                        "checkoutHighest": 141,
+                        "checkoutTonPlus": 1,
+                        "checkoutPercentage": 100,
+                        "checkoutsMissed": 0,
+                        "checkoutsHit": 1
+                    }
                 },
                 "timeline": [{
                     "set": 1,
@@ -163,9 +176,8 @@ matchesResult = db.matches.insert([
                         "scoring": [120, 88, 27, 43]
                     }]
                 }]
-            }]
-        },
-        "_class": "Match"
+            }],
+        "_class": "X01Match"
     }
 ])
 print(matchesResult)

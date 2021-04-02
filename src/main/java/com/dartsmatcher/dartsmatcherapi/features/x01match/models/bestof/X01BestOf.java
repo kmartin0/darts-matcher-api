@@ -1,24 +1,20 @@
-package com.dartsmatcher.dartsmatcherapi.features.match.models;
+package com.dartsmatcher.dartsmatcherapi.features.x01match.models.bestof;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MatchBestOf {
+public class X01BestOf {
 
 	@Min(1)
 	private int legs;
 
 	@Min(1)
 	private int sets;
-
-	@NotNull
-	MatchBestOfType type;
 
 }

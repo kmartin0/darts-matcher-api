@@ -1,6 +1,5 @@
 package com.dartsmatcher.dartsmatcherapi.features.user;
 
-import com.dartsmatcher.dartsmatcherapi.features.match.models.RegisteredMatchPlayer;
 import com.dartsmatcher.dartsmatcherapi.features.user.password.PasswordDto;
 import com.dartsmatcher.dartsmatcherapi.features.user.password.change.ChangePasswordDto;
 import com.dartsmatcher.dartsmatcherapi.features.user.password.forgot.ForgotPasswordDto;
@@ -41,7 +40,6 @@ public class UserController {
 
 	@GetMapping(path = Endpoints.GET_USER_BY_ID)
 	@ResponseStatus(HttpStatus.OK)
-//	@PreAuthorize("isAuthenticated()")
 	public User getUserById(@PathVariable ObjectId id) {
 
 		return userService.getUser(id);

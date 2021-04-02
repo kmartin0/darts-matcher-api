@@ -1,6 +1,6 @@
-package com.dartsmatcher.dartsmatcherapi.features.match;
+package com.dartsmatcher.dartsmatcherapi.features.x01match;
 
-import com.dartsmatcher.dartsmatcherapi.features.match.models.Match;
+import com.dartsmatcher.dartsmatcherapi.features.x01match.models.X01Match;
 import org.bson.types.ObjectId;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -10,19 +10,18 @@ import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 
 @Validated
-public interface IMatchService {
+public interface IX01MatchService {
 
 	@PreAuthorize("isAuthenticated()")
-	Match saveMatch(@Valid Match match);
+	X01Match saveMatch(@Valid X01Match x01Match);
 
-//	@PreAuthorize("isAuthenticated()")
-	Match getMatch(@NotNull ObjectId matchId);
-
-	@PreAuthorize("isAuthenticated()")
-	ArrayList<Match> getAuthenticatedUserMatches();
+	X01Match getMatch(@NotNull ObjectId matchId);
 
 	@PreAuthorize("isAuthenticated()")
-	Match updateMatch(@Valid Match match, @NotNull ObjectId matchId);
+	ArrayList<X01Match> getAuthenticatedUserMatches();
+
+	@PreAuthorize("isAuthenticated()")
+	X01Match updateMatch(@Valid X01Match x01Match, @NotNull ObjectId matchId);
 
 	@PreAuthorize("isAuthenticated()")
 	void deleteMatchForAuthenticatedUser(@NotNull ObjectId matchId);

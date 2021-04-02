@@ -12,9 +12,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Target({ FIELD, METHOD, PARAMETER, ANNOTATION_TYPE })
 @Retention(RUNTIME)
-@Constraint(validatedBy = NoReservedNamesValidator.class)
+@Constraint(validatedBy = ValidMatchPlayerIdsValidator.class)
 @Documented
-public @interface NoReservedNames {
+public @interface ValidMatchPlayerIds {
 	String message() default "{message.username.not.allowed}";
 	Class<?>[] groups() default { };
 	Class<? extends Payload>[] payload() default { };
