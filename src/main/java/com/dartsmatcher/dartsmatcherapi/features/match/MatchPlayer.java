@@ -1,14 +1,11 @@
 package com.dartsmatcher.dartsmatcherapi.features.match;
 
-import com.dartsmatcher.dartsmatcherapi.features.match.PlayerType;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.statistics.X01PlayerStatistics;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 
-import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 @Data

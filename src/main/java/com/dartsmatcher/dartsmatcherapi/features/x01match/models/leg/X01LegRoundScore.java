@@ -12,9 +12,13 @@ import javax.validation.constraints.Min;
 @NoArgsConstructor
 public class X01LegRoundScore {
 
-	private String player;
+	private String playerId;
 
 	private int doublesMissed;
+
+	@Max(3)
+	@Min(1)
+	private int dartsUsed;
 
 	@Min(0)
 	@Max(180)

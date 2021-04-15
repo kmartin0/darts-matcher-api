@@ -1,17 +1,17 @@
 package com.dartsmatcher.dartsmatcherapi.features.x01match.models;
 
 import com.dartsmatcher.dartsmatcherapi.features.match.BaseMatch;
+import com.dartsmatcher.dartsmatcherapi.features.match.MatchPlayer;
 import com.dartsmatcher.dartsmatcherapi.features.match.MatchStatus;
 import com.dartsmatcher.dartsmatcherapi.features.match.MatchType;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.bestof.X01BestOf;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.playerresult.X01PlayerResult;
-import com.dartsmatcher.dartsmatcherapi.features.match.MatchPlayer;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.set.X01Set;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.statistics.X01PlayerStatistics;
 import com.dartsmatcher.dartsmatcherapi.utils.CurrentThrowUtils;
 import com.dartsmatcher.dartsmatcherapi.utils.X01ResultUtils;
 import com.dartsmatcher.dartsmatcherapi.utils.X01StatisticsUtils;
-import com.dartsmatcher.dartsmatcherapi.validators.anonymousname.ValidMatchPlayerIds;
+import com.dartsmatcher.dartsmatcherapi.utils.X01TimelineUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,7 +27,6 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -37,18 +36,17 @@ import java.util.stream.Collectors;
 @TypeAlias("X01Match")
 public class X01Match extends BaseMatch {
 
-	public X01Match(ObjectId id, @NotNull LocalDateTime startDate, LocalDateTime endDate, @NotNull String throwFirst,
-					ArrayList<String> orderOfPlay, @NotNull MatchType matchType, @Min(0) int x01,
-					@NotNull MatchStatus matchStatus, @Valid @NotNull X01BestOf bestOf, @Valid ArrayList<X01PlayerResult> result,
-					@Valid ArrayList<X01PlayerStatistics> statistics, @NotNull @Valid ArrayList<MatchPlayer> players,
+	public X01Match(ObjectId id, @NotNull LocalDateTime startDate, LocalDateTime endDate, String currentThrower,
+					@NotNull @Valid ArrayList<MatchPlayer> players, @NotNull MatchType matchType, @Min(0) int x01,
+					@NotNull MatchStatus matchStatus, @Valid @NotNull X01BestOf bestOf,
+					@Valid ArrayList<X01PlayerResult> result, @Valid ArrayList<X01PlayerStatistics> statistics,
 					@Valid ArrayList<X01Set> timeline) {
-		super(id, startDate, endDate, throwFirst, orderOfPlay, matchType);
+		super(id, startDate, endDate, currentThrower, players, matchType);
 		this.x01 = x01;
 		this.matchStatus = matchStatus;
 		this.bestOf = bestOf;
 		this.result = result;
 		this.statistics = statistics;
-		this.players = players;
 		this.timeline = timeline;
 	}
 
@@ -67,11 +65,6 @@ public class X01Match extends BaseMatch {
 
 	@Valid
 	private ArrayList<X01PlayerStatistics> statistics;
-
-	@NotNull
-	@ValidMatchPlayerIds
-	@Valid
-	private ArrayList<MatchPlayer> players;
 
 	@Valid
 	private ArrayList<X01Set> timeline;
@@ -108,17 +101,24 @@ public class X01Match extends BaseMatch {
 	}
 
 	@JsonIgnore
-	public void updateResultAndStatisticsAndCurrentThrower() {
-		updateResult();
-		updateStatistics();
-		updateCurrentThrower();
+	public void updateTimeline() {
+		X01TimelineUtils.updateTimeline(this);
 	}
 
 	@JsonIgnore
-	public void updateResultAndStatisticsAndCurrentThrower(int set) {
-		updateResult(set);
-		updateStatistics();
+	public void updateAll() {
+		updateResult();
+		updateTimeline();
 		updateCurrentThrower();
+		updateStatistics();
+	}
+
+	@JsonIgnore
+	public void updateAll(int set) {
+		updateResult(set);
+		updateTimeline();
+		updateCurrentThrower();
+		updateStatistics();
 	}
 
 	@JsonIgnore
@@ -140,12 +140,6 @@ public class X01Match extends BaseMatch {
 	public void continueMatch() {
 		setMatchStatus(MatchStatus.IN_PLAY);
 		setEndDate(null);
-	}
-
-	public ArrayList<String> getOrderOfPlay() {
-		return (orderOfPlay != null && !orderOfPlay.isEmpty()) ?
-				orderOfPlay :
-				getPlayers().stream().map(MatchPlayer::getPlayerId).collect(Collectors.toCollection(ArrayList::new));
 	}
 
 }

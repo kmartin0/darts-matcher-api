@@ -2,10 +2,11 @@ package com.dartsmatcher.dartsmatcherapi.utils;
 
 import com.dartsmatcher.dartsmatcherapi.features.match.ResultType;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.X01Match;
+import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01LegRound;
+import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01LegRoundScore;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.playerresult.X01PlayerResult;
 import com.dartsmatcher.dartsmatcherapi.features.match.MatchPlayer;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01Leg;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01PlayerLeg;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.set.X01Set;
 
 import java.util.ArrayList;
@@ -59,14 +60,17 @@ public class X01ResultUtils {
 
 		if (set != null && match != null) {
 			for (X01Leg leg : set.getLegs()) { // Iterate through the legs and find the players with no score remaining.
-				for (X01PlayerLeg playerLeg : leg.getPlayers()) {
-					int remaining = match.getX01() - playerLeg.getScoring().stream().mapToInt(Integer::intValue).sum();
+				HashMap<String, Integer> playersRemaining = new HashMap<>();
+				for (X01LegRound legRound : leg.getRounds()) {
+					for (X01LegRoundScore playerScore : legRound.getPlayerScores()) {
+						int previousRemaining = playersRemaining.getOrDefault(playerScore.getPlayerId(), match.getX01());
 
-					// Player has won the leg.
-					if (remaining <= 0) {
-						legsWon.put(leg.getLeg(), playerLeg.getPlayerId());
+						playersRemaining.put(playerScore.getPlayerId(), previousRemaining - playerScore.getScore());
 					}
 				}
+				playersRemaining.forEach((playerId, remaining) -> {
+					if (remaining <= 0) legsWon.put(leg.getLeg(), playerId);
+				});
 
 			}
 		}
@@ -121,6 +125,9 @@ public class X01ResultUtils {
 		Map<String, Integer> numWon = match.getPlayers().stream()
 				.collect(Collectors.toMap(MatchPlayer::getPlayerId, player -> 0));
 
+		// Reference to hold the match winners
+		ArrayList<String> matchWinners = new ArrayList<>();
+
 		// Number of sets with a result.
 		AtomicInteger numPlayed = new AtomicInteger();
 
@@ -128,8 +135,10 @@ public class X01ResultUtils {
 			// When a match is a best of 1 set then the score should reflect the number of legs won in the first set.
 			// Else the score will reflect the number of sets won.
 			if (match.getBestOf().getSets() == 1) {
-				X01Set set = match.getTimeline().get(0);
+				X01Set set = match.getTimeline().isEmpty() ? X01TimelineUtils.createSet(match.getPlayers(), 1) : match.getTimeline().get(0);
+
 				match.setResult(set.getResult());
+				return;
 			} else {
 				// Iterate through the legs to fill numWon and setsPlayed.
 				match.getTimeline().forEach(x01Set -> {
@@ -148,13 +157,12 @@ public class X01ResultUtils {
 				int toGo = match.getBestOf().getSets() - numPlayed.get();
 
 				// Construct a list of players that have won (in case of multiple winners it's a draw).
-				ArrayList<String> matchWinners = X01ResultUtils.getWinners(numWon, toGo);
-
-				// Construct and add the player results to the match.
-				match.setResult(X01ResultUtils.createPlayerResults(numWon, matchWinners));
+				matchWinners.addAll(X01ResultUtils.getWinners(numWon, toGo));
 			}
 		}
 
+		// Construct and add the player results to the match.
+		match.setResult(X01ResultUtils.createPlayerResults(numWon, matchWinners));
 	}
 
 	/**

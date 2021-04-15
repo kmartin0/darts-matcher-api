@@ -1,6 +1,7 @@
 package com.dartsmatcher.dartsmatcherapi.validators.anonymousname;
 
 import com.dartsmatcher.dartsmatcherapi.features.match.MatchPlayer;
+import com.dartsmatcher.dartsmatcherapi.features.match.PlayerType;
 import org.bson.types.ObjectId;
 import org.hibernate.validator.constraintvalidation.HibernateConstraintValidatorContext;
 
@@ -21,7 +22,7 @@ public class ValidMatchPlayerIdsValidator implements ConstraintValidator<ValidMa
 		HibernateConstraintValidatorContext hibernateContext = context.unwrap(HibernateConstraintValidatorContext.class);
 		hibernateContext.disableDefaultConstraintViolation();
 
-		Set<String> reservedNames = new HashSet<>(Collections.singletonList("dartBot"));
+		ArrayList<String> reservedNames = new ArrayList<>(Collections.singletonList("dartBot"));
 		Set<Object> tmpPlayerIds = new HashSet<>();
 
 		for (MatchPlayer matchPlayer : matchPlayers) {
@@ -29,20 +30,11 @@ public class ValidMatchPlayerIdsValidator implements ConstraintValidator<ValidMa
 			String playerId = matchPlayer.getPlayerId();
 			String violatedPlayerId = "";
 
-			switch (matchPlayer.getPlayerType()) {
 
-				case REGISTERED: {
-					if (!ObjectId.isValid(playerId)) {
-						violatedPlayerId = playerId;
-					}
-				}
-				break;
-				case ANONYMOUS: {
-					if (reservedNames.stream().anyMatch(playerId::equalsIgnoreCase)) {
-						violatedPlayerId = playerId;
-					}
-				}
-				break;
+			if (matchPlayer.getPlayerType() == PlayerType.REGISTERED && !ObjectId.isValid(playerId) || // Registered players should have a valid object id.
+					reservedNames.stream().anyMatch(playerId::equalsIgnoreCase) || // Player id's cannot be the same as the reserved names.
+					playerId.contains(".")) { // Player id's must not contain dots.
+				violatedPlayerId = playerId;
 			}
 
 			if (!violatedPlayerId.isEmpty()) {

@@ -1,11 +1,13 @@
 package com.dartsmatcher.dartsmatcherapi.features.match;
 
+import com.dartsmatcher.dartsmatcherapi.validators.anonymousname.ValidMatchPlayerIds;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -25,7 +27,10 @@ public class BaseMatch {
 
 	private String currentThrower;
 
-	protected ArrayList<String> orderOfPlay;
+	@NotNull
+	@ValidMatchPlayerIds
+	@Valid
+	private ArrayList<MatchPlayer> players;
 
 	@NotNull
 	private MatchType matchType;

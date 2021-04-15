@@ -1,0 +1,26 @@
+[
+  {
+    "checkout": 2,
+    "minDarts": 1,
+    "suggested": [
+      {
+        "section": 1,
+        "area": "DOUBLE"
+      }
+    ]
+  },
+  {
+    "checkout": 3,
+    "minDarts": 2,
+    "suggested": [
+      {
+        "section": 1,
+        "area": "SINGLE"
+      },
+      {
+        "section": 1,
+        "area": "DOUBLE"
+      }
+    ]
+  }
+]

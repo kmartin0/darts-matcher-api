@@ -27,6 +27,27 @@ public class LiveMatchController {
 		return liveMatchService.updateLiveMatch(x01Throw);
 	}
 
+	@MessageMapping("/live/matches/{matchId}:delete-throw")
+	@SendTo("/live/matches/{matchId}")
+	public X01Match deleteThrowLiveMatch(@Valid @Payload X01DeleteThrow x01DeleteThrow) {
+
+		return liveMatchService.deleteThrowLiveMatch(x01DeleteThrow);
+	}
+
+	@MessageMapping("/live/matches/{matchId}:delete-set")
+	@SendTo("/live/matches/{matchId}")
+	public X01Match deleteThrowLiveMatch(@Valid @Payload X01DeleteSet x01DeleteSet) {
+
+		return liveMatchService.deleteSetLiveMatch(x01DeleteSet);
+	}
+
+	@MessageMapping("/live/matches/{matchId}:delete-leg")
+	@SendTo("/live/matches/{matchId}")
+	public X01Match deleteThrowLiveMatch(@Valid @Payload X01DeleteLeg x01DeleteLeg) {
+
+		return liveMatchService.deleteLegLiveMatch(x01DeleteLeg);
+	}
+
 	@SubscribeMapping("/live/matches/{matchId}")
 	public X01Match subscribeMatch(@DestinationVariable ObjectId matchId) {
 		return liveMatchService.getLiveMatch(matchId);

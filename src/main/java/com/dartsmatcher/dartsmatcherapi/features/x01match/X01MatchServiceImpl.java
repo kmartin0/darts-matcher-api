@@ -8,10 +8,16 @@ import com.dartsmatcher.dartsmatcherapi.features.x01match.models.X01Match;
 import com.dartsmatcher.dartsmatcherapi.features.match.MatchPlayer;
 import com.dartsmatcher.dartsmatcherapi.features.match.PlayerType;
 import com.dartsmatcher.dartsmatcherapi.features.user.IUserService;
+import com.dartsmatcher.dartsmatcherapi.features.x01match.models.checkout.X01Checkout;
 import com.dartsmatcher.dartsmatcherapi.utils.MessageResolver;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bson.types.ObjectId;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -25,11 +31,17 @@ public class X01MatchServiceImpl implements IX01MatchService {
 
 	private final MessageResolver messageResolver;
 
+	@Value("classpath:data/checkouts.json")
+	Resource checkoutsResourceFile;
+
 	public X01MatchServiceImpl(X01MatchRepository x01MatchRepository, IUserService userService, MessageResolver messageResolver) {
 		this.x01MatchRepository = x01MatchRepository;
 		this.userService = userService;
 		this.messageResolver = messageResolver;
 	}
+
+	// TODO: MatchRoomServiceImpl.saveMatchRoom(X01MatchRoom)
+	// TODO: saveMatch(X01MatchRoom)
 
 	@Override
 	public X01Match saveMatch(X01Match x01Match) {
@@ -43,7 +55,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
 		}
 
 		// Add statistics and result.
-		x01Match.updateResultAndStatisticsAndCurrentThrower();
+		x01Match.updateAll();
 
 		return x01MatchRepository.save(x01Match);
 	}
@@ -112,5 +124,15 @@ public class X01MatchServiceImpl implements IX01MatchService {
 		} else {
 			x01MatchRepository.delete(matchToDelete);
 		}
+	}
+
+	@Override
+	public ArrayList<X01Checkout> getCheckouts() throws IOException {
+
+		ObjectMapper mapper = new ObjectMapper();
+
+		return mapper.readValue(checkoutsResourceFile.getInputStream(), new TypeReference<ArrayList<X01Checkout>>() {
+		});
+
 	}
 }

@@ -24,4 +24,5 @@ public class Endpoints {
 	public static final String GET_ALL_USER_MATCHES = "/matches";
 	public static final String UPDATE_MATCH = "/matches/{matchId}";
 	public static final String DELETE_MATCH = "/matches/{matchId}";
+	public static final String GET_CHECKOUTS = "/checkouts";
 }

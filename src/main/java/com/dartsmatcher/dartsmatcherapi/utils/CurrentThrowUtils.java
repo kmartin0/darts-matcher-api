@@ -1,13 +1,15 @@
 package com.dartsmatcher.dartsmatcherapi.utils;
 
+import com.dartsmatcher.dartsmatcherapi.features.match.MatchPlayer;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.X01Match;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01Leg;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01PlayerLeg;
+import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01LegRound;
+import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01LegRoundScore;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.set.X01Set;
 
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class CurrentThrowUtils {
 
@@ -15,11 +17,11 @@ public class CurrentThrowUtils {
 		if (match == null) return;
 
 		if (match.getTimeline() == null || match.getTimeline().isEmpty()) {
-			match.setCurrentThrower(match.getOrderOfPlay().get(0));
+			match.setCurrentThrower(match.getPlayers().get(0).getPlayerId());
 			return;
 		}
 
-		boolean matchHasResult = match.getResult().stream().anyMatch(x01PlayerResult -> x01PlayerResult.getResult() != null);
+		boolean matchHasResult = match.getResult() != null && match.getResult().stream().anyMatch(x01PlayerResult -> x01PlayerResult.getResult() != null);
 		if (matchHasResult) {
 			match.setCurrentThrower(null);
 			return;
@@ -46,34 +48,27 @@ public class CurrentThrowUtils {
 
 		ArrayList<String> orderOfPlayInLeg = createLegOrderOfPlay(match.getPlayers().size(), orderOfPlayInSet, currentLeg.orElse(null), currentSet.get());
 
-		match.setCurrentThrower(getCurrentThrowerInLeg(currentLeg.orElse(null), orderOfPlayInLeg));
+		match.setCurrentThrower(getCurrentThrowerInLeg(match, currentLeg.orElse(null), orderOfPlayInLeg));
 	}
 
-	public static String getCurrentThrowerInLeg(X01Leg leg, ArrayList<String> orderOfPlayInLeg) {
+	public static String getCurrentThrowerInLeg(X01Match match, X01Leg leg, ArrayList<String> orderOfPlayInLeg) {
 		if (leg == null) {
 			return orderOfPlayInLeg.get(0);
 		}
 
-		int round = leg.getPlayers().stream().filter(x01PlayerLeg -> x01PlayerLeg.getScoring() != null).mapToInt(x -> x.getScoring().size()).max().orElse(1);
+		X01LegRound x01LegRound = leg.getRounds().stream()
+				.filter(_x01LegRound -> _x01LegRound.getPlayerScores().size() < match.getPlayers().size())
+				.findFirst()
+				.orElse(null);
 
-		boolean roundComplete = true;
-		for (X01PlayerLeg x01PlayerLeg : leg.getPlayers()) {
-			if (x01PlayerLeg.getScoring() == null || x01PlayerLeg.getScoring().size() < round) {
-				roundComplete = false;
-				break;
-			}
-		}
-		if (roundComplete) round++;
-
-		for (String playerId : orderOfPlayInLeg) {
-			X01PlayerLeg x01PlayerLeg = leg.getPlayers().stream()
-					.filter(_x01PlayerLeg -> Objects.equals(_x01PlayerLeg.getPlayerId(), playerId))
-					.findFirst()
-					.orElse(null);
-
-			// When the player has not thrown this round, it's this players' turn.
-			if (x01PlayerLeg == null || x01PlayerLeg.getScoring() == null || x01PlayerLeg.getScoring().size() != round) {
-				return playerId;
+		if (x01LegRound == null) {
+			return orderOfPlayInLeg.get(0);
+		} else {
+			for (String playerId : orderOfPlayInLeg) {
+				Optional<X01LegRoundScore> playerScore = x01LegRound.getPlayerScore(playerId);
+				if (!playerScore.isPresent()) {
+					return playerId;
+				}
 			}
 		}
 
@@ -98,16 +93,20 @@ public class CurrentThrowUtils {
 
 	public static ArrayList<String> createSetOrderOfPlay(X01Match match, X01Set set) {
 
+		ArrayList<String> matchOrderOfPlay = match.getPlayers().stream()
+				.map(MatchPlayer::getPlayerId)
+				.collect(Collectors.toCollection(ArrayList::new));
+
 		if (set == null) {
 			int setsPlayed = match.getTimeline().stream().mapToInt(X01Set::getSet).max().orElse(0);
 			int throwsFirstInSet = setsPlayed % match.getPlayers().size();
 
-			return createOrderOfPlay(match.getOrderOfPlay(), throwsFirstInSet);
+			return createOrderOfPlay(matchOrderOfPlay, throwsFirstInSet);
 		}
 
 		int throwsFirstInSet = (set.getSet() - 1) % match.getPlayers().size();
 
-		return createOrderOfPlay(match.getOrderOfPlay(), throwsFirstInSet);
+		return createOrderOfPlay(matchOrderOfPlay, throwsFirstInSet);
 
 	}
 

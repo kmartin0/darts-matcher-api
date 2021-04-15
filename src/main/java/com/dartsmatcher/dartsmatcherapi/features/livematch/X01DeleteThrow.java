@@ -5,14 +5,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 
-import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class X01Throw {
+public class X01DeleteThrow {
 
 	private ObjectId matchId;
 
@@ -27,16 +26,5 @@ public class X01Throw {
 
 	@Min(0)
 	private int round;
-
-	@Min(0)
-	@Max(180)
-	private int score;
-
-	@Min(1)
-	@Max(3)
-	private int dartsUsed;
-
-	@Min(0)
-	private int doublesMissed;
 
 }

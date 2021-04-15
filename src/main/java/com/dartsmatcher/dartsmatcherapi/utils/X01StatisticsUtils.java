@@ -1,7 +1,7 @@
 package com.dartsmatcher.dartsmatcherapi.utils;
 
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.X01Match;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01PlayerLeg;
+import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01LegRoundScore;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.statistics.X01AverageStatistics;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.statistics.X01CheckoutStatistics;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.statistics.X01PlayerStatistics;
@@ -39,27 +39,23 @@ public class X01StatisticsUtils {
 				if (set != null) {
 					set.getLegs().forEach(leg -> {
 						if (leg != null) {
-							leg.getPlayers().forEach(playerLeg -> {
-								if (playerLeg != null) {
-									x01Match.getStatistics().stream()
-											.filter(_statistics -> Objects.equals(_statistics.getPlayerId(), playerLeg.getPlayerId()))
+							leg.getRounds().forEach(x01LegRound -> {
+								x01LegRound.getPlayerScores().forEach(x01LegRoundScore -> {
+									statistics.stream()
+											.filter(x01PlayerStatistics -> Objects.equals(x01PlayerStatistics.getPlayerId(), x01LegRoundScore.getPlayerId()))
 											.findFirst()
-											.ifPresent(playerStats -> {
-												boolean isLegWinner = Objects.equals(leg.getWinner(), playerLeg.getPlayerId());
-												for (int i = 0; i < playerLeg.getScoring().size(); i++) {
-													int score = playerLeg.getScoring().get(i);
-													int dartsThrown = 3;
-
-													if (isLegWinner && i == playerLeg.getScoring().size() - 1) {
-														dartsThrown = leg.getDartsUsedFinalThrow();
-													}
-
-													X01StatisticsUtils.updateThrowStats(playerStats, score, dartsThrown, i < 3);
-													X01StatisticsUtils.updateTonPlusStats(playerStats, score);
+											.ifPresent(x01PlayerStatistics -> {
+												boolean isCheckout = false;
+												if (Objects.equals(x01LegRoundScore.getPlayerId(), leg.getWinner()) &&
+														!leg.getRound(x01LegRound.getRound() + 1).isPresent()) {
+													isCheckout = true;
 												}
-												X01StatisticsUtils.updateCheckoutStats(playerStats, playerLeg, isLegWinner);
+
+												X01StatisticsUtils.updateThrowStats(x01PlayerStatistics, x01LegRoundScore.getScore(), x01LegRoundScore.getDartsUsed(), x01LegRound.getRound() <= 3);
+												X01StatisticsUtils.updateTonPlusStats(x01PlayerStatistics, x01LegRoundScore.getScore());
+												X01StatisticsUtils.updateCheckoutStats(x01PlayerStatistics, x01LegRoundScore, isCheckout);
 											});
-								}
+								});
 							});
 						}
 					});
@@ -90,15 +86,16 @@ public class X01StatisticsUtils {
 	 * Update MatchPlayerStatistics CheckoutsHit, CheckoutsMissed, CheckoutHighest and CheckoutPercentage with the
 	 * player's checkouts from a leg.
 	 *
-	 * @param playerStats  MatchPlayerStatistics reference to be updated.
-	 * @param x01PlayerLeg PlayerLegScore the leg of which the checkouts are thrown.
+	 * @param playerStats      MatchPlayerStatistics reference to be updated.
+	 * @param x01LegRoundScore X01LegRoundScore the round of which the checkouts are thrown.
+	 * @param isCheckout       boolean if the round score was a checkout.
 	 */
-	public static void updateCheckoutStats(X01PlayerStatistics playerStats, X01PlayerLeg x01PlayerLeg, boolean isLegWinner) {
+	public static void updateCheckoutStats(X01PlayerStatistics playerStats, X01LegRoundScore x01LegRoundScore, boolean isCheckout) {
 		X01CheckoutStatistics checkoutStats = playerStats.getCheckoutStats();
 
 		// If the player won the leg add a checkoutHit and check for tonPlusCheckout.
-		if (isLegWinner) {
-			int checkout = x01PlayerLeg.getScoring().get(x01PlayerLeg.getScoring().size() - 1);
+		if (isCheckout) {
+			int checkout = x01LegRoundScore.getScore();
 
 			// Check if the player has hit a higher checkout. If not set it with the current checkout.
 			if (checkout > checkoutStats.getCheckoutHighest()) checkoutStats.setCheckoutHighest(checkout);
@@ -111,7 +108,7 @@ public class X01StatisticsUtils {
 		}
 
 		// Increment the checkouts missed with the checkouts missed from this leg.
-		checkoutStats.setCheckoutsMissed(checkoutStats.getCheckoutsMissed() + x01PlayerLeg.getDoublesMissed());
+		checkoutStats.setCheckoutsMissed(checkoutStats.getCheckoutsMissed() + x01LegRoundScore.getDoublesMissed());
 
 		// Calculate and set new checkout percentage.
 		float doublesThrown = checkoutStats.getCheckoutsHit() + checkoutStats.getCheckoutsMissed();
@@ -121,7 +118,7 @@ public class X01StatisticsUtils {
 
 
 	/**
-	 * Update MatchPlayerStatistics Darts and Points thrown with the scoring of this leg.
+	 * Update MatchPlayerStatistics Darts and Points thrown with the scoring of a round.
 	 *
 	 * @param playerStats MatchPlayerStatistics reference to be updated.
 	 * @param score       The score a player has thrown.
