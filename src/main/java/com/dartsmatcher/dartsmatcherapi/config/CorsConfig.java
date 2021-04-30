@@ -17,7 +17,7 @@ public class CorsConfig {
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		CorsConfiguration config = new CorsConfiguration();
 		config.setAllowCredentials(true);
-		config.setAllowedOrigins(Arrays.asList("http://192.168.1.17:4200", "http://localhost:4200", "http://jxy.me"));
+		config.setAllowedOrigins(Arrays.asList("http://192.168.1.17:4200", "http://localhost:4200", "http://jxy.me", "https://darts-matcher-web.herokuapp.com", "http://darts-matcher-web.herokuapp.com"));
 		config.addAllowedHeader("*");
 		config.addAllowedMethod("*");
 		source.registerCorsConfiguration("/**", config);
