@@ -38,28 +38,12 @@ public class X01MatchController {
 		return matchService.getMatch(matchId);
 	}
 
-	@GetMapping(path = Endpoints.GET_ALL_USER_MATCHES, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseStatus(HttpStatus.OK)
-	@PreAuthorize("isAuthenticated()")
-	public ArrayList<X01Match> getUserMatches() {
-
-		return matchService.getAuthenticatedUserMatches();
-	}
-
 	@PutMapping(path = Endpoints.UPDATE_MATCH, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.CREATED)
 	@PreAuthorize("isAuthenticated()")
 	public X01Match updateMatch(@Valid @RequestBody X01Match x01Match, @PathVariable ObjectId matchId) {
 
 		return matchService.updateMatch(x01Match, matchId);
-	}
-
-	@DeleteMapping(path = Endpoints.DELETE_MATCH, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	@PreAuthorize("isAuthenticated()")
-	public void setDeleteMatch(@PathVariable ObjectId matchId) {
-
-		matchService.deleteMatchForAuthenticatedUser(matchId);
 	}
 
 	@GetMapping(path = Endpoints.GET_CHECKOUTS, produces = MediaType.APPLICATION_JSON_VALUE)
