@@ -7,6 +7,16 @@ db = conn.getDB("darts-matcher")
 // Insert Client Details (clientSecret = secret)
 clientDetailsResult = db.client_details.insert([
     {
+        "clientId": "darts-matcher-dev",
+        "clientSecret": "$2a$12$o3dmbF3ElqPL1ApJ.9R/Qu7cVBMyV8pn80.HPFPdKO/jerqGJiXZe",
+        "scope": "all",
+        "authorizedGrantTypes": "password,refresh_token,client_credentials",
+        "authorities": "ROLE_CLIENT",
+        "accessTokenValidity": 172800,
+        "refreshTokenValidity": 604800,
+        "_class": "ClientDetailsImpl"
+    },
+    {
         "clientId": "darts-matcher-web",
         "clientSecret": "$2a$12$o3dmbF3ElqPL1ApJ.9R/Qu7cVBMyV8pn80.HPFPdKO/jerqGJiXZe",
         "scope": "all",

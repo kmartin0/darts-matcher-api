@@ -8,7 +8,7 @@ import com.dartsmatcher.dartsmatcherapi.features.x01match.models.bestof.X01BestO
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.playerresult.X01PlayerResult;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.set.X01Set;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.statistics.X01PlayerStatistics;
-import com.dartsmatcher.dartsmatcherapi.utils.CurrentThrowUtils;
+import com.dartsmatcher.dartsmatcherapi.utils.X01ThrowerUtils;
 import com.dartsmatcher.dartsmatcherapi.utils.X01ResultUtils;
 import com.dartsmatcher.dartsmatcherapi.utils.X01StatisticsUtils;
 import com.dartsmatcher.dartsmatcherapi.utils.X01TimelineUtils;
@@ -79,8 +79,8 @@ public class X01Match extends BaseMatch {
 	}
 
 	@JsonIgnore
-	public void updateCurrentThrower() {
-		CurrentThrowUtils.updateCurrentThrower(this);
+	public void updateThrower() {
+		X01ThrowerUtils.updateThrower(this);
 	}
 
 	@JsonIgnore
@@ -109,7 +109,7 @@ public class X01Match extends BaseMatch {
 	public void updateAll() {
 		updateResult();
 		updateTimeline();
-		updateCurrentThrower();
+		updateThrower();
 		updateStatistics();
 	}
 
@@ -117,7 +117,7 @@ public class X01Match extends BaseMatch {
 	public void updateAll(int set) {
 		updateResult(set);
 		updateTimeline();
-		updateCurrentThrower();
+		updateThrower();
 		updateStatistics();
 	}
 

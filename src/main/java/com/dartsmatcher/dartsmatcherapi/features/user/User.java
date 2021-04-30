@@ -28,7 +28,7 @@ public class User {
 	@NotBlank(groups = {Create.class, Update.class})
 	@Length(groups = {Create.class, Update.class}, min = 4, max = 24)
 	@NoWhitespace(groups = {Create.class, Update.class})
-	@ValidMatchPlayerIds(groups = {Create.class, Update.class})
+//	@ValidMatchPlayerIds(groups = {Create.class, Update.class}) // TODO: FIX CHANGE VALIDATOR TYPE TO STRING AND IN MATCHPLAYER DO ARRAYLIST<@ValidMatchPlayerId String> PLAYERS
 	private String userName;
 
 	@NotBlank(groups = {Create.class, Update.class})

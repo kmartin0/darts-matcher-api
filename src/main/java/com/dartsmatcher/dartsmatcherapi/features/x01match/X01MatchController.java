@@ -3,8 +3,6 @@ package com.dartsmatcher.dartsmatcherapi.features.x01match;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.X01Match;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.checkout.X01Checkout;
 import com.dartsmatcher.dartsmatcherapi.utils.Endpoints;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;

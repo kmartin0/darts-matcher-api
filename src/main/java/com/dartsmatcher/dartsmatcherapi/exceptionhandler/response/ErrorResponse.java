@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,6 +32,7 @@ public class ErrorResponse implements Serializable {
 		this.code = apiErrorCode.getHttpStatus().value();
 		this.description = description;
 		this.error = apiErrorCode.name();
+		System.out.println(Arrays.toString(details));
 		this.details = detailsArrToHashMap(details);
 	}
 
@@ -38,13 +40,7 @@ public class ErrorResponse implements Serializable {
 		this.code = apiErrorCode.getHttpStatus().value();
 		this.description = description;
 		this.error = apiErrorCode.name();
-	}
-
-	public ErrorResponse(ApiErrorCode apiErrorCode, String description, Map<String, String> details) {
-		this.code = apiErrorCode.getHttpStatus().value();
-		this.description = description;
-		this.error = apiErrorCode.name();
-		this.details = details;
+		this.details = new HashMap<>();
 	}
 
 	private HashMap<String, String> detailsArrToHashMap(TargetError... details) {
@@ -52,7 +48,8 @@ public class ErrorResponse implements Serializable {
 
 		HashMap<String, String> tmpDetails = new HashMap<>();
 		for (TargetError targetError : details) {
-			tmpDetails.put(targetError.getTarget(), targetError.getError());
+			String target = targetError.getTarget() != null ? targetError.getTarget() : "body";
+			tmpDetails.put(target, targetError.getError());
 		}
 		return tmpDetails;
 	}

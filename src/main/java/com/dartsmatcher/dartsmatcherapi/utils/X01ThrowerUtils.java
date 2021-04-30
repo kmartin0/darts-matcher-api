@@ -11,7 +11,28 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class CurrentThrowUtils {
+public class X01ThrowerUtils {
+
+	public static void updateThrower(X01Match match) {
+		X01ThrowerUtils.updateCurrentThrower(match);
+		X01ThrowerUtils.updateThrowsFirst(match);
+	}
+
+	public static void updateThrowsFirst(X01Match match) {
+		if (match == null || match.getTimeline() == null) return;
+
+		match.getTimeline().forEach(x01Set -> {
+			if (x01Set.getLegs() != null) {
+				ArrayList<String> orderOfPlayInSet = createSetOrderOfPlay(match, x01Set);
+
+				x01Set.getLegs().forEach(x01Leg -> {
+					ArrayList<String> orderOfPlayInLeg = createLegOrderOfPlay(match.getPlayers().size(), orderOfPlayInSet, x01Leg, x01Set);
+
+					x01Leg.setThrowsFirst(orderOfPlayInLeg.get(0));
+				});
+			}
+		});
+	}
 
 	public static void updateCurrentThrower(X01Match match) {
 		if (match == null) return;

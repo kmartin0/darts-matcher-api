@@ -1,5 +1,5 @@
 package com.dartsmatcher.dartsmatcherapi.features.match;
 
-public enum DartRegionArea {
+public enum DartSectionArea {
 	SINGLE, DOUBLE, TRIPLE
 }

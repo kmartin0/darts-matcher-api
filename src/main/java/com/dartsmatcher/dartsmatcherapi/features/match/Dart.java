@@ -15,5 +15,5 @@ public class Dart {
 	@Max(20)
 	private int section;
 
-	private DartRegionArea area;
+	private DartSectionArea area;
 }

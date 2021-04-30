@@ -2,6 +2,7 @@ package com.dartsmatcher.dartsmatcherapi.exceptionhandler.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
 @AllArgsConstructor

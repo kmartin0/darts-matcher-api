@@ -1,4 +1,4 @@
-package com.dartsmatcher.dartsmatcherapi.features.livematch;
+package com.dartsmatcher.dartsmatcherapi.features.x01livematch.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -32,7 +32,7 @@ public class X01Throw {
 	@Max(180)
 	private int score;
 
-	@Min(1)
+	@Min(0)
 	@Max(3)
 	private int dartsUsed;
 

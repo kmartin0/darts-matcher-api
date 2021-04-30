@@ -1,7 +1,7 @@
 package com.dartsmatcher.dartsmatcherapi.exceptionhandler;
 
 import com.dartsmatcher.dartsmatcherapi.exceptionhandler.exception.ForbiddenException;
-import com.dartsmatcher.dartsmatcherapi.exceptionhandler.exception.InvalidArgumentException;
+import com.dartsmatcher.dartsmatcherapi.exceptionhandler.exception.InvalidArgumentsException;
 import com.dartsmatcher.dartsmatcherapi.exceptionhandler.exception.ResourceAlreadyExistsException;
 import com.dartsmatcher.dartsmatcherapi.exceptionhandler.exception.ResourceNotFoundException;
 import com.dartsmatcher.dartsmatcherapi.exceptionhandler.response.ApiErrorCode;
@@ -9,14 +9,13 @@ import com.dartsmatcher.dartsmatcherapi.exceptionhandler.response.ErrorResponse;
 import com.dartsmatcher.dartsmatcherapi.exceptionhandler.response.TargetError;
 import com.dartsmatcher.dartsmatcherapi.utils.MessageResolver;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.ConversionFailedException;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.messaging.converter.MessageConversionException;
-import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.HttpMediaTypeException;
@@ -31,18 +30,19 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
 	private final MessageResolver messageResolver;
 
+
 	@Autowired
 	public GlobalExceptionHandler(MessageResolver messageResolver) {
 		this.messageResolver = messageResolver;
 	}
 
+	// Handler for all unhandled exceptions.
 	@ExceptionHandler({Exception.class})
 	public ResponseEntity<ErrorResponse> handleRunTimeException(Exception e) {
 		e.printStackTrace();
@@ -55,6 +55,7 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());
 	}
 
+	// Handler for access denied exceptions.
 	@ExceptionHandler({AccessDeniedException.class})
 	public void handleAccessDeniedException(AccessDeniedException e) {
 		// Let an AccessDeniedException fall back to the Spring Security Handler.
@@ -62,6 +63,7 @@ public class GlobalExceptionHandler {
 		throw e;
 	}
 
+	// Handler for bad credentials.
 	@ExceptionHandler({BadCredentialsException.class})
 	public void handleBadCredentialsExceptionException(BadCredentialsException e) {
 		// Let an BadCredentialsException fall back to the Spring Security Handler.
@@ -77,6 +79,7 @@ public class GlobalExceptionHandler {
 		throw e;
 	}
 
+	// Handler for custom forbidden exception.
 	@ExceptionHandler({ForbiddenException.class})
 	public ResponseEntity<ErrorResponse> handleForbiddenException(ForbiddenException e) {
 		ApiErrorCode apiErrorCode = ApiErrorCode.PERMISSION_DENIED;
@@ -88,31 +91,34 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());
 	}
 
+	// Handler for bean validation errors thrown in controllers.
 	@ExceptionHandler({MethodArgumentNotValidException.class})
 	public ResponseEntity<ErrorResponse> handleMethodArgumentsInvalidException(MethodArgumentNotValidException e) {
-		HashMap<String, String> errors = new HashMap<>();
+		ArrayList<TargetError> errors = new ArrayList<>();
 		ApiErrorCode apiErrorCode = ApiErrorCode.INVALID_ARGUMENTS;
 
 		for (ObjectError error : e.getBindingResult().getAllErrors()) {
 			if (error instanceof FieldError) {
-				errors.put(((FieldError) error).getField(), error.getDefaultMessage());
+				errors.add(new TargetError(((FieldError) error).getField(), error.getDefaultMessage()));
 			} else {
-				errors.put(error.getCode(), error.getDefaultMessage());
+				errors.add(new TargetError(error.getCode(), error.getDefaultMessage()));
 			}
 		}
 
 		ErrorResponse responseBody = new ErrorResponse(
 				apiErrorCode,
 				messageResolver.getMessage("exception.invalid.arguments"),
-				errors
+				errors.toArray(new TargetError[0])
 		);
 
 		return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());
 	}
 
+	// Handler for bean validation errors in services.
+	@SuppressWarnings("DuplicatedCode")
 	@ExceptionHandler({ConstraintViolationException.class})
 	public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException e) {
-		HashMap<String, String> errors = new HashMap<>();
+		ArrayList<TargetError> errors = new ArrayList<>();
 		ApiErrorCode apiErrorCode = ApiErrorCode.INVALID_ARGUMENTS;
 
 		// Constructs the path disregarding the first two path nodes.
@@ -137,33 +143,33 @@ public class GlobalExceptionHandler {
 				if (i < violationPropertyPaths.size() - 1) errorPath.append(".");
 			}
 
-			errors.put(errorPath.toString(), violation.getMessage());
+			errors.add(new TargetError(errorPath.toString(), violation.getMessage()));
 		}
 
 		ErrorResponse responseBody = new ErrorResponse(
 				apiErrorCode,
 				messageResolver.getMessage("exception.invalid.arguments"),
-				errors
+				errors.toArray(new TargetError[0])
 		);
 
 		return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());
 	}
 
-	@ExceptionHandler({InvalidArgumentException.class})
-	public ResponseEntity<ErrorResponse> handleInvalidArgumentException(InvalidArgumentException e) {
+	// Handler for custom invalid arguments.
+	@ExceptionHandler({InvalidArgumentsException.class})
+	public ResponseEntity<ErrorResponse> handleInvalidArgumentException(InvalidArgumentsException e) {
 		ApiErrorCode apiErrorCode = ApiErrorCode.INVALID_ARGUMENTS;
 
 		ErrorResponse responseBody = new ErrorResponse(
 				apiErrorCode,
 				messageResolver.getMessage("exception.invalid.arguments"),
-				new HashMap<String, String>() {{
-					put(e.getTarget(), e.getError());
-				}}
+				e.getErrors().toArray(new TargetError[0])
 		);
 
 		return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());
 	}
 
+	// Handler for accessing url that don't support the Http media type (e.g. using form url encoded where only application/json is supported).
 	@ExceptionHandler({HttpMediaTypeException.class})
 	public ResponseEntity<ErrorResponse> handleHttpMediaTypeException(HttpMediaTypeException e) {
 		ApiErrorCode apiErrorCode = ApiErrorCode.UNSUPPORTED_MEDIA_TYPE;
@@ -175,6 +181,7 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());
 	}
 
+	// Handler for accessing url that don't support the Http method (e.g. using HTTP POST where only HTTP GET is supported).
 	@ExceptionHandler({HttpRequestMethodNotSupportedException.class})
 	public ResponseEntity<ErrorResponse> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
 		ApiErrorCode apiErrorCode = ApiErrorCode.METHOD_NOT_ALLOWED;
@@ -186,6 +193,7 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());
 	}
 
+	// Handler for accessing url that doesn't exist
 	@ExceptionHandler({NoHandlerFoundException.class})
 	public ResponseEntity<ErrorResponse> handleNoHandlerFoundExceptionException(NoHandlerFoundException e) {
 		ApiErrorCode apiErrorCode = ApiErrorCode.URI_NOT_FOUND;
@@ -197,6 +205,7 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());
 	}
 
+	// Handler for resources that are not found.
 	@ExceptionHandler({ResourceNotFoundException.class})
 	public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException e) {
 		ApiErrorCode apiErrorCode = ApiErrorCode.RESOURCE_NOT_FOUND;
@@ -208,9 +217,11 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());
 	}
 
-	@ExceptionHandler({HttpMessageNotReadableException.class})
-	public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+	// Handler for sending malformed data or invalid data types (e.g. invalid json, using array instead of string).
+	@ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class, ConversionFailedException.class})
+	public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(Exception e) {
 		e.printStackTrace();
+
 		ApiErrorCode apiErrorCode = ApiErrorCode.MESSAGE_NOT_READABLE;
 		ErrorResponse responseBody = new ErrorResponse(
 				apiErrorCode,
@@ -220,18 +231,7 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());
 	}
 
-	@ExceptionHandler({MethodArgumentTypeMismatchException.class})
-	public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
-		e.printStackTrace();
-		ApiErrorCode apiErrorCode = ApiErrorCode.MESSAGE_NOT_READABLE;
-		ErrorResponse responseBody = new ErrorResponse(
-				apiErrorCode,
-				messageResolver.getMessage("exception.body.not.readable")
-		);
-
-		return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());
-	}
-
+	// Handler for trying to create a resource when it already exists.
 	@ExceptionHandler({ResourceAlreadyExistsException.class})
 	public ResponseEntity<ErrorResponse> handleResourceAlreadyExistsException(ResourceAlreadyExistsException e) {
 		ApiErrorCode apiErrorCode = ApiErrorCode.ALREADY_EXISTS;
@@ -244,9 +244,11 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());
 	}
 
-	@ExceptionHandler({CannotCreateTransactionException.class})
-	public ResponseEntity<ErrorResponse> handleCannotCreateTransactionException(CannotCreateTransactionException e) {
+	// Handler for when the database is down.
+	@ExceptionHandler({DataAccessResourceFailureException.class})
+	public ResponseEntity<ErrorResponse> handleDataAccessResourceFailureException(DataAccessResourceFailureException e) {
 		ApiErrorCode apiErrorCode = ApiErrorCode.UNAVAILABLE;
+
 		ErrorResponse responseBody = new ErrorResponse(
 				apiErrorCode,
 				messageResolver.getMessage("exception.service.unavailable")
@@ -255,15 +257,4 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());
 	}
 
-	@MessageExceptionHandler({MessageConversionException.class})
-	public ResponseEntity<ErrorResponse> handleMessageConversionException(MessageConversionException e) {
-		e.printStackTrace();
-		ApiErrorCode apiErrorCode = ApiErrorCode.UNAVAILABLE;
-		ErrorResponse responseBody = new ErrorResponse(
-				apiErrorCode,
-				messageResolver.getMessage("exception.service.unavailable")
-		);
-
-		return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());
-	}
 }

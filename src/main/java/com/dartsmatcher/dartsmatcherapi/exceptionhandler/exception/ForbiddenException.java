@@ -6,7 +6,7 @@ import lombok.Getter;
 public class ForbiddenException extends RuntimeException {
 
 	// Description
-	private String description;
+	private final String description;
 
 
 	public ForbiddenException(String description) {

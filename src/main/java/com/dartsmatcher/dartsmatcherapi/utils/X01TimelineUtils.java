@@ -20,42 +20,11 @@ public class X01TimelineUtils {
 		X01TimelineUtils.updateTimelineOrder(x01Match);
 	}
 
-	private static void updateTimelineOrder(X01Match x01Match) {
-
-		// Sort the sets.
-		x01Match.getTimeline().sort(Comparator.comparing(X01Set::getSet));
-
-		// Make sure there are no gaps in the sets.
-		for (int i = 0; i < x01Match.getTimeline().size(); i++) {
-			x01Match.getTimeline().get(i).setSet(i + 1);
-		}
-
-		x01Match.getTimeline().forEach(x01Set -> {
-			// Sort the legs.
-			x01Set.getLegs().sort(Comparator.comparing(X01Leg::getLeg));
-
-			// Make sure there are no gaps in the legs.
-			for (int i = 0; i < x01Set.getLegs().size(); i++) {
-				x01Set.getLegs().get(i).setLeg(i + 1);
-			}
-
-			x01Set.getLegs().forEach(x01Leg -> {
-				// Sort the rounds.
-				x01Leg.getRounds().sort(Comparator.comparing(X01LegRound::getRound));
-
-				// Make sure there are no gaps in the rounds.
-				for (int i = 0; i < x01Leg.getRounds().size(); i++) {
-					x01Leg.getRounds().get(i).setRound(i + 1);
-				}
-			});
-		});
-	}
-
 	private static void updateTimelineInPlay(X01Match x01Match) {
+		if (x01Match.getResult().stream().anyMatch(x01PlayerResult -> x01PlayerResult.getResult() != null)) return;
 
 		// If the timeline is empty, create one.
 		if (x01Match.getTimeline() == null || x01Match.getTimeline().isEmpty()) {
-
 			x01Match.setTimeline(new ArrayList<>(Collections.singletonList(createSet(x01Match.getPlayers(), 1))));
 
 			return;
@@ -87,12 +56,43 @@ public class X01TimelineUtils {
 		}
 	}
 
+	private static void updateTimelineOrder(X01Match x01Match) {
+
+		// Sort the sets.
+		x01Match.getTimeline().sort(Comparator.comparing(X01Set::getSet));
+
+		// Make sure there are no gaps in the sets.
+		for (int i = 0; i < x01Match.getTimeline().size(); i++) {
+			x01Match.getTimeline().get(i).setSet(i + 1);
+		}
+
+		x01Match.getTimeline().forEach(x01Set -> {
+			// Sort the legs.
+			x01Set.getLegs().sort(Comparator.comparing(X01Leg::getLeg));
+
+			// Make sure there are no gaps in the legs.
+			for (int i = 0; i < x01Set.getLegs().size(); i++) {
+				x01Set.getLegs().get(i).setLeg(i + 1);
+			}
+
+			x01Set.getLegs().forEach(x01Leg -> {
+				// Sort the rounds.
+				x01Leg.getRounds().sort(Comparator.comparing(X01LegRound::getRound));
+
+				// Make sure there are no gaps in the rounds.
+				for (int i = 0; i < x01Leg.getRounds().size(); i++) {
+					x01Leg.getRounds().get(i).setRound(i + 1);
+				}
+			});
+		});
+	}
+
 	public static X01LegRound createLegRound(int roundNumber) {
 		return new X01LegRound(roundNumber, new ArrayList<>());
 	}
 
 	public static X01Leg createLeg(int legNumber) {
-		return new X01Leg(legNumber, null, new ArrayList<>(Collections.singletonList(createLegRound(1))));
+		return new X01Leg(legNumber, null, null, new ArrayList<>(Collections.singletonList(createLegRound(1))));
 	}
 
 	public static X01Set createSet(ArrayList<MatchPlayer> players, int setNumber) {

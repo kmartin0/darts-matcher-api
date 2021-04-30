@@ -22,8 +22,7 @@ public class X01Leg {
 
 	private String winner;
 
-//	@Max(3)
-//	private int dartsUsedFinalThrow;
+	private String throwsFirst;
 
 	@Valid
 	@NotNull
