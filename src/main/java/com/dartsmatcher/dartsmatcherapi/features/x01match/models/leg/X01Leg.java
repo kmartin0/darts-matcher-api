@@ -30,9 +30,29 @@ public class X01Leg {
 
 	@JsonIgnore
 	public Optional<X01LegRound> getRound(int roundNumber) {
+		if (getRounds() == null) return Optional.empty();
+
 		return getRounds().stream()
 				.filter(round -> round.getRound() == roundNumber)
 				.findFirst();
+	}
+
+	public int getScored(String playerId) {
+		if (getRounds() == null) return 0;
+
+		return getRounds().stream()
+				.flatMap(x01LegRound -> x01LegRound.getPlayerScores().stream())
+				.filter(x01LegRoundScore -> x01LegRoundScore.getPlayerId().equals(playerId))
+				.mapToInt(X01LegRoundScore::getScore).sum();
+	}
+
+	public int getDartsUsed(String playerId) {
+		if (getRounds() == null) return 0;
+
+		return getRounds().stream()
+				.flatMap(x01LegRound -> x01LegRound.getPlayerScores().stream())
+				.filter(x01LegRoundScore -> x01LegRoundScore.getPlayerId().equals(playerId))
+				.mapToInt(X01LegRoundScore::getDartsUsed).sum();
 	}
 
 }

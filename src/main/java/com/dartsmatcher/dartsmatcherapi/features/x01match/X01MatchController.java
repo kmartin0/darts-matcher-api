@@ -1,5 +1,6 @@
 package com.dartsmatcher.dartsmatcherapi.features.x01match;
 
+import com.dartsmatcher.dartsmatcherapi.features.x01checkout.IX01CheckoutService;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.X01Match;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.checkout.X01Checkout;
 import com.dartsmatcher.dartsmatcherapi.utils.Endpoints;
@@ -19,8 +20,11 @@ public class X01MatchController {
 
 	private final IX01MatchService matchService;
 
-	public X01MatchController(IX01MatchService matchService) {
+	private final IX01CheckoutService checkoutService;
+
+	public X01MatchController(IX01MatchService matchService, IX01CheckoutService checkoutService) {
 		this.matchService = matchService;
+		this.checkoutService = checkoutService;
 	}
 
 	@PostMapping(path = Endpoints.SAVE_MATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -50,7 +54,7 @@ public class X01MatchController {
 	@ResponseStatus(HttpStatus.OK)
 	public ArrayList<X01Checkout> getFinishes() throws IOException {
 
-		return matchService.getCheckouts();
+		return checkoutService.getCheckouts();
 	}
 
 }

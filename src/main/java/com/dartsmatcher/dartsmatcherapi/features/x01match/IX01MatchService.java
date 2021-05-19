@@ -36,6 +36,4 @@ public interface IX01MatchService {
 
 	X01Match updateMatch(@Valid X01DeleteLeg x01DeleteLeg);
 
-	ArrayList<X01Checkout> getCheckouts() throws IOException;
-
 }

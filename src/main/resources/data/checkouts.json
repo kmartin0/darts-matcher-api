@@ -15,7 +15,7 @@
     "suggested": [
       {
         "section": 1,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 1,
@@ -39,7 +39,7 @@
     "suggested": [
       {
         "section": 1,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 2,
@@ -63,7 +63,7 @@
     "suggested": [
       {
         "section": 3,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 2,
@@ -87,7 +87,7 @@
     "suggested": [
       {
         "section": 1,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 4,
@@ -111,7 +111,7 @@
     "suggested": [
       {
         "section": 3,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 4,
@@ -135,7 +135,7 @@
     "suggested": [
       {
         "section": 5,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 4,
@@ -159,7 +159,7 @@
     "suggested": [
       {
         "section": 7,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 4,
@@ -183,7 +183,7 @@
     "suggested": [
       {
         "section": 1,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 8,
@@ -207,7 +207,7 @@
     "suggested": [
       {
         "section": 3,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 8,
@@ -231,7 +231,7 @@
     "suggested": [
       {
         "section": 5,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 8,
@@ -255,7 +255,7 @@
     "suggested": [
       {
         "section": 7,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 8,
@@ -279,7 +279,7 @@
     "suggested": [
       {
         "section": 9,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 8,
@@ -303,7 +303,7 @@
     "suggested": [
       {
         "section": 11,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 8,
@@ -327,7 +327,7 @@
     "suggested": [
       {
         "section": 13,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 8,
@@ -351,7 +351,7 @@
     "suggested": [
       {
         "section": 15,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 8,
@@ -375,7 +375,7 @@
     "suggested": [
       {
         "section": 1,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 16,
@@ -399,7 +399,7 @@
     "suggested": [
       {
         "section": 3,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 16,
@@ -423,7 +423,7 @@
     "suggested": [
       {
         "section": 5,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 16,
@@ -446,8 +446,8 @@
     "minDarts": 2,
     "suggested": [
       {
-        "section": 9,
-        "area": "SINGLE"
+        "section": 7,
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 16,
@@ -471,7 +471,7 @@
     "suggested": [
       {
         "section": 9,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 16,
@@ -485,7 +485,7 @@
     "suggested": [
       {
         "section": 10,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 16,
@@ -499,7 +499,7 @@
     "suggested": [
       {
         "section": 11,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 16,
@@ -513,7 +513,7 @@
     "suggested": [
       {
         "section": 12,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 16,
@@ -527,7 +527,7 @@
     "suggested": [
       {
         "section": 13,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 16,
@@ -541,7 +541,7 @@
     "suggested": [
       {
         "section": 14,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 16,
@@ -555,7 +555,7 @@
     "suggested": [
       {
         "section": 15,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 16,
@@ -569,7 +569,7 @@
     "suggested": [
       {
         "section": 16,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 16,
@@ -583,7 +583,7 @@
     "suggested": [
       {
         "section": 17,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 16,
@@ -597,7 +597,7 @@
     "suggested": [
       {
         "section": 18,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 16,
@@ -611,7 +611,7 @@
     "suggested": [
       {
         "section": 19,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 16,
@@ -625,7 +625,7 @@
     "suggested": [
       {
         "section": 20,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 16,
@@ -639,7 +639,7 @@
     "suggested": [
       {
         "section": 13,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 20,
@@ -653,7 +653,7 @@
     "suggested": [
       {
         "section": 14,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 20,
@@ -667,7 +667,7 @@
     "suggested": [
       {
         "section": 15,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 20,
@@ -681,7 +681,7 @@
     "suggested": [
       {
         "section": 16,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 20,
@@ -695,7 +695,7 @@
     "suggested": [
       {
         "section": 17,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 20,
@@ -709,7 +709,7 @@
     "suggested": [
       {
         "section": 18,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 20,
@@ -723,7 +723,7 @@
     "suggested": [
       {
         "section": 19,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 20,
@@ -737,7 +737,7 @@
     "suggested": [
       {
         "section": 20,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 20,
@@ -1287,7 +1287,7 @@
       },
       {
         "section": 10,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 16,
@@ -1319,7 +1319,7 @@
       },
       {
         "section": 9,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 16,
@@ -1337,7 +1337,7 @@
       },
       {
         "section": 10,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 16,
@@ -1355,7 +1355,7 @@
       },
       {
         "section": 14,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 16,
@@ -1373,7 +1373,7 @@
       },
       {
         "section": 16,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 20,
@@ -1391,7 +1391,7 @@
       },
       {
         "section": 13,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 16,
@@ -1409,7 +1409,7 @@
       },
       {
         "section": 14,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 16,
@@ -1427,7 +1427,7 @@
       },
       {
         "section": 18,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 16,
@@ -1445,7 +1445,7 @@
       },
       {
         "section": 20,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 20,
@@ -1463,7 +1463,7 @@
       },
       {
         "section": 17,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 16,
@@ -1481,7 +1481,7 @@
       },
       {
         "section": 13,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 20,
@@ -1499,7 +1499,7 @@
       },
       {
         "section": 19,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 16,
@@ -1517,7 +1517,7 @@
       },
       {
         "section": 12,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 20,
@@ -1535,7 +1535,7 @@
       },
       {
         "section": 13,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 20,
@@ -1553,7 +1553,7 @@
       },
       {
         "section": 14,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 20,
@@ -1571,7 +1571,7 @@
       },
       {
         "section": 15,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 20,
@@ -1589,7 +1589,7 @@
       },
       {
         "section": 16,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 20,
@@ -1607,7 +1607,7 @@
       },
       {
         "section": 17,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 20,
@@ -1625,7 +1625,7 @@
       },
       {
         "section": 18,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 20,
@@ -1661,7 +1661,7 @@
       },
       {
         "section": 20,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 20,
@@ -1747,7 +1747,7 @@
     "suggested": [
       {
         "section": 25,
-        "area": "SINGLE"
+        "area": "SINGLE_BULL"
       },
       {
         "section": 20,
@@ -1841,11 +1841,11 @@
       },
       {
         "section": 20,
-        "area": "SINGLE"
+        "area": "OUTER_SINGLE"
       },
       {
         "section": 50,
-        "area": "SINGLE"
+        "area": "DOUBLE_BULL"
       }
     ]
   },
@@ -2385,7 +2385,7 @@
       },
       {
         "section": 50,
-        "area": "SINGLE"
+        "area": "DOUBLE_BULL"
       }
     ]
   },
@@ -2403,7 +2403,7 @@
       },
       {
         "section": 50,
-        "area": "SINGLE"
+        "area": "DOUBLE_BULL"
       }
     ]
   },
@@ -2421,7 +2421,7 @@
       },
       {
         "section": 50,
-        "area": "SINGLE"
+        "area": "DOUBLE_BULL"
       }
     ]
   },
@@ -2439,7 +2439,7 @@
       },
       {
         "section": 50,
-        "area": "SINGLE"
+        "area": "DOUBLE_BULL"
       }
     ]
   }

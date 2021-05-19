@@ -1,5 +1,7 @@
 package com.dartsmatcher.dartsmatcherapi.features.x01livematch;
 
+import com.dartsmatcher.dartsmatcherapi.features.x01Dartbot.X01DartBotService;
+import com.dartsmatcher.dartsmatcherapi.features.x01Dartbot.X01DartBotThrow;
 import com.dartsmatcher.dartsmatcherapi.features.x01livematch.dto.X01DeleteLeg;
 import com.dartsmatcher.dartsmatcherapi.features.x01livematch.dto.X01DeleteSet;
 import com.dartsmatcher.dartsmatcherapi.features.x01livematch.dto.X01DeleteThrow;
@@ -20,8 +22,20 @@ public class X01LiveMatchController {
 
 	private final IX01MatchService matchService;
 
-	public X01LiveMatchController(IX01MatchService matchService) {
+	private final X01DartBotService dartBotService;
+
+	public X01LiveMatchController(IX01MatchService matchService, X01DartBotService dartBotService) {
 		this.matchService = matchService;
+		this.dartBotService = dartBotService;
+	}
+
+	@MessageMapping(Websockets.X01_THROW_DART_BOT)
+	@SendTo(Websockets.X01_MATCH)
+	public X01Match throwDartBot(@Valid @Payload X01DartBotThrow x01DartBotThrow) throws IOException {
+
+		X01Throw x01Throw = dartBotService.dartBotThrow(x01DartBotThrow);
+
+		return matchService.updateMatch(x01Throw);
 	}
 
 	@MessageMapping(Websockets.X01_ADD_THROW)

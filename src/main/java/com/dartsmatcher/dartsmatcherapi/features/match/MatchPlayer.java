@@ -21,7 +21,7 @@ public class MatchPlayer {
 
 	@JsonIgnore
 	public ObjectId getPlayerObjectId() {
-		if (playerType.equals(PlayerType.REGISTERED) && ObjectId.isValid(playerId)) {
+		if ((playerType.equals(PlayerType.DART_BOT) || playerType.equals(PlayerType.REGISTERED)) && ObjectId.isValid(playerId)) {
 			return new ObjectId(playerId);
 		} else {
 			return null;

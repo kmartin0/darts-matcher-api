@@ -6,6 +6,8 @@ import com.dartsmatcher.dartsmatcherapi.exceptionhandler.response.TargetError;
 import com.dartsmatcher.dartsmatcherapi.features.match.MatchPlayer;
 import com.dartsmatcher.dartsmatcherapi.features.match.PlayerType;
 import com.dartsmatcher.dartsmatcherapi.features.user.IUserService;
+import com.dartsmatcher.dartsmatcherapi.features.x01Dartbot.X01DartBotService;
+import com.dartsmatcher.dartsmatcherapi.features.x01checkout.IX01CheckoutService;
 import com.dartsmatcher.dartsmatcherapi.features.x01livematch.dto.X01DeleteLeg;
 import com.dartsmatcher.dartsmatcherapi.features.x01livematch.dto.X01DeleteSet;
 import com.dartsmatcher.dartsmatcherapi.features.x01livematch.dto.X01DeleteThrow;
@@ -18,11 +20,7 @@ import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01LegRound
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.set.X01Set;
 import com.dartsmatcher.dartsmatcherapi.utils.MessageResolver;
 import com.dartsmatcher.dartsmatcherapi.utils.X01TimelineUtils;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
@@ -46,14 +44,14 @@ public class X01MatchServiceImpl implements IX01MatchService {
 
 	private final IUserService userService;
 
+	private final IX01CheckoutService checkoutService;
+
 	private final MessageResolver messageResolver;
 
-	@Value("classpath:data/checkouts.json")
-	Resource checkoutsResourceFile;
-
-	public X01MatchServiceImpl(X01MatchRepository x01MatchRepository, IUserService userService, MessageResolver messageResolver) {
+	public X01MatchServiceImpl(X01MatchRepository x01MatchRepository, IUserService userService, IX01CheckoutService checkoutService, MessageResolver messageResolver) {
 		this.x01MatchRepository = x01MatchRepository;
 		this.userService = userService;
+		this.checkoutService = checkoutService;
 		this.messageResolver = messageResolver;
 	}
 
@@ -127,6 +125,9 @@ public class X01MatchServiceImpl implements IX01MatchService {
 
 		// Get the leg round, a new leg round is created if it doesn't exist yet.
 		X01LegRound legRound = getOrAddLegRound(leg, x01Throw.getRound());
+
+		// TODO: If it is a dart bot throw update the X01Throw with a the dart bot turn.
+//		dartBotService.dartBotThrow()
 
 		// Add the throw to the leg round.
 		playerAddThrow(leg, legRound, x01Throw, match.getX01());
@@ -203,16 +204,6 @@ public class X01MatchServiceImpl implements IX01MatchService {
 		match.updateAll();
 
 		return x01MatchRepository.save(match);
-	}
-
-	@Override
-	public ArrayList<X01Checkout> getCheckouts() throws IOException {
-
-		ObjectMapper mapper = new ObjectMapper();
-
-		return mapper.readValue(checkoutsResourceFile.getInputStream(), new TypeReference<ArrayList<X01Checkout>>() {
-		});
-
 	}
 
 	// Create set, if already exists replace with empty set.
@@ -305,7 +296,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
 			});
 
 
-		} else if (remaining < 0) {
+		} else if (remaining < 0 || remaining == 1) {
 			x01LegRoundScore.setScore(0);
 		}
 
@@ -315,9 +306,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
 		if (score > 170)
 			throw new InvalidArgumentsException(new TargetError("score", messageResolver.getMessage("message.impossible.checkout", score)));
 
-		X01Checkout checkout = getCheckouts().stream()
-				.filter(x01Checkout -> x01Checkout.getCheckout() == score)
-				.findFirst()
+		X01Checkout checkout = checkoutService.getCheckout(score)
 				.orElseThrow(() -> new InvalidArgumentsException(new TargetError("score", messageResolver.getMessage("message.impossible.checkout", score))));
 
 		if (dartsUsed < checkout.getMinDarts())

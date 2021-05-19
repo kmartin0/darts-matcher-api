@@ -1,6 +1,6 @@
 package com.dartsmatcher.dartsmatcherapi.features.x01match.models.checkout;
 
-import com.dartsmatcher.dartsmatcherapi.features.match.Dart;
+import com.dartsmatcher.dartsmatcherapi.features.board.Dart;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

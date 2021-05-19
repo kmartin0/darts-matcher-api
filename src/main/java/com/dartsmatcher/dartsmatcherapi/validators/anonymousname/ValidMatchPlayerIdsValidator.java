@@ -22,7 +22,7 @@ public class ValidMatchPlayerIdsValidator implements ConstraintValidator<ValidMa
 		HibernateConstraintValidatorContext hibernateContext = context.unwrap(HibernateConstraintValidatorContext.class);
 		hibernateContext.disableDefaultConstraintViolation();
 
-		ArrayList<String> reservedNames = new ArrayList<>(Collections.singletonList("dartBot"));
+		ArrayList<String> reservedNames = new ArrayList<>(Collections.singletonList("admin"));
 		Set<Object> tmpPlayerIds = new HashSet<>();
 
 		for (MatchPlayer matchPlayer : matchPlayers) {
@@ -30,10 +30,8 @@ public class ValidMatchPlayerIdsValidator implements ConstraintValidator<ValidMa
 			String playerId = matchPlayer.getPlayerId();
 			String violatedPlayerId = "";
 
-
 			if (matchPlayer.getPlayerType() == PlayerType.REGISTERED && !ObjectId.isValid(playerId) || // Registered players should have a valid object id.
-					reservedNames.stream().anyMatch(playerId::equalsIgnoreCase) || // Player id's cannot be the same as the reserved names.
-					playerId.contains(".")) { // Player id's must not contain dots.
+					reservedNames.stream().anyMatch(playerId::equalsIgnoreCase)) { // Player id's cannot be the same as the reserved names.
 				violatedPlayerId = playerId;
 			}
 
