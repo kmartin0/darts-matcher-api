@@ -52,7 +52,7 @@ public class X01StatisticsUtils {
 												}
 
 												X01StatisticsUtils.updateThrowStats(x01PlayerStatistics, x01LegRoundScore.getScore(), x01LegRoundScore.getDartsUsed(), x01LegRound.getRound() <= 3);
-												X01StatisticsUtils.updateTonPlusStats(x01PlayerStatistics, x01LegRoundScore.getScore());
+												X01StatisticsUtils.updateScorePlusStats(x01PlayerStatistics, x01LegRoundScore.getScore());
 												X01StatisticsUtils.updateCheckoutStats(x01PlayerStatistics, x01LegRoundScore, isCheckout);
 											});
 								});
@@ -72,13 +72,16 @@ public class X01StatisticsUtils {
 	 * @param playerStats MatchPlayerStatistics reference to be updated.
 	 * @param score       Int the score.
 	 */
-	public static void updateTonPlusStats(X01PlayerStatistics playerStats, int score) {
+	public static void updateScorePlusStats(X01PlayerStatistics playerStats, int score) {
 
 		X01ScoresStatistics scoreStats = playerStats.getScoresStats();
 
-		// determine if the score is a TonPlus, TonForty or TonEighty scoring.
+		// Increment the value of the bracket the score falls in.
+		if (score >= 40 && score < 60) scoreStats.setFortyPlus(scoreStats.getFortyPlus() + 1);
+		if (score >= 60 && score < 80) scoreStats.setSixtyPlus(scoreStats.getSixtyPlus() + 1);
+		if (score >= 80 && score < 100) scoreStats.setEightyPlus(scoreStats.getEightyPlus() + 1);
 		if (score >= 100 && score < 140) scoreStats.setTonPlus(scoreStats.getTonPlus() + 1);
-		if (score >= 140 && score < 180) scoreStats.setTonForty(scoreStats.getTonForty() + 1);
+		if (score >= 140 && score < 180) scoreStats.setTonFortyPlus(scoreStats.getTonFortyPlus() + 1);
 		if (score == 180) scoreStats.setTonEighty(scoreStats.getTonEighty() + 1);
 	}
 

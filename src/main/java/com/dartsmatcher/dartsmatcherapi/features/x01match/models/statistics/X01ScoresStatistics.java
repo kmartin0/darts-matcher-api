@@ -9,9 +9,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class X01ScoresStatistics {
 
+	private int fortyPlus;
+
+	private int sixtyPlus;
+
+	private int eightyPlus;
+
 	private int tonPlus;
 
-	private int tonForty;
+	private int tonFortyPlus;
 
 	private int tonEighty;
 
