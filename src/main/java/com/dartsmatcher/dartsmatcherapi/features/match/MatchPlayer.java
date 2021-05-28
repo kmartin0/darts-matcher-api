@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springframework.lang.Nullable;
 
 import javax.validation.constraints.NotNull;
 
@@ -15,6 +16,15 @@ public class MatchPlayer {
 
 	@NotNull
 	private String playerId;
+
+	@Nullable
+	private String userName;
+
+	@Nullable
+	private String firstName;
+
+	@Nullable
+	private String lastName;
 
 	@NotNull
 	private PlayerType playerType;

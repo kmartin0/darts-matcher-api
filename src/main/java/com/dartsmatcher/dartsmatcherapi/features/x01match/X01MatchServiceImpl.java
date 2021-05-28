@@ -6,6 +6,7 @@ import com.dartsmatcher.dartsmatcherapi.exceptionhandler.response.TargetError;
 import com.dartsmatcher.dartsmatcherapi.features.match.MatchPlayer;
 import com.dartsmatcher.dartsmatcherapi.features.match.PlayerType;
 import com.dartsmatcher.dartsmatcherapi.features.user.IUserService;
+import com.dartsmatcher.dartsmatcherapi.features.user.User;
 import com.dartsmatcher.dartsmatcherapi.features.x01Dartbot.X01DartBotService;
 import com.dartsmatcher.dartsmatcherapi.features.x01checkout.IX01CheckoutService;
 import com.dartsmatcher.dartsmatcherapi.features.x01livematch.dto.X01DeleteLeg;
@@ -60,10 +61,14 @@ public class X01MatchServiceImpl implements IX01MatchService {
 		// Prevent users from assigning an id.
 		x01Match.setId(null);
 
-		// Check if players exist
+		// Check if players exist and fill their information.
 		for (MatchPlayer player : x01Match.getPlayers()) {
-			if (player.getPlayerType() == PlayerType.REGISTERED)
-				userService.getUser(new ObjectId(player.getPlayerId()));
+			if (player.getPlayerType() == PlayerType.REGISTERED) {
+				User user = userService.getUser(new ObjectId(player.getPlayerId()));
+				player.setUserName(user.getUserName());
+				player.setFirstName(user.getFirstName());
+				player.setLastName(user.getLastName());
+			}
 		}
 
 		// Add statistics and result.
