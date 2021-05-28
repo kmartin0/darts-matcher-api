@@ -8,6 +8,8 @@ import com.dartsmatcher.dartsmatcherapi.features.x01match.models.playerresult.X0
 import com.dartsmatcher.dartsmatcherapi.features.match.MatchPlayer;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01Leg;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.set.X01Set;
+import com.dartsmatcher.dartsmatcherapi.features.x01match.models.set.X01SetPlayerResult;
+import org.springframework.security.core.parameters.P;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -110,7 +112,7 @@ public class X01ResultUtils {
 		ArrayList<String> setWinners = X01ResultUtils.getWinners(numOfLegsWon, legsToGo);
 
 		// Construct and add the player results to the set.
-		set.setResult(X01ResultUtils.createPlayerResults(numOfLegsWon, setWinners));
+		set.setResult(X01ResultUtils.createSetPlayerResults(numOfLegsWon, setWinners));
 	}
 
 	/**
@@ -121,8 +123,11 @@ public class X01ResultUtils {
 	public static void updateMatchPlayerResults(X01Match match) {
 		if (match == null) return;
 
-		// Find how many sets each player has won. Store playerId as key, number of sets won as value.
-		Map<String, Integer> numWon = match.getPlayers().stream()
+		// Map of all match players and their total number of sets and legs won.
+		Map<String, Integer> setsWon = match.getPlayers().stream()
+				.collect(Collectors.toMap(MatchPlayer::getPlayerId, player -> 0));
+
+		Map<String, Integer> legsWon = match.getPlayers().stream()
 				.collect(Collectors.toMap(MatchPlayer::getPlayerId, player -> 0));
 
 		// Reference to hold the match winners
@@ -132,37 +137,30 @@ public class X01ResultUtils {
 		AtomicInteger numPlayed = new AtomicInteger();
 
 		if (match.getTimeline() != null) {
-			// When a match is a best of 1 set then the score should reflect the number of legs won in the first set.
-			// Else the score will reflect the number of sets won.
-			if (match.getBestOf().getSets() == 1) {
-				X01Set set = match.getTimeline().isEmpty() ? X01TimelineUtils.createSet(match.getPlayers(), 1) : match.getTimeline().get(0);
+			// Iterate through the legs to fill numWon and setsPlayed.
+			match.getTimeline().forEach(x01Set -> {
+				boolean setHasWinner = false;
 
-				match.setResult(set.getResult());
-				return;
-			} else {
-				// Iterate through the legs to fill numWon and setsPlayed.
-				match.getTimeline().forEach(x01Set -> {
-					boolean setHasWinner = false;
+				for (X01SetPlayerResult setPlayerResult : x01Set.getResult()) {
+					legsWon.put(setPlayerResult.getPlayerId(), legsWon.getOrDefault(setPlayerResult.getPlayerId(), 0) + setPlayerResult.getLegsWon());
 
-					for (X01PlayerResult playerResult : x01Set.getResult()) {
-						if (playerResult.getResult() == ResultType.WIN || playerResult.getResult() == ResultType.DRAW) {
-							numWon.put(playerResult.getPlayerId(), numWon.getOrDefault(playerResult.getPlayerId(), 0) + 1);
-							setHasWinner = true;
-						}
+					if (setPlayerResult.getResult() == ResultType.WIN || setPlayerResult.getResult() == ResultType.DRAW) {
+						setsWon.put(setPlayerResult.getPlayerId(), setsWon.getOrDefault(setPlayerResult.getPlayerId(), 0) + 1);
+						setHasWinner = true;
 					}
-					if (setHasWinner) numPlayed.getAndIncrement();
-				});
+				}
+				if (setHasWinner) numPlayed.getAndIncrement();
+			});
 
-				// Number of sets still to play.
-				int toGo = match.getBestOf().getSets() - numPlayed.get();
+			// Number of sets still to play.
+			int toGo = match.getBestOf().getSets() - numPlayed.get();
 
-				// Construct a list of players that have won (in case of multiple winners it's a draw).
-				matchWinners.addAll(X01ResultUtils.getWinners(numWon, toGo));
-			}
+			// Construct a list of players that have won (in case of multiple winners it's a draw).
+			matchWinners.addAll(X01ResultUtils.getWinners(setsWon, toGo));
 		}
 
 		// Construct and add the player results to the match.
-		match.setResult(X01ResultUtils.createPlayerResults(numWon, matchWinners));
+		match.setResult(X01ResultUtils.createPlayerResults(setsWon, matchWinners, legsWon));
 	}
 
 	/**
@@ -202,22 +200,59 @@ public class X01ResultUtils {
 	}
 
 	/**
-	 * Creates a X01PlayerResult for each player with their playerId, score and result.
+	 * Creates a X01SetPlayerResult for each player with their playerId, legs won and result.
 	 *
-	 * @param playerScores Map<String, Integer> Containing the playerId as key and their score as value.
-	 * @param winners      ArrayList<String> Containing the players that have won (multiple winners means a draw between these players).
-	 * @return ArrayList<X01PlayerResult> Containing an X01PlayerResult for each of the players listed in the playerScores Map.
+	 * @param playersLegsWon Map<String, Integer> Containing the playerId as key and their number of legs won as value.
+	 * @param winners        ArrayList<String> Containing the players that have won the set (multiple winners means a draw between these players).
+	 * @return ArrayList<X01SetPlayerResult> Containing an X01SetPlayerResult for each of the players listed in the playerScores Map.
 	 */
-	public static ArrayList<X01PlayerResult> createPlayerResults(Map<String, Integer> playerScores, ArrayList<String> winners) {
-		ArrayList<X01PlayerResult> playerResults = new ArrayList<>();
+	public static ArrayList<X01SetPlayerResult> createSetPlayerResults(Map<String, Integer> playersLegsWon, ArrayList<String> winners) {
+		ArrayList<X01SetPlayerResult> playerResults = new ArrayList<>();
 
-		if (playerScores == null || winners == null) return playerResults;
+		if (playersLegsWon == null || winners == null) return playerResults;
 
 		// Iterate through each player score to determine their score and result. And add them to the playerResults.
-		playerScores.forEach((playerId, score) -> {
+		playersLegsWon.forEach((playerId, legsWon) -> {
+			X01SetPlayerResult playerResult = new X01SetPlayerResult(
+					playerId,
+					legsWon,
+					null
+			);
+
+			// If there are no winners then the result of each players stays null.
+			if (!winners.isEmpty()) {
+				if (winners.contains(playerId)) // When a player is the sole winner then he has won otherwise its a draw between all winners.
+					playerResult.setResult(winners.size() > 1 ? ResultType.DRAW : ResultType.WIN);
+				else
+					playerResult.setResult(ResultType.LOSE); // When a player is not in the winners list then he has lost.
+			}
+
+			playerResults.add(playerResult);
+
+		});
+
+		return playerResults;
+	}
+
+	/**
+	 * Creates a X01PlayerResult for each player with their playerId, score and result.
+	 *
+	 * @param playerSetsWon Map<String, Integer> Containing the playerId as key and their number of sets won as value.
+	 * @param winners       ArrayList<String> Containing the players that have won the match (multiple winners means a draw between these players).
+	 * @param playerLegsWon Map<String, Integer> Containing the playerId as key and their number of legs won as value.
+	 * @return ArrayList<X01PlayerResult> Containing an X01PlayerResult for each of the players listed in the playerScores Map.
+	 */
+	public static ArrayList<X01PlayerResult> createPlayerResults(Map<String, Integer> playerSetsWon, ArrayList<String> winners, Map<String, Integer> playerLegsWon) {
+		ArrayList<X01PlayerResult> playerResults = new ArrayList<>();
+
+		if (playerSetsWon == null || winners == null || playerLegsWon == null) return playerResults;
+
+		// Iterate through each player score to determine their score and result. And add them to the playerResults.
+		playerSetsWon.forEach((playerId, setsWon) -> {
 			X01PlayerResult playerResult = new X01PlayerResult(
 					playerId,
-					score,
+					playerLegsWon.getOrDefault(playerId, 0),
+					setsWon,
 					null
 			);
 

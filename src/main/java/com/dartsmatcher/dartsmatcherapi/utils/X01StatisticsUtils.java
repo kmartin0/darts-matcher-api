@@ -14,7 +14,7 @@ import java.util.Objects;
 public class X01StatisticsUtils {
 
 	/**
-	 * Updates result and statistics for a match using it's timeline.
+	 * Updates statistics for a match using it's timeline.
 	 *
 	 * @param x01Match Match reference to be updated.
 	 */

@@ -6,6 +6,7 @@ import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01Leg;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01LegRound;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.playerresult.X01PlayerResult;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.set.X01Set;
+import com.dartsmatcher.dartsmatcherapi.features.x01match.models.set.X01SetPlayerResult;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -96,8 +97,8 @@ public class X01TimelineUtils {
 	}
 
 	public static X01Set createSet(ArrayList<MatchPlayer> players, int setNumber) {
-		ArrayList<X01PlayerResult> playerResults = players.stream()
-				.map(matchPlayer -> new X01PlayerResult(matchPlayer.getPlayerId(), 0, null))
+		ArrayList<X01SetPlayerResult> playerResults = players.stream()
+				.map(matchPlayer -> new X01SetPlayerResult(matchPlayer.getPlayerId(), 0, null))
 				.collect(Collectors.toCollection(ArrayList::new));
 
 		return new X01Set(setNumber, playerResults, new ArrayList<>(Collections.singletonList(createLeg(1))));

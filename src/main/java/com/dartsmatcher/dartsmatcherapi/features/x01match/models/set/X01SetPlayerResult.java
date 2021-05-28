@@ -1,4 +1,4 @@
-package com.dartsmatcher.dartsmatcherapi.features.x01match.models.playerresult;
+package com.dartsmatcher.dartsmatcherapi.features.x01match.models.set;
 
 import com.dartsmatcher.dartsmatcherapi.features.match.ResultType;
 import lombok.AllArgsConstructor;
@@ -8,13 +8,11 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class X01PlayerResult {
+public class X01SetPlayerResult {
 
 	private String playerId;
 
 	private int legsWon;
-
-	private int setsWon;
 
 	private ResultType result;
 

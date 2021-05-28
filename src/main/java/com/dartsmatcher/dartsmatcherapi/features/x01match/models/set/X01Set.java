@@ -23,7 +23,7 @@ public class X01Set {
 	@Min(1)
 	private int set;
 
-	private ArrayList<X01PlayerResult> result;
+	private ArrayList<X01SetPlayerResult> result;
 
 	@NotNull
 	@Valid

@@ -9,6 +9,7 @@ import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01LegRound
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01LegRoundScore;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.playerresult.X01PlayerResult;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.set.X01Set;
+import com.dartsmatcher.dartsmatcherapi.features.x01match.models.set.X01SetPlayerResult;
 import com.dartsmatcher.dartsmatcherapi.utils.X01ThrowerUtils;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Assertions;
@@ -150,8 +151,8 @@ public class CurrentThrowTests {
 		set1Leg1.getRounds().add(round2);
 		set1Leg1.getRounds().add(round3);
 
-		X01PlayerResult johnResult = new X01PlayerResult("John Doe", 1, ResultType.WIN);
-		X01PlayerResult janeResult = new X01PlayerResult("Jane Doe", 1, ResultType.LOSE);
+		X01SetPlayerResult johnResult = new X01SetPlayerResult("John Doe", 1, ResultType.WIN);
+		X01SetPlayerResult janeResult = new X01SetPlayerResult("Jane Doe", 1, ResultType.LOSE);
 
 		X01Set set1 = new X01Set(1, new ArrayList<>(Arrays.asList(johnResult, janeResult)), new ArrayList<>(Collections.singletonList(set1Leg1)));
 
