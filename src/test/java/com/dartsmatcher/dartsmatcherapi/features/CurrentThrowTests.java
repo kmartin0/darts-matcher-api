@@ -48,6 +48,7 @@ public class CurrentThrowTests {
 				players,
 				MatchType.X01,
 				501,
+				false,
 				MatchStatus.IN_PLAY,
 				new X01BestOf(3, 1),
 				null,

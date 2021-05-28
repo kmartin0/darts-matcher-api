@@ -40,11 +40,12 @@ public class X01Match extends BaseMatch {
 
 	public X01Match(ObjectId id, @NotNull LocalDateTime startDate, LocalDateTime endDate, String currentThrower,
 					@NotNull @Valid ArrayList<MatchPlayer> players, @NotNull MatchType matchType, @Min(0) int x01,
-					@NotNull MatchStatus matchStatus, @Valid @NotNull X01BestOf bestOf,
+					boolean trackDoubles, @NotNull MatchStatus matchStatus, @Valid @NotNull X01BestOf bestOf,
 					@Valid ArrayList<X01PlayerResult> result, @Valid ArrayList<X01PlayerStatistics> statistics,
 					@Valid ArrayList<X01Set> timeline) {
 		super(id, startDate, endDate, currentThrower, players, matchType);
 		this.x01 = x01;
+		this.trackDoubles = trackDoubles;
 		this.matchStatus = matchStatus;
 		this.bestOf = bestOf;
 		this.result = result;
@@ -57,6 +58,8 @@ public class X01Match extends BaseMatch {
 
 	@Min(0)
 	private int x01;
+
+	private boolean trackDoubles;
 
 	@NotNull
 	private MatchStatus matchStatus;
