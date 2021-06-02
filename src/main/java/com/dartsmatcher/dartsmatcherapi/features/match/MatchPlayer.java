@@ -1,5 +1,6 @@
 package com.dartsmatcher.dartsmatcherapi.features.match;
 
+import com.dartsmatcher.dartsmatcherapi.features.x01Dartbot.X01DartBotSettings;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,6 +29,9 @@ public class MatchPlayer {
 
 	@NotNull
 	private PlayerType playerType;
+
+	@Nullable
+	private X01DartBotSettings dartBotSettings;
 
 	@JsonIgnore
 	public ObjectId getPlayerObjectId() {

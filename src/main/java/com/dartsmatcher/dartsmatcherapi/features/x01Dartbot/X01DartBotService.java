@@ -4,6 +4,7 @@ import com.dartsmatcher.dartsmatcherapi.exceptionhandler.exception.ResourceNotFo
 import com.dartsmatcher.dartsmatcherapi.features.board.Board;
 import com.dartsmatcher.dartsmatcherapi.features.board.BoardSectionArea;
 import com.dartsmatcher.dartsmatcherapi.features.board.Dart;
+import com.dartsmatcher.dartsmatcherapi.features.match.MatchPlayer;
 import com.dartsmatcher.dartsmatcherapi.features.x01checkout.IX01CheckoutService;
 import com.dartsmatcher.dartsmatcherapi.features.x01livematch.dto.X01Throw;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.IX01MatchService;
@@ -16,8 +17,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Objects;
 
-// TODO: Multiple Bots different averages.
 @Service
 public class X01DartBotService {
 
@@ -47,18 +48,19 @@ public class X01DartBotService {
 
 		String dartBotId = x01DartBotThrow.getDartBotId();
 		X01Match match = matchService.getMatch(x01DartBotThrow.getMatchId());
+		MatchPlayer dartBotPlayer = match.getPlayers().stream().filter(matchPlayer -> matchPlayer.getPlayerId().equals(dartBotId)).findFirst().orElse(null);
 
 		X01Leg x01Leg = match.getSet(x01DartBotThrow.getSet())
 				.flatMap(x01Set -> x01Set.getLeg(x01DartBotThrow.getLeg()))
 				.orElseThrow(() -> new ResourceNotFoundException(X01Leg.class, x01DartBotThrow.getLeg()));
 
-		X01DartBotSettings dartBotSettings = match.getDartBotSettings();
+		X01DartBotSettings dartBotSettings = Objects.requireNonNull(dartBotPlayer).getDartBotSettings();
 		if (dartBotSettings == null) throw new ResourceNotFoundException(X01DartBotSettings.class, null);
 
 		// Starting values.
 		int legScored = x01Leg.getScored(dartBotId);
 		int legDartsUsed = x01Leg.getDartsUsed(dartBotId);
-		double expectedOneDartAvg = match.getDartBotSettings().getExpectedThreeDartAverage() / 3.0;
+		double expectedOneDartAvg = dartBotSettings.getExpectedThreeDartAverage() / 3.0;
 
 		// Generate the X01LegRoundScore containing the score, darts used and doubles missed for this round.
 		X01LegRoundScore roundScore = new X01LegRoundScore(dartBotId, 0, 0, 0);

@@ -4,7 +4,6 @@ import com.dartsmatcher.dartsmatcherapi.features.match.BaseMatch;
 import com.dartsmatcher.dartsmatcherapi.features.match.MatchPlayer;
 import com.dartsmatcher.dartsmatcherapi.features.match.MatchStatus;
 import com.dartsmatcher.dartsmatcherapi.features.match.MatchType;
-import com.dartsmatcher.dartsmatcherapi.features.x01Dartbot.X01DartBotSettings;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.bestof.X01BestOf;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.playerresult.X01PlayerResult;
 import com.dartsmatcher.dartsmatcherapi.features.x01match.models.set.X01Set;
@@ -21,7 +20,6 @@ import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.lang.Nullable;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -52,10 +50,7 @@ public class X01Match extends BaseMatch {
 		this.statistics = statistics;
 		this.timeline = timeline;
 	}
-
-	@Nullable
-	private X01DartBotSettings dartBotSettings;
-
+	
 	@Min(0)
 	private int x01;
 

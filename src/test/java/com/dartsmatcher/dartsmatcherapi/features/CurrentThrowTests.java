@@ -38,8 +38,8 @@ public class CurrentThrowTests {
 	@BeforeEach
 	void init() {
 		players = new ArrayList<>();
-		players.add(new MatchPlayer("John Doe", null, null, null, PlayerType.ANONYMOUS));
-		players.add(new MatchPlayer("Jane Doe", null, null, null, PlayerType.ANONYMOUS));
+		players.add(new MatchPlayer("John Doe", null, null, null, PlayerType.ANONYMOUS, null));
+		players.add(new MatchPlayer("Jane Doe", null, null, null, PlayerType.ANONYMOUS, null));
 
 		match = new X01Match(
 				new ObjectId(),

@@ -1,5 +1,7 @@
 package com.dartsmatcher.dartsmatcherapi.features;
 
+import com.dartsmatcher.dartsmatcherapi.features.match.MatchPlayer;
+import com.dartsmatcher.dartsmatcherapi.features.match.PlayerType;
 import com.dartsmatcher.dartsmatcherapi.features.x01Dartbot.X01DartBotService;
 import com.dartsmatcher.dartsmatcherapi.features.x01Dartbot.X01DartBotSettings;
 import com.dartsmatcher.dartsmatcherapi.features.x01Dartbot.X01DartBotThrow;
@@ -26,6 +28,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @ExtendWith({SpringExtension.class})
 @ContextConfiguration(classes = {X01DartBotService.class, X01CheckoutServiceImpl.class})
@@ -48,14 +52,17 @@ public class X01DartBotServiceTests {
 		final int x01 = 501;
 		final double maxAvgDeviation = X01DartBotService.MAX_ONE_DART_AVG_DEVIATION * 3;
 
-		for (int avg = 180; avg > 0; avg--) {
+		for (int avg = 21; avg > 0; avg--) {
 
 			// Initialize the match with the base settings.
 			X01Leg x01Leg = new X01Leg(1, null, dartBotId, new ArrayList<>());
 			X01Set x01Set = new X01Set(1, null, new ArrayList<>(Collections.singletonList(x01Leg)));
 
+			X01DartBotSettings dartBotSettings = new X01DartBotSettings(avg);
+			MatchPlayer dartBotPlayer = new MatchPlayer(dartBotId, null, null, null, PlayerType.DART_BOT, dartBotSettings);
+
 			match.setTimeline(new ArrayList<>(Collections.singletonList(x01Set)));
-			match.setDartBotSettings(new X01DartBotSettings(avg));
+			match.setPlayers(new ArrayList<>(Collections.singletonList(dartBotPlayer)));
 
 			// Initialize the minimum and maximum number of darts a dart bot must complete a leg in.
 			double minAvg = avg - maxAvgDeviation;
@@ -64,8 +71,10 @@ public class X01DartBotServiceTests {
 			int marginOfError = 1;
 
 			int minDarts = (int) Math.floor((x01 / (maxAvg < 1 ? 1 : maxAvg)) * 3) - marginOfError;
-			int maxDarts = (int) Math.ceil((x01 / (minAvg < 1 ? 1 : minAvg)) * 3) + marginOfError;
+			if (minDarts < 9) minDarts = 9;
 
+			int maxDarts = (int) Math.ceil((x01 / (minAvg < 1 ? 1 : minAvg)) * 3) + marginOfError;
+			
 			// Let the dart bot complete x number of legs and for each leg check that the darts used is within the range of minimum and maximum darts.
 			for (int j = 0; j < 50; j++) {
 				int round = 1;
