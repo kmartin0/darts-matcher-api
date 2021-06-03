@@ -74,7 +74,7 @@ public class X01DartBotServiceTests {
 			if (minDarts < 9) minDarts = 9;
 
 			int maxDarts = (int) Math.ceil((x01 / (minAvg < 1 ? 1 : minAvg)) * 3) + marginOfError;
-			
+
 			// Let the dart bot complete x number of legs and for each leg check that the darts used is within the range of minimum and maximum darts.
 			for (int j = 0; j < 50; j++) {
 				int round = 1;

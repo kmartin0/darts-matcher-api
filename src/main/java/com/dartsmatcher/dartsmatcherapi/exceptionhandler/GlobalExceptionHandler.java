@@ -11,11 +11,13 @@ import com.dartsmatcher.dartsmatcherapi.utils.MessageResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.HttpMediaTypeException;
@@ -63,12 +65,11 @@ public class GlobalExceptionHandler {
 		throw e;
 	}
 
-	// Handler for bad credentials.
-	@ExceptionHandler({BadCredentialsException.class})
-	public void handleBadCredentialsExceptionException(BadCredentialsException e) {
-		// Let an BadCredentialsException fall back to the Spring Security Handler.
+	// Handler for invalid credentials.
+	@ExceptionHandler({InvalidGrantException.class})
+	public ResponseEntity<InvalidGrantException> handleInvalidGrantExceptionException(InvalidGrantException e) {
 
-		throw e;
+		return new ResponseEntity<>(e, HttpStatus.UNAUTHORIZED);
 	}
 
 	// Typically thrown when no Authentication object is present in SecurityContext

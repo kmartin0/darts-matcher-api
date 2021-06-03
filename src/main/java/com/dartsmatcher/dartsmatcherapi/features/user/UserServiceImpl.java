@@ -16,6 +16,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
@@ -93,7 +94,7 @@ public class UserServiceImpl implements IUserService {
 		if (authentication instanceof JwtAuthenticationToken) {
 			// Get email from token and return the User object.
 			String email = ((Jwt) authentication.getPrincipal()).getClaim("user_name");
-			return userRepository.findByEmailIgnoreCase(email).orElseThrow(() -> new BadCredentialsException(messageResolver.getMessage("exception.username.not.found")));
+			return userRepository.findByEmailIgnoreCase(email).orElseThrow(() -> new InvalidGrantException(messageResolver.getMessage("exception.username.not.found")));
 		} else {
 			throw new AuthenticationCredentialsNotFoundException(messageResolver.getMessage("exception.authentication.credentials.not.found"));
 		}
@@ -129,7 +130,7 @@ public class UserServiceImpl implements IUserService {
 		if (passwordEncoder.matches(user.getPassword(), userToUpdate.getPassword())) {
 			user.setPassword(userToUpdate.getPassword());
 		} else {
-			throw new BadCredentialsException(messageResolver.getMessage("exception.bad.credentials"));
+			throw new InvalidGrantException(messageResolver.getMessage("exception.bad.credentials"));
 		}
 
 		// If the email is being changed, check if the new email is not already in use.
@@ -161,7 +162,7 @@ public class UserServiceImpl implements IUserService {
 
 		// Validate the password matches. Else throw ForbiddenException.
 		if (!passwordEncoder.matches(passwordDto.getPassword(), userToDelete.getPassword())) {
-			throw new BadCredentialsException(messageResolver.getMessage("exception.bad.credentials"));
+			throw new InvalidGrantException(messageResolver.getMessage("exception.bad.credentials"));
 		}
 
 		// Delete the user
@@ -183,7 +184,7 @@ public class UserServiceImpl implements IUserService {
 			userToUpdate.setPassword(passwordEncoder.encode(changePasswordDto.getNewPassword()));
 			userRepository.save(userToUpdate);
 		} else {
-			throw new BadCredentialsException(messageResolver.getMessage("exception.bad.credentials"));
+			throw new InvalidGrantException(messageResolver.getMessage("exception.bad.credentials"));
 		}
 	}
 
@@ -230,7 +231,7 @@ public class UserServiceImpl implements IUserService {
 
 		// Throw bad credentials exception when password token not present or expired.
 		if (!passwordToken.isPresent() || passwordToken.get().getExpiration().isBefore(LocalDateTime.now(clock))) {
-			throw new BadCredentialsException(messageResolver.getMessage("exception.password.reset.token"));
+			throw new InvalidGrantException(messageResolver.getMessage("exception.password.reset.token"));
 		}
 
 		// Change the password and save.
