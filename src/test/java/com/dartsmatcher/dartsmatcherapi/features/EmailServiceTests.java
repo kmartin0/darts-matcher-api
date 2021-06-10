@@ -24,6 +24,7 @@ import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -70,6 +71,7 @@ public class EmailServiceTests {
 				"John",
 				"Doe",
 				"johndoe@gmail.com",
+				new ArrayList<>(),
 				"pass123"
 		);
 	}

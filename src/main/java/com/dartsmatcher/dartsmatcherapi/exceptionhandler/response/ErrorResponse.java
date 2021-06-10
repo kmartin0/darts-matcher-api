@@ -2,6 +2,7 @@ package com.dartsmatcher.dartsmatcherapi.exceptionhandler.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,6 +14,7 @@ import java.util.Map;
 @Getter
 @Setter
 @AllArgsConstructor
+@EqualsAndHashCode
 public class ErrorResponse implements Serializable {
 
 	// The Status

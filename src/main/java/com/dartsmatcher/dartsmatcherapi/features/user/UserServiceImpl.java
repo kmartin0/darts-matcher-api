@@ -3,6 +3,7 @@ package com.dartsmatcher.dartsmatcherapi.features.user;
 import com.dartsmatcher.dartsmatcherapi.exceptionhandler.exception.ResourceAlreadyExistsException;
 import com.dartsmatcher.dartsmatcherapi.exceptionhandler.exception.ResourceNotFoundException;
 import com.dartsmatcher.dartsmatcherapi.features.email.IEmailService;
+import com.dartsmatcher.dartsmatcherapi.features.friendrequest.FriendsDetails;
 import com.dartsmatcher.dartsmatcherapi.features.user.password.PasswordDto;
 import com.dartsmatcher.dartsmatcherapi.features.user.password.change.ChangePasswordDto;
 import com.dartsmatcher.dartsmatcherapi.features.user.password.forgot.ForgotPasswordDto;
@@ -12,7 +13,6 @@ import com.dartsmatcher.dartsmatcherapi.features.user.password.reset.ResetPasswo
 import com.dartsmatcher.dartsmatcherapi.utils.MessageResolver;
 import org.bson.types.ObjectId;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,13 +23,13 @@ import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
 
-
+// TODO: General security check deny permission when a different authenticated user tries to alter another user.
 @Service
 public class UserServiceImpl implements IUserService {
 
@@ -75,6 +75,9 @@ public class UserServiceImpl implements IUserService {
 			throw new ResourceAlreadyExistsException(User.class, "userName", user.getUserName());
 		});
 
+		// Initialize friends array
+		user.setFriends(new ArrayList<>());
+
 		// Encrypt the user password.
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
 
@@ -108,6 +111,13 @@ public class UserServiceImpl implements IUserService {
 		user.setEmail(null);
 
 		return user;
+	}
+
+	@Override
+	public ArrayList<User> getUserFriendsDetails() {
+		User user = getAuthenticatedUser();
+// TODO: Check if findFriendsDetails return empty arraylist
+		return userRepository.findFriendsDetails(user.getId()).orElse(new FriendsDetails(new ArrayList<>())).getFriendsDetails();
 	}
 
 	/**
@@ -146,8 +156,21 @@ public class UserServiceImpl implements IUserService {
 			});
 		}
 
+		// Friends can only be updated by accepting a friend request.
+		user.setFriends(userToUpdate.getFriends());
+
+		// TODO: If first, last or username has changed. Update the matches from the user.
+
 		// Save and return the updated user.
 		return userRepository.save(user);
+	}
+
+	@Override
+	public User updateFriends(ObjectId userId, ArrayList<ObjectId> friends) {
+		User userToUpdate = getUser(userId);
+		userToUpdate.setFriends(friends);
+
+		return userRepository.save(userToUpdate);
 	}
 
 	/**
@@ -164,6 +187,9 @@ public class UserServiceImpl implements IUserService {
 		if (!passwordEncoder.matches(passwordDto.getPassword(), userToDelete.getPassword())) {
 			throw new InvalidGrantException(messageResolver.getMessage("exception.bad.credentials"));
 		}
+
+		// TODO: Delete the friend requests involving this user.
+		// TODO: Check what happens to existing matches from this user.
 
 		// Delete the user
 		userRepository.delete(userToDelete);

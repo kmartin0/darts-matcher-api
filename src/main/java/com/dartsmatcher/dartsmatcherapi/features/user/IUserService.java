@@ -10,6 +10,8 @@ import org.springframework.validation.annotation.Validated;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 @Validated
 public interface IUserService {
@@ -22,9 +24,15 @@ public interface IUserService {
 
 	User getUser(@NotNull ObjectId userId);
 
+	@PreAuthorize("isAuthenticated()")
+	ArrayList<User> getUserFriendsDetails();
+
 	@Validated({User.Update.class})
 	@PreAuthorize("isAuthenticated()")
 	User updateUser(@Valid User user);
+
+	@PreAuthorize("isAuthenticated()")
+	User updateFriends(ObjectId userId, ArrayList<ObjectId> friends);
 
 	@PreAuthorize("isAuthenticated()")
 	void deleteUser(@Valid PasswordDto passwordDto);

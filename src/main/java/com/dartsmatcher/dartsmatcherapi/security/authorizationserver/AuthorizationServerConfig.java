@@ -10,14 +10,12 @@ import org.springframework.security.oauth2.config.annotation.configurers.ClientD
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerEndpointsConfiguration;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
-import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
-import org.springframework.security.oauth2.provider.token.DefaultUserAuthenticationConverter;
-import org.springframework.security.oauth2.provider.token.TokenStore;
-import org.springframework.security.oauth2.provider.token.UserAuthenticationConverter;
+import org.springframework.security.oauth2.provider.token.*;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
 import java.security.KeyPair;
+import java.util.Arrays;
 
 @Configuration
 @Import(AuthorizationServerEndpointsConfiguration.class)
@@ -39,16 +37,6 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 	}
 
 	/**
-	 * Converts to and from and Authentication object using the custom UserDetailsService.
-	 */
-	@Bean
-	public UserAuthenticationConverter userAuthenticationConverter() {
-		DefaultUserAuthenticationConverter authenticationConverter = new DefaultUserAuthenticationConverter();
-		authenticationConverter.setUserDetailsService(userDetailsService);
-		return authenticationConverter;
-	}
-
-	/**
 	 * Creates an JwtAccessTokenConverter which encodes and decodes the jwt using our signing key.
 	 * Also encodes/decodes the user data inside the token.
 	 */
@@ -57,10 +45,6 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 		// Adds the jwt signing key
 		final JwtAccessTokenConverter accessTokenConverter = new JwtAccessTokenConverter();
 		accessTokenConverter.setKeyPair(keyPair);
-
-		// Adds the custom principal implementation in the Authentication Context
-		((DefaultAccessTokenConverter) accessTokenConverter.getAccessTokenConverter())
-				.setUserTokenConverter(userAuthenticationConverter());
 
 		return accessTokenConverter;
 	}
@@ -81,6 +65,19 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 		clients.withClientDetails(clientDetailsService);
 	}
 
+	@Bean
+	public TokenEnhancer tokenEnhancer() {
+		return new CustomTokenEnhancer();
+	}
+
+	@Bean
+	public TokenEnhancerChain tokenEnhancerChain() {
+		TokenEnhancerChain enhancerChain = new TokenEnhancerChain();
+		enhancerChain.setTokenEnhancers(Arrays.asList(tokenEnhancer(), accessTokenConverter()));
+
+		return enhancerChain;
+	}
+
 	/**
 	 * Configure the authorization server endpoints with a tokenStore, authenticationManager,
 	 * accessTokenConverter and userDetailsService.
@@ -88,8 +85,10 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 	@Override
 	public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 		endpoints.tokenStore(tokenStore())
-				.authenticationManager(authenticationManager)
 				.accessTokenConverter(accessTokenConverter())
-				.userDetailsService(userDetailsService);
+				.tokenEnhancer(tokenEnhancerChain())
+				.authenticationManager(authenticationManager)
+				.userDetailsService(userDetailsService)
+				.reuseRefreshTokens(false);
 	}
 }

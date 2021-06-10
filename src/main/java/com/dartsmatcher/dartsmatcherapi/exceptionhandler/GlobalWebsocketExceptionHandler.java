@@ -18,6 +18,7 @@ import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -35,7 +36,6 @@ public class GlobalWebsocketExceptionHandler {
 	private final MessageResolver messageResolver;
 
 
-	@Autowired
 	public GlobalWebsocketExceptionHandler(MessageResolver messageResolver) {
 		this.messageResolver = messageResolver;
 	}
@@ -50,6 +50,18 @@ public class GlobalWebsocketExceptionHandler {
 				ApiErrorCode.INTERNAL,
 				stompHeaderAccessor.getDestination(),
 				messageResolver.getMessage("exception.internal")
+		);
+	}
+
+	// Handler for access denied exceptions.
+	@MessageExceptionHandler(AccessDeniedException.class)
+	@SendToUser(destinations = Websockets.ERROR_QUEUE, broadcast = false)
+	public WebSocketErrorResponse handleAccessDeniedException(AccessDeniedException e, StompHeaderAccessor stompHeaderAccessor) {
+
+		return new WebSocketErrorResponse(
+				ApiErrorCode.UNAUTHENTICATED,
+				stompHeaderAccessor.getDestination(),
+				messageResolver.getMessage("exception.authentication.credentials.not.found")
 		);
 	}
 

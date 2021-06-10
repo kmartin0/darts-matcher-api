@@ -7,7 +7,6 @@ import com.dartsmatcher.dartsmatcherapi.features.match.MatchPlayer;
 import com.dartsmatcher.dartsmatcherapi.features.match.PlayerType;
 import com.dartsmatcher.dartsmatcherapi.features.user.IUserService;
 import com.dartsmatcher.dartsmatcherapi.features.user.User;
-import com.dartsmatcher.dartsmatcherapi.features.x01Dartbot.X01DartBotService;
 import com.dartsmatcher.dartsmatcherapi.features.x01checkout.IX01CheckoutService;
 import com.dartsmatcher.dartsmatcherapi.features.x01livematch.dto.X01DeleteLeg;
 import com.dartsmatcher.dartsmatcherapi.features.x01livematch.dto.X01DeleteSet;

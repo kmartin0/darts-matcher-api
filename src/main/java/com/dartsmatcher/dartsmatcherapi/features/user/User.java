@@ -1,6 +1,5 @@
 package com.dartsmatcher.dartsmatcherapi.features.user;
 
-import com.dartsmatcher.dartsmatcherapi.validators.anonymousname.ValidMatchPlayerIds;
 import com.dartsmatcher.dartsmatcherapi.validators.nowhitespace.NoWhitespace;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -14,6 +13,7 @@ import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import java.util.ArrayList;
 
 @Data
 @AllArgsConstructor
@@ -40,6 +40,8 @@ public class User {
 	@NotBlank(groups = {Create.class, Update.class})
 	@Email(groups = {Create.class, Update.class})
 	private String email;
+
+	private ArrayList<ObjectId> friends;
 
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	@NotBlank(groups = {Create.class, Update.class})

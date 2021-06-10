@@ -41,10 +41,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static org.mockito.ArgumentMatchers.any;
 
@@ -430,6 +427,7 @@ class UserServiceTests {
 				"John",
 				"Doe",
 				"johndoe@gmail.com",
+				new ArrayList<>(),
 				"pass123"
 		);
 	}
