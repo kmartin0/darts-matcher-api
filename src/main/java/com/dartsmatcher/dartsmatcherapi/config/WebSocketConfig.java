@@ -1,19 +1,13 @@
 package com.dartsmatcher.dartsmatcherapi.config;
 
 import com.dartsmatcher.dartsmatcherapi.exceptionhandler.CustomStompSubProtocolErrorHandler;
-import com.dartsmatcher.dartsmatcherapi.exceptionhandler.response.ApiErrorCode;
-import com.dartsmatcher.dartsmatcherapi.exceptionhandler.response.WebSocketErrorResponse;
 import com.dartsmatcher.dartsmatcherapi.utils.MessageResolver;
-import com.dartsmatcher.dartsmatcherapi.utils.Websockets;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
-import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -24,8 +18,6 @@ import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.BearerTokenAuthenticationToken;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
@@ -53,15 +45,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
 		registry.addEndpoint("/darts-matcher-websocket").setAllowedOriginPatterns("*").withSockJS();
-
-//		StompSubProtocolErrorHandler errorHandler = new StompSubProtocolErrorHandler();
-
-
 		registry.setErrorHandler(new CustomStompSubProtocolErrorHandler(messageResolver));
 	}
 
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry registry) {
+		registry.setApplicationDestinationPrefixes("/app", "/user");
 		registry.enableSimpleBroker("/topic", "/queue");
 	}
 
@@ -78,18 +67,15 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 						String bearer = NativeMessageHeaderAccessor.getFirstNativeHeader("Authorization", message.getHeaders());
 						if (bearer != null) {
 							BearerTokenAuthenticationToken bearerAuth = new BearerTokenAuthenticationToken(bearer.replaceAll("Bearer ", ""));
-							Authentication authentication = null;
+							Authentication authentication;
 							try {
 								authentication = getAuthenticationManager().authenticate(bearerAuth);
-								System.out.println();
 							} catch (Exception e) {
 								e.printStackTrace();
-
 								throw e;
 							}
 
 							if (authentication != null) {
-//								SecurityContextHolder.getContext().setAuthentication(authentication);
 								accessor.setUser(authentication);
 							}
 						}
@@ -100,20 +86,4 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 			}
 		});
 	}
-
-
-	//	 Handler for all unhandled exceptions.
-	@MessageExceptionHandler(Exception.class)
-	@SendToUser(destinations = Websockets.ERROR_QUEUE, broadcast = false)
-	public WebSocketErrorResponse handleRunTimeException(Exception e, StompHeaderAccessor stompHeaderAccessor) {
-		e.printStackTrace();
-
-		return new WebSocketErrorResponse(
-				ApiErrorCode.INTERNAL,
-				stompHeaderAccessor.getDestination(),
-				"INTERNAL"
-		);
-	}
-
-
 }

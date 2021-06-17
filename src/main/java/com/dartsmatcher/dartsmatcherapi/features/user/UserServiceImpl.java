@@ -12,6 +12,7 @@ import com.dartsmatcher.dartsmatcherapi.features.user.password.reset.PasswordTok
 import com.dartsmatcher.dartsmatcherapi.features.user.password.reset.ResetPasswordDto;
 import com.dartsmatcher.dartsmatcherapi.utils.MessageResolver;
 import org.bson.types.ObjectId;
+import org.springframework.data.mongodb.core.query.TextCriteria;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
 
-// TODO: General security check deny permission when a different authenticated user tries to alter another user.
 @Service
 public class UserServiceImpl implements IUserService {
 
@@ -105,19 +105,22 @@ public class UserServiceImpl implements IUserService {
 
 	@Override
 	public User getUser(ObjectId userId) {
-		User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException(User.class, userId));
+		return userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException(User.class, userId));
 
-		// Email is removed for anonymous requests.
-		user.setEmail(null);
-
-		return user;
 	}
 
 	@Override
-	public ArrayList<User> getUserFriendsDetails() {
-		User user = getAuthenticatedUser();
-// TODO: Check if findFriendsDetails return empty arraylist
-		return userRepository.findFriendsDetails(user.getId()).orElse(new FriendsDetails(new ArrayList<>())).getFriendsDetails();
+	public ArrayList<User> searchUsers(String query) {
+		TextCriteria textCriteria = TextCriteria.forDefaultLanguage().caseSensitive(false).matchingAny(query.split("\\s+"));
+
+		return userRepository.findAllBy(textCriteria);
+	}
+
+	@Override
+	public ArrayList<User> getUserFriendsDetails(ObjectId userId) {
+
+		// TODO: Check if findFriendsDetails return empty arraylist
+		return userRepository.findFriendsDetails(userId).orElse(new FriendsDetails(new ArrayList<>())).getFriendsDetails();
 	}
 
 	/**
@@ -171,6 +174,18 @@ public class UserServiceImpl implements IUserService {
 		userToUpdate.setFriends(friends);
 
 		return userRepository.save(userToUpdate);
+	}
+
+	@Override
+	public void deleteFriend(ObjectId friendId) {
+		User authenticatedUser = getAuthenticatedUser();
+		User friendToDelete = getUser(friendId);
+
+		authenticatedUser.getFriends().remove(friendToDelete.getId());
+		userRepository.save(authenticatedUser);
+
+		friendToDelete.getFriends().remove(authenticatedUser.getId());
+		userRepository.save(friendToDelete);
 	}
 
 	/**

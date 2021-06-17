@@ -23,6 +23,7 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.HttpMediaTypeException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -151,6 +152,20 @@ public class GlobalExceptionHandler {
 				apiErrorCode,
 				messageResolver.getMessage("exception.invalid.arguments"),
 				errors.toArray(new TargetError[0])
+		);
+
+		return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());
+	}
+
+	@ExceptionHandler({MissingServletRequestParameterException.class})
+	public ResponseEntity<ErrorResponse> handleMissingServletRequestParameterException(MissingServletRequestParameterException e) {
+
+		ApiErrorCode apiErrorCode = ApiErrorCode.INVALID_ARGUMENTS;
+
+		ErrorResponse responseBody = new ErrorResponse(
+				apiErrorCode,
+				messageResolver.getMessage("exception.invalid.arguments"),
+				new TargetError(e.getParameterName(), messageResolver.getMessage("javax.validation.constraints.NotNull.message"))
 		);
 
 		return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());

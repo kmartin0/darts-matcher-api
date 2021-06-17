@@ -2,6 +2,9 @@ package com.dartsmatcher.dartsmatcherapi.features.friendrequest;
 
 import com.dartsmatcher.dartsmatcherapi.features.user.IUserService;
 import com.dartsmatcher.dartsmatcherapi.features.user.User;
+import com.dartsmatcher.dartsmatcherapi.utils.CustomJsonViews;
+import com.dartsmatcher.dartsmatcherapi.utils.Websockets;
+import com.fasterxml.jackson.annotation.JsonView;
 import org.bson.types.ObjectId;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -10,13 +13,16 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Map;
+
+import static org.springframework.messaging.core.AbstractMessageSendingTemplate.CONVERSION_HINT_HEADER;
 
 @Controller
-@RestController
 public class FriendRequestController {
 
 	private final IFriendRequestService friendRequestService;
@@ -29,25 +35,27 @@ public class FriendRequestController {
 		this.messagingTemplate = messagingTemplate;
 	}
 
-	@MessageMapping("/topic/friends/requests:create")
+	@MessageMapping(Websockets.CREATE_FRIEND_REQUEST)
 	@PreAuthorize("isAuthenticated()")
-	public void createFriendRequest(@Valid @Payload FriendRequest friendRequest) {
+	public void createFriendRequest(@Validated({User.NotNullId.class}) @Payload FriendRequest friendRequest) {
 		friendRequestService.createFriendRequest(friendRequest);
 
-		sendUpdatedFriendRequests(friendRequest.getSender(), friendRequest.getReceiver());
+		sendUpdatedFriendRequests(friendRequest.getSender().getId(), friendRequest.getReceiver().getId());
 	}
 
-	@MessageMapping("/topic/friends/requests/{friendRequestId}:update")
+	@MessageMapping(Websockets.UPDATE_FRIEND_REQUEST)
 	@PreAuthorize("isAuthenticated()")
 	public void updateFriendRequest(@DestinationVariable ObjectId friendRequestId,
 									@Valid @Payload FriendRequestStatus friendRequestStatus) {
+
 		FriendRequest updatedFriendRequest = friendRequestService.updateFriendRequest(friendRequestId, friendRequestStatus);
 
-		sendUpdatedFriendRequests(updatedFriendRequest.getSender(), updatedFriendRequest.getReceiver());
+		sendUpdatedFriendRequests(updatedFriendRequest.getSender().getId(), updatedFriendRequest.getReceiver().getId());
 	}
 
-	@SubscribeMapping("/topic/friends/requests")
+	@SubscribeMapping(Websockets.GET_FRIEND_REQUESTS)
 	@PreAuthorize("isAuthenticated()")
+	@JsonView({CustomJsonViews.PublicView.class})
 	public ArrayList<FriendRequest> subscribeFriendRequests() {
 		User authenticatedUser = userService.getAuthenticatedUser();
 
@@ -55,53 +63,42 @@ public class FriendRequestController {
 	}
 
 	private void sendUpdatedFriendRequests(ObjectId senderId, ObjectId receiverId) {
-		// Send updated friend requests to sender. // TODO: Sort by date.
+		// Send updated friend requests to sender.
+
+		Map<String, Object> conversionHints = Collections.singletonMap(
+				CONVERSION_HINT_HEADER, new Class[]{CustomJsonViews.PublicView.class}
+		);
+
 		User sender = userService.getUser(senderId);
 		messagingTemplate.convertAndSendToUser(
 				sender.getEmail(),
-				"/topic/friends/requests",
-				friendRequestService.getFriendRequests(sender.getId())
+				Websockets.GET_FRIEND_REQUESTS,
+				friendRequestService.getFriendRequests(sender.getId()),
+				conversionHints
+		);
+
+		messagingTemplate.convertAndSendToUser(
+				sender.getEmail(),
+				Websockets.GET_FRIENDS,
+				userService.getUserFriendsDetails(sender.getId()),
+				conversionHints
 		);
 
 		User receiver = userService.getUser(receiverId);
 
-		// Send updated friend requests to receiver. // TODO: Sort by date.
+		// Send updated friend requests to receiver.
 		messagingTemplate.convertAndSendToUser(
 				receiver.getEmail(),
-				"/topic/friends/requests",
-				friendRequestService.getFriendRequests(receiver.getId())
+				Websockets.GET_FRIEND_REQUESTS,
+				friendRequestService.getFriendRequests(receiver.getId()),
+				conversionHints
+		);
+
+		messagingTemplate.convertAndSendToUser(
+				receiver.getEmail(),
+				Websockets.GET_FRIENDS,
+				userService.getUserFriendsDetails(receiver.getId()),
+				conversionHints
 		);
 	}
 }
-
-
-/*
-Step 1:
-		===============================
-		Friend_Requests
-		===============================
-		from: objectId,
-		to: objectId,
-		status: (Declined, Accepted, Pending)
-		===============================
-
-		===============================
-		User
-		===============================
-		friends: objectId[]
-		...
-		===============================
-
-		Step 2:
-		Expose Websocket (topic/{userId}/friends)
-		Expose Message (topic/friends/requests:create)
-		Expose Message (topic/friends/requests:update)
-
-		User 1 Websocket Listens to subscribeFriends
-		User 2 Websocket Listens to subscribeFriends
-
-		User 2 Sends message which creates friend request to User 1
-		User 1 + User 2 Websocket receives map (friends: Friend[], friendRequests: FriendRequest)
-		User 1 Sends friend request update Message
-		User 1 + User 2 Websocket receives map (friends: Friend[], friendRequests: FriendRequest)
-*/

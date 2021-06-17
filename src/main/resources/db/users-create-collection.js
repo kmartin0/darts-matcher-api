@@ -40,3 +40,6 @@ db.createCollection("users", {
 // Create unique indexes
 db.users.createIndex({ "userName": 1 }, { unique: true })
 db.users.createIndex({ "email": 1 }, { unique: true })
+
+// Create text search index
+db.users.createIndex({userName: "text", firstName: "text", lastName: "text"})

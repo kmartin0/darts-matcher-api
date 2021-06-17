@@ -34,7 +34,6 @@ public class ErrorResponse implements Serializable {
 		this.code = apiErrorCode.getHttpStatus().value();
 		this.description = description;
 		this.error = apiErrorCode.name();
-		System.out.println(Arrays.toString(details));
 		this.details = detailsArrToHashMap(details);
 	}
 

@@ -1,5 +1,6 @@
 package com.dartsmatcher.dartsmatcherapi.exceptionhandler;
 
+import com.dartsmatcher.dartsmatcherapi.exceptionhandler.exception.ForbiddenException;
 import com.dartsmatcher.dartsmatcherapi.exceptionhandler.exception.InvalidArgumentsException;
 import com.dartsmatcher.dartsmatcherapi.exceptionhandler.exception.ResourceAlreadyExistsException;
 import com.dartsmatcher.dartsmatcherapi.exceptionhandler.exception.ResourceNotFoundException;
@@ -62,6 +63,17 @@ public class GlobalWebsocketExceptionHandler {
 				ApiErrorCode.UNAUTHENTICATED,
 				stompHeaderAccessor.getDestination(),
 				messageResolver.getMessage("exception.authentication.credentials.not.found")
+		);
+	}
+
+	// Handler for custom forbidden exception.
+	@MessageExceptionHandler(ForbiddenException.class)
+	@SendToUser(destinations = Websockets.ERROR_QUEUE, broadcast = false)
+	public WebSocketErrorResponse handleForbiddenException(ForbiddenException e, StompHeaderAccessor stompHeaderAccessor) {
+		return new WebSocketErrorResponse(
+				ApiErrorCode.PERMISSION_DENIED,
+				stompHeaderAccessor.getDestination(),
+				e.getDescription()
 		);
 	}
 

@@ -16,7 +16,6 @@ import java.util.ArrayList;
 @Validated
 public interface IUserService {
 
-	@Validated({User.Create.class})
 	User saveUser(@Valid User user);
 
 	@PreAuthorize("isAuthenticated()")
@@ -24,15 +23,19 @@ public interface IUserService {
 
 	User getUser(@NotNull ObjectId userId);
 
-	@PreAuthorize("isAuthenticated()")
-	ArrayList<User> getUserFriendsDetails();
+	ArrayList<User> searchUsers(String query);
 
-	@Validated({User.Update.class})
+	@PreAuthorize("isAuthenticated()")
+	ArrayList<User> getUserFriendsDetails(ObjectId userId);
+
 	@PreAuthorize("isAuthenticated()")
 	User updateUser(@Valid User user);
 
 	@PreAuthorize("isAuthenticated()")
 	User updateFriends(ObjectId userId, ArrayList<ObjectId> friends);
+
+	@PreAuthorize("isAuthenticated()")
+	void deleteFriend(ObjectId friendId);
 
 	@PreAuthorize("isAuthenticated()")
 	void deleteUser(@Valid PasswordDto passwordDto);

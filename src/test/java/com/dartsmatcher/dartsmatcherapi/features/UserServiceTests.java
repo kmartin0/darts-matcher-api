@@ -87,7 +87,7 @@ class UserServiceTests {
 		userService.saveUser(user);
 
 		// Then
-		Set<ConstraintViolation<User>> constraintViolations = validator.validate(user, User.Create.class);
+		Set<ConstraintViolation<User>> constraintViolations = validator.validate(user);
 		Assertions.assertEquals(0, constraintViolations.size());
 		Assertions.assertEquals("encryptedPassword", user.getPassword());
 		Mockito.verify(userRepository, Mockito.times(1)).save(user);
@@ -182,7 +182,7 @@ class UserServiceTests {
 		User updatedUser = userService.updateUser(userToUpdate);
 
 		// Then
-		Set<ConstraintViolation<User>> constraintViolations = validator.validate(updatedUser, User.Update.class);
+		Set<ConstraintViolation<User>> constraintViolations = validator.validate(updatedUser);
 		Assertions.assertEquals(0, constraintViolations.size());
 		Mockito.verify(userRepository, Mockito.times(1)).save(updatedUser);
 	}

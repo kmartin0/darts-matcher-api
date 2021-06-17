@@ -1,5 +1,8 @@
 package com.dartsmatcher.dartsmatcherapi.features.friendrequest;
 
+import com.dartsmatcher.dartsmatcherapi.features.user.User;
+import com.dartsmatcher.dartsmatcherapi.utils.CustomJsonViews;
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,6 +11,7 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
@@ -19,14 +23,20 @@ import java.time.LocalDateTime;
 public class FriendRequest {
 
 	@MongoId
+	@JsonView({CustomJsonViews.PublicView.class})
 	private ObjectId id;
 
 	@NotNull
-	private ObjectId sender;
+	@Valid
+	@JsonView({CustomJsonViews.PublicView.class})
+	private User sender;
 
 	@NotNull
-	private ObjectId receiver;
+	@Valid
+	@JsonView({CustomJsonViews.PublicView.class})
+	private User receiver;
 
+	@JsonView({CustomJsonViews.PublicView.class})
 	private LocalDateTime date;
 
 }

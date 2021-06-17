@@ -9,6 +9,7 @@ public class Endpoints {
 	public static final String SAVE_USER = "/users";
 	public static final String GET_USER = "/users";
 	public static final String GET_USER_BY_ID = "/users/{id}";
+	public static final String SEARCH_USER_BY_QUERY = "/users:search";
 	public static final String UPDATE_USER = "/users";
 	public static final String DELETE_USER = "/users";
 	public static final String CHANGE_PASSWORD = "/users/change-password";
