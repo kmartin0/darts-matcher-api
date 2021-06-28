@@ -1,11 +1,11 @@
 package com.dartsmatcher.dartsmatcherapi.utils;
 
-import com.dartsmatcher.dartsmatcherapi.features.match.MatchPlayer;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.X01Match;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01Leg;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01LegRound;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01LegRoundScore;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.set.X01Set;
+import com.dartsmatcher.dartsmatcherapi.features.basematch.MatchPlayer;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.X01Match;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.leg.X01Leg;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.leg.X01LegRound;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.leg.X01LegRoundScore;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.set.X01Set;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -38,7 +38,7 @@ public class X01ThrowerUtils {
 		if (match == null) return;
 
 		if (match.getTimeline() == null || match.getTimeline().isEmpty()) {
-			match.setCurrentThrower(match.getPlayers().get(0).getPlayerId());
+			match.setCurrentThrower(match.getPlayers().isEmpty() ? null : match.getPlayers().get(0).getPlayerId());
 			return;
 		}
 
@@ -118,17 +118,18 @@ public class X01ThrowerUtils {
 				.map(MatchPlayer::getPlayerId)
 				.collect(Collectors.toCollection(ArrayList::new));
 
-		if (set == null) {
-			int setsPlayed = match.getTimeline().stream().mapToInt(X01Set::getSet).max().orElse(0);
-			int throwsFirstInSet = setsPlayed % match.getPlayers().size();
+		int throwsFirstInSet = 0;
 
-			return createOrderOfPlay(matchOrderOfPlay, throwsFirstInSet);
+		if (match.getPlayers().size() > 0) {
+			if (set == null) {
+				int setsPlayed = match.getTimeline().stream().mapToInt(X01Set::getSet).max().orElse(0);
+				throwsFirstInSet = setsPlayed % match.getPlayers().size();
+			} else {
+				throwsFirstInSet = (set.getSet() - 1) % match.getPlayers().size();
+			}
 		}
 
-		int throwsFirstInSet = (set.getSet() - 1) % match.getPlayers().size();
-
 		return createOrderOfPlay(matchOrderOfPlay, throwsFirstInSet);
-
 	}
 
 	public static ArrayList<String> createOrderOfPlay(ArrayList<String> initialOrder, int firstToThrow) {

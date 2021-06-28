@@ -1,11 +1,11 @@
 package com.dartsmatcher.dartsmatcherapi.utils;
 
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.X01Match;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01LegRoundScore;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.statistics.X01AverageStatistics;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.statistics.X01CheckoutStatistics;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.statistics.X01PlayerStatistics;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.statistics.X01ScoresStatistics;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.X01Match;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.leg.X01LegRoundScore;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.statistics.X01AverageStatistics;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.statistics.X01CheckoutStatistics;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.statistics.X01PlayerStatistics;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.statistics.X01ScoresStatistics;
 
 import javax.validation.Valid;
 import java.util.ArrayList;

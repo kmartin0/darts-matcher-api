@@ -7,6 +7,7 @@ public class Websockets {
 
 	// Match Websocket topics
 	public static final String X01_MATCH = "/topic/matches/{matchId}";
+	public static final String X01_START_MATCH = "/topic/matches/{matchId}:start";
 	public static final String X01_THROW_DART_BOT = "/topic/matches/{matchId}:throw-dart-bot";
 	public static final String X01_ADD_THROW = "/topic/matches/{matchId}:update";
 	public static final String X01_DELETE_THROW = "/topic/matches/{matchId}:delete-throw";

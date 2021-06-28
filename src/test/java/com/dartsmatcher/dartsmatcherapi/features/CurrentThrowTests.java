@@ -1,15 +1,15 @@
 package com.dartsmatcher.dartsmatcherapi.features;
 
 import com.dartsmatcher.dartsmatcherapi.config.LocaleConfig;
-import com.dartsmatcher.dartsmatcherapi.features.match.*;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.X01Match;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.bestof.X01BestOf;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01Leg;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01LegRound;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01LegRoundScore;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.playerresult.X01PlayerResult;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.set.X01Set;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.set.X01SetPlayerResult;
+import com.dartsmatcher.dartsmatcherapi.features.basematch.MatchPlayerInviteStatusEnum;
+import com.dartsmatcher.dartsmatcherapi.features.basematch.*;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.X01Match;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.bestof.X01BestOf;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.leg.X01Leg;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.leg.X01LegRound;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.leg.X01LegRoundScore;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.set.X01Set;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.set.X01SetPlayerResult;
 import com.dartsmatcher.dartsmatcherapi.utils.X01ThrowerUtils;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Assertions;
@@ -38,8 +38,8 @@ public class CurrentThrowTests {
 	@BeforeEach
 	void init() {
 		players = new ArrayList<>();
-		players.add(new MatchPlayer("John Doe", null, null, null, PlayerType.ANONYMOUS, null));
-		players.add(new MatchPlayer("Jane Doe", null, null, null, PlayerType.ANONYMOUS, null));
+		players.add(new MatchPlayer("John Doe", null, null, null, PlayerType.ANONYMOUS, null, MatchPlayerInviteStatusEnum.ACCEPTED));
+		players.add(new MatchPlayer("Jane Doe", null, null, null, PlayerType.ANONYMOUS, null, MatchPlayerInviteStatusEnum.ACCEPTED));
 
 		match = new X01Match(
 				new ObjectId(),

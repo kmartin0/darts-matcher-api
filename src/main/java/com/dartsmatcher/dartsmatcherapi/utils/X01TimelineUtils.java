@@ -1,12 +1,11 @@
 package com.dartsmatcher.dartsmatcherapi.utils;
 
-import com.dartsmatcher.dartsmatcherapi.features.match.MatchPlayer;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.X01Match;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01Leg;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01LegRound;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.playerresult.X01PlayerResult;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.set.X01Set;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.set.X01SetPlayerResult;
+import com.dartsmatcher.dartsmatcherapi.features.basematch.MatchPlayer;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.X01Match;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.leg.X01Leg;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.leg.X01LegRound;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.set.X01Set;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.set.X01SetPlayerResult;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,6 +22,13 @@ public class X01TimelineUtils {
 
 	private static void updateTimelineInPlay(X01Match x01Match) {
 		if (x01Match.getResult().stream().anyMatch(x01PlayerResult -> x01PlayerResult.getResult() != null)) return;
+
+		// When there are no players, the timeline should be empty.
+		if (x01Match.getPlayers().isEmpty()) {
+			x01Match.setTimeline(new ArrayList<>());
+
+			return;
+		}
 
 		// If the timeline is empty, create one.
 		if (x01Match.getTimeline() == null || x01Match.getTimeline().isEmpty()) {

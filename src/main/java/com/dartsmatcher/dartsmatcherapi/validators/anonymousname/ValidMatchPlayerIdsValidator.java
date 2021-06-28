@@ -1,7 +1,7 @@
 package com.dartsmatcher.dartsmatcherapi.validators.anonymousname;
 
-import com.dartsmatcher.dartsmatcherapi.features.match.MatchPlayer;
-import com.dartsmatcher.dartsmatcherapi.features.match.PlayerType;
+import com.dartsmatcher.dartsmatcherapi.features.basematch.MatchPlayer;
+import com.dartsmatcher.dartsmatcherapi.features.basematch.PlayerType;
 import org.bson.types.ObjectId;
 import org.hibernate.validator.constraintvalidation.HibernateConstraintValidatorContext;
 

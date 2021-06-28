@@ -1,15 +1,14 @@
 package com.dartsmatcher.dartsmatcherapi.utils;
 
-import com.dartsmatcher.dartsmatcherapi.features.match.ResultType;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.X01Match;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01LegRound;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01LegRoundScore;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.playerresult.X01PlayerResult;
-import com.dartsmatcher.dartsmatcherapi.features.match.MatchPlayer;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01Leg;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.set.X01Set;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.set.X01SetPlayerResult;
-import org.springframework.security.core.parameters.P;
+import com.dartsmatcher.dartsmatcherapi.features.basematch.ResultType;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.X01Match;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.leg.X01LegRound;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.leg.X01LegRoundScore;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.playerresult.X01PlayerResult;
+import com.dartsmatcher.dartsmatcherapi.features.basematch.MatchPlayer;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.leg.X01Leg;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.set.X01Set;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.set.X01SetPlayerResult;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -170,7 +169,7 @@ public class X01ResultUtils {
 	 */
 	public static ArrayList<String> getWinners(Map<String, Integer> playerScores, int toGo) {
 		ArrayList<String> winners = new ArrayList<>();
-		if (playerScores == null) return winners;
+		if (playerScores == null || playerScores.isEmpty()) return winners;
 
 		// The highest score from the playerScores.
 		int mostWon = Collections.max(playerScores.entrySet(), Map.Entry.comparingByValue()).getValue();

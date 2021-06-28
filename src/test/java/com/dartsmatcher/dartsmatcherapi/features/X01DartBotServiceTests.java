@@ -1,18 +1,19 @@
 package com.dartsmatcher.dartsmatcherapi.features;
 
-import com.dartsmatcher.dartsmatcherapi.features.match.MatchPlayer;
-import com.dartsmatcher.dartsmatcherapi.features.match.PlayerType;
-import com.dartsmatcher.dartsmatcherapi.features.x01Dartbot.X01DartBotService;
-import com.dartsmatcher.dartsmatcherapi.features.x01Dartbot.X01DartBotSettings;
-import com.dartsmatcher.dartsmatcherapi.features.x01Dartbot.X01DartBotThrow;
-import com.dartsmatcher.dartsmatcherapi.features.x01checkout.X01CheckoutServiceImpl;
-import com.dartsmatcher.dartsmatcherapi.features.x01livematch.dto.X01Throw;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.IX01MatchService;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.X01Match;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01Leg;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01LegRound;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.leg.X01LegRoundScore;
-import com.dartsmatcher.dartsmatcherapi.features.x01match.models.set.X01Set;
+import com.dartsmatcher.dartsmatcherapi.features.basematch.MatchPlayerInviteStatusEnum;
+import com.dartsmatcher.dartsmatcherapi.features.basematch.MatchPlayer;
+import com.dartsmatcher.dartsmatcherapi.features.basematch.PlayerType;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01Dartbot.X01DartBotService;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01Dartbot.X01DartBotSettings;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01Dartbot.X01DartBotThrow;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01checkout.X01CheckoutServiceImpl;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01livematch.dto.X01Throw;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.IX01MatchService;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.X01Match;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.leg.X01Leg;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.leg.X01LegRound;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.leg.X01LegRoundScore;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.set.X01Set;
 import org.bson.types.ObjectId;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -28,8 +29,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 @ExtendWith({SpringExtension.class})
 @ContextConfiguration(classes = {X01DartBotService.class, X01CheckoutServiceImpl.class})
@@ -59,7 +58,7 @@ public class X01DartBotServiceTests {
 			X01Set x01Set = new X01Set(1, null, new ArrayList<>(Collections.singletonList(x01Leg)));
 
 			X01DartBotSettings dartBotSettings = new X01DartBotSettings(avg);
-			MatchPlayer dartBotPlayer = new MatchPlayer(dartBotId, null, null, null, PlayerType.DART_BOT, dartBotSettings);
+			MatchPlayer dartBotPlayer = new MatchPlayer(dartBotId, null, null, null, PlayerType.DART_BOT, dartBotSettings, MatchPlayerInviteStatusEnum.ACCEPTED);
 
 			match.setTimeline(new ArrayList<>(Collections.singletonList(x01Set)));
 			match.setPlayers(new ArrayList<>(Collections.singletonList(dartBotPlayer)));
