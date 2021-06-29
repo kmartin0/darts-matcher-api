@@ -51,7 +51,7 @@ public class X01Match extends BaseMatch {
 	}
 
 	// TODO: Replace with X01MatchSettings
-	@Min(0)
+	@Min(2)
 	private int x01;
 
 	private boolean trackDoubles;
