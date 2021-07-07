@@ -124,10 +124,14 @@ public class X01MatchServiceImpl implements IX01MatchService {
 		// Set id to new match object.
 		x01Match.setId(matchToUpdate.getId());
 
-		// Check if players exist
+		// Check if players exist and fill their information.
 		for (MatchPlayer player : x01Match.getPlayers()) {
-			if (player.getPlayerType() == PlayerType.REGISTERED)
-				userService.getUser(new ObjectId(player.getPlayerId()));
+			if (player.getPlayerType() == PlayerType.REGISTERED) {
+				User user = userService.getUser(new ObjectId(player.getPlayerId()));
+				player.setUserName(user.getUserName());
+				player.setFirstName(user.getFirstName());
+				player.setLastName(user.getLastName());
+			}
 		}
 
 		// Add statistics.

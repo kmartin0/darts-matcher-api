@@ -47,7 +47,7 @@ public class X01LiveMatchController {
 
 	@MessageMapping(Websockets.X01_ADD_THROW)
 	@SendTo(Websockets.X01_MATCH)
-	public X01Match updateMatch(@Valid @Payload X01Throw x01Throw) throws IOException {
+	public X01Match addThrow(@Valid @Payload X01Throw x01Throw) throws IOException {
 
 		return matchService.updateMatch(x01Throw);
 	}

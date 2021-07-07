@@ -4,10 +4,12 @@ import com.dartsmatcher.dartsmatcherapi.features.x01.x01checkout.IX01CheckoutSer
 import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.X01Match;
 import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.checkout.X01Checkout;
 import com.dartsmatcher.dartsmatcherapi.utils.Endpoints;
+import com.dartsmatcher.dartsmatcherapi.utils.Websockets;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -16,15 +18,19 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 @RestController
+@Controller
 public class X01MatchController {
 
 	private final IX01MatchService matchService;
 
 	private final IX01CheckoutService checkoutService;
 
-	public X01MatchController(IX01MatchService matchService, IX01CheckoutService checkoutService) {
+	private final SimpMessagingTemplate simpMessagingTemplate;
+
+	public X01MatchController(IX01MatchService matchService, IX01CheckoutService checkoutService, SimpMessagingTemplate simpMessagingTemplate) {
 		this.matchService = matchService;
 		this.checkoutService = checkoutService;
+		this.simpMessagingTemplate = simpMessagingTemplate;
 	}
 
 	@PostMapping(path = Endpoints.SAVE_MATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -44,8 +50,11 @@ public class X01MatchController {
 
 	@PutMapping(path = Endpoints.UPDATE_MATCH, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.CREATED)
-	@PreAuthorize("isAuthenticated()")
+//	@PreAuthorize("isAuthenticated()")
 	public X01Match updateMatch(@Valid @RequestBody X01Match x01Match, @PathVariable ObjectId matchId) {
+		X01Match updatedMatch = matchService.updateMatch(x01Match, matchId);
+
+		simpMessagingTemplate.convertAndSend(Websockets.X01_MATCH.replace("{matchId}", updatedMatch.getId().toString()), updatedMatch);
 
 		return matchService.updateMatch(x01Match, matchId);
 	}
