@@ -1,0 +1,16 @@
+services:
+  darts-matcher-api:
+    restart: always
+    image: darts-matcher-api
+    container_name: darts-matcher-api
+    build:
+      context: .
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - DB_URI=mongodb://localhost:27017/darts-matcher
+      - JWK_KEYSTORE_ALIAS=darts-matcher-alias
+      - JWK_KEYSTORE_PASS=secret
+      - JWK_KEYSTORE_PATH=classpath:keystore/darts-matcher-dev-jwk.jks
+      - JWK_SET_URI=http://localhost:8080/.well-known/jwks.json
+    ports:
+      - 8080:8080
