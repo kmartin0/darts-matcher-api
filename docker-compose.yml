@@ -1,3 +1,4 @@
+version: "3"
 services:
   darts-matcher-api:
     restart: always
@@ -13,4 +14,4 @@ services:
       - JWK_KEYSTORE_PATH=classpath:keystore/darts-matcher-dev-jwk.jks
       - JWK_SET_URI=http://localhost:8080/.well-known/jwks.json
     ports:
-      - 8080:8080
+      - "8080:8080"
