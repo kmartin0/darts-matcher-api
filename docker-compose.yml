@@ -13,5 +13,7 @@ services:
       - JWK_KEYSTORE_PASS=secret
       - JWK_KEYSTORE_PATH=classpath:keystore/darts-matcher-dev-jwk.jks
       - JWK_SET_URI=http://localhost:8080/.well-known/jwks.json
+      - EMAIL_USERNAME=DUMMY_EMAIL@EMAIL.COM
+      - EMAIL_PASSWORD=DUMMY_EMAIL_PASSWORD
     ports:
       - "8080:8080"
