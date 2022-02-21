@@ -159,7 +159,7 @@ public class X01ResultUtils {
 		}
 
 		// Construct and add the player results to the match.
-		match.setResult(X01ResultUtils.createPlayerResults(setsWon, matchWinners, legsWon));
+		match.setX01Result(X01ResultUtils.createPlayerResults(setsWon, matchWinners, legsWon));
 	}
 
 	/**

@@ -21,7 +21,7 @@ public class X01TimelineUtils {
 	}
 
 	private static void updateTimelineInPlay(X01Match x01Match) {
-		if (x01Match.getResult().stream().anyMatch(x01PlayerResult -> x01PlayerResult.getResult() != null)) return;
+		if (x01Match.getX01Result().stream().anyMatch(x01PlayerResult -> x01PlayerResult.getResult() != null)) return;
 
 		// When there are no players, the timeline should be empty.
 		if (x01Match.getPlayers().isEmpty()) {

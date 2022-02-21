@@ -28,6 +28,7 @@ import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -155,8 +156,8 @@ class UserServiceTests {
 		SecurityContextHolder.setContext(securityContext);
 		Mockito.when(userRepository.findByEmailIgnoreCase(user.getEmail())).thenReturn(Optional.empty());
 
-		// Assert getAuthenticatedUser throws BadCredentialsException.
-		Assertions.assertThrows(BadCredentialsException.class, () -> userService.getAuthenticatedUser());
+		// Assert getAuthenticatedUser throws InvalidGrantException.
+		Assertions.assertThrows(InvalidGrantException.class, () -> userService.getAuthenticatedUser());
 	}
 
 	@Test
@@ -241,8 +242,8 @@ class UserServiceTests {
 
 		Mockito.when(passwordEncoder.matches(any(), any())).thenReturn(false);
 
-		// When update user Then expect ResourceAlreadyExistsException
-		Assertions.assertThrows(BadCredentialsException.class, () -> userService.updateUser(authenticatedUser));
+		// When update user Then expect InvalidGrantException
+		Assertions.assertThrows(InvalidGrantException.class, () -> userService.updateUser(authenticatedUser));
 	}
 
 	@Test
@@ -266,8 +267,8 @@ class UserServiceTests {
 
 		Mockito.when(passwordEncoder.matches(any(), any())).thenReturn(false);
 
-		// When delete user Then expect ResourceAlreadyExistsException
-		Assertions.assertThrows(BadCredentialsException.class, () -> userService.deleteUser(new PasswordDto(authenticatedUser.getPassword())));
+		// When delete user Then expect InvalidGrantException
+		Assertions.assertThrows(InvalidGrantException.class, () -> userService.deleteUser(new PasswordDto(authenticatedUser.getPassword())));
 	}
 
 	@Test
@@ -296,8 +297,8 @@ class UserServiceTests {
 
 		Mockito.when(passwordEncoder.matches(any(), any())).thenReturn(false);
 
-		// When delete user Then expect ResourceAlreadyExistsException
-		Assertions.assertThrows(BadCredentialsException.class, () -> userService.changePassword(changePasswordDto));
+		// When delete user Then expect InvalidGrantException
+		Assertions.assertThrows(InvalidGrantException.class, () -> userService.changePassword(changePasswordDto));
 	}
 
 	@Test
@@ -381,8 +382,8 @@ class UserServiceTests {
 
 		Mockito.when(passwordTokenRepository.findByToken(passwordToken.getToken())).thenReturn(Optional.empty());
 
-		// When reset password Then expect BadCredentialsException
-		Assertions.assertThrows(BadCredentialsException.class, () -> userService.resetPassword(resetPasswordDto));
+		// When reset password Then expect InvalidGrantException
+		Assertions.assertThrows(InvalidGrantException.class, () -> userService.resetPassword(resetPasswordDto));
 	}
 
 	@Test
@@ -398,8 +399,8 @@ class UserServiceTests {
 
 		Mockito.when(passwordTokenRepository.findByToken(passwordToken.getToken())).thenReturn(Optional.of(passwordToken));
 
-		// When reset password Then expect BadCredentialsException
-		Assertions.assertThrows(BadCredentialsException.class, () -> userService.resetPassword(resetPasswordDto));
+		// When reset password Then expect InvalidGrantException
+		Assertions.assertThrows(InvalidGrantException.class, () -> userService.resetPassword(resetPasswordDto));
 	}
 
 	@Test

@@ -42,7 +42,7 @@ public class X01ThrowerUtils {
 			return;
 		}
 
-		boolean matchHasResult = match.getResult() != null && match.getResult().stream().anyMatch(x01PlayerResult -> x01PlayerResult.getResult() != null);
+		boolean matchHasResult = match.getX01Result() != null && match.getX01Result().stream().anyMatch(x01PlayerResult -> x01PlayerResult.getResult() != null);
 		if (matchHasResult) {
 			match.setCurrentThrower(null);
 			return;

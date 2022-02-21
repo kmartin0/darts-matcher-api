@@ -1,22 +1,17 @@
 package com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models;
 
-import com.dartsmatcher.dartsmatcherapi.features.basematch.BaseMatch;
-import com.dartsmatcher.dartsmatcherapi.features.basematch.MatchPlayer;
-import com.dartsmatcher.dartsmatcherapi.features.basematch.MatchStatus;
-import com.dartsmatcher.dartsmatcherapi.features.basematch.MatchType;
+import com.dartsmatcher.dartsmatcherapi.features.basematch.*;
 import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.bestof.X01BestOf;
 import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.playerresult.X01PlayerResult;
 import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.set.X01Set;
 import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.statistics.X01PlayerStatistics;
+import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.x01settings.X01MatchSettings;
 import com.dartsmatcher.dartsmatcherapi.utils.X01ResultUtils;
 import com.dartsmatcher.dartsmatcherapi.utils.X01StatisticsUtils;
 import com.dartsmatcher.dartsmatcherapi.utils.X01ThrowerUtils;
 import com.dartsmatcher.dartsmatcherapi.utils.X01TimelineUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -36,100 +31,115 @@ import java.util.Optional;
 @TypeAlias("X01Match")
 public class X01Match extends BaseMatch {
 
-	public X01Match(ObjectId id, @NotNull LocalDateTime startDate, LocalDateTime endDate, String currentThrower,
-					@NotNull @Valid ArrayList<MatchPlayer> players, @NotNull MatchType matchType, @Min(0) int x01,
-					boolean trackDoubles, @NotNull MatchStatus matchStatus, @Valid @NotNull X01BestOf bestOf,
-					@Valid ArrayList<X01PlayerResult> result, @Valid ArrayList<X01PlayerStatistics> statistics,
-					@Valid ArrayList<X01Set> timeline) {
-		super(id, startDate, endDate, currentThrower, matchStatus, players, matchType);
-		this.x01 = x01;
-		this.trackDoubles = trackDoubles;
-		this.bestOf = bestOf;
-		this.result = result;
-		this.statistics = statistics;
-		this.timeline = timeline;
-	}
+    public X01Match(ObjectId id, @NotNull LocalDateTime startDate, LocalDateTime endDate, String currentThrower,
+                    @NotNull @Valid ArrayList<MatchPlayer> players, @Valid ArrayList<MatchPlayerResult> matchResult,
+                    @NotNull MatchType matchType, @Min(0) int x01, boolean trackDoubles, @NotNull MatchStatus matchStatus,
+                    @Valid @NotNull X01BestOf bestOf, @Valid ArrayList<X01PlayerResult> x01Result,
+                    @Valid ArrayList<X01PlayerStatistics> statistics, @Valid ArrayList<X01Set> timeline) {
+        super(id, startDate, endDate, currentThrower, matchStatus, players, matchResult, matchType);
+        this.x01 = x01;
+        this.trackDoubles = trackDoubles;
+        this.bestOf = bestOf;
+        this.x01Result = x01Result;
+        this.statistics = statistics;
+        this.timeline = timeline;
+    }
 
-	// TODO: Replace with X01MatchSettings
-	@Min(2)
-	private int x01;
+    @Valid
+    @NotNull
+    private X01MatchSettings matchSettings;
 
-	private boolean trackDoubles;
+    // TODO: Replace with X01MatchSettings
+    @Min(2)
+    private int x01;
 
-	@Valid
-	@NotNull
-	private X01BestOf bestOf;
+    private boolean trackDoubles;
 
-	@Valid
-	private ArrayList<X01PlayerResult> result;
+    @Valid
+    @NotNull
+    private X01BestOf bestOf;
 
-	@Valid
-	private ArrayList<X01PlayerStatistics> statistics;
+    @Valid
+    @Setter(AccessLevel.NONE)
+    private ArrayList<X01PlayerResult> x01Result;
 
-	@Valid
-	private ArrayList<X01Set> timeline;
+    @Valid
+    private ArrayList<X01PlayerStatistics> statistics;
 
-	@JsonIgnore
-	public Optional<X01Set> getSet(int set) {
-		if (getTimeline() == null) return Optional.empty();
+    @Valid
+    private ArrayList<X01Set> timeline;
 
-		return getTimeline().stream()
-				.filter(x01PlayerSet -> x01PlayerSet.getSet() == set)
-				.findFirst();
-	}
+    @JsonIgnore
+    public Optional<X01Set> getSet(int set) {
+        if (getTimeline() == null) return Optional.empty();
 
-	@JsonIgnore
-	public void updateThrower() {
-		X01ThrowerUtils.updateThrower(this);
-	}
+        return getTimeline().stream()
+                .filter(x01PlayerSet -> x01PlayerSet.getSet() == set)
+                .findFirst();
+    }
 
-	@JsonIgnore
-	public void updateResult() {
-		X01ResultUtils.updateMatchResult(this);
-		updateMatchStatus();
-	}
+    @JsonIgnore
+    public void updateThrower() {
+        X01ThrowerUtils.updateThrower(this);
+    }
 
-	@JsonIgnore
-	public void updateResult(int set) {
-		X01ResultUtils.updateMatchResult(this, getSet(set).orElse(null));
-		updateMatchStatus();
-	}
+    @JsonIgnore
+    public void updateResult() {
+        X01ResultUtils.updateMatchResult(this);
+        updateMatchStatus();
+    }
 
-	@JsonIgnore
-	public void updateStatistics() {
-		X01StatisticsUtils.updateStatistics(this);
-	}
+    @JsonIgnore
+    public void updateResult(int set) {
+        X01ResultUtils.updateMatchResult(this, getSet(set).orElse(null));
+        updateMatchStatus();
+    }
 
-	@JsonIgnore
-	public void updateTimeline() {
-		X01TimelineUtils.updateTimeline(this);
-	}
+    @JsonIgnore
+    public void updateStatistics() {
+        X01StatisticsUtils.updateStatistics(this);
+    }
 
-	@JsonIgnore
-	public void updateAll() {
-		updateResult();
-		updateTimeline();
-		updateThrower();
-		updateStatistics();
-	}
+    @JsonIgnore
+    public void updateTimeline() {
+        X01TimelineUtils.updateTimeline(this);
+    }
 
-	@JsonIgnore
-	public void updateAll(int set) {
-		updateResult(set);
-		updateTimeline();
-		updateThrower();
-		updateStatistics();
-	}
+    @JsonIgnore
+    public void updateAll() {
+        updateResult();
+        updateTimeline();
+        updateThrower();
+        updateStatistics();
+    }
 
-	@JsonIgnore
-	public void updateMatchStatus() {
-		if (MatchStatus.LOBBY.equals(getMatchStatus())) return;
+    @JsonIgnore
+    public void updateAll(int set) {
+        updateResult(set);
+        updateTimeline();
+        updateThrower();
+        updateStatistics();
+    }
 
-		if (getResult() != null && getResult().stream().anyMatch(playerResult -> playerResult.getResult() != null)) {
-			setMatchStatus(MatchStatus.CONCLUDED);
-		} else {
-			setMatchStatus(MatchStatus.IN_PLAY);
-		}
-	}
+    @JsonIgnore
+    public void updateMatchStatus() {
+        if (MatchStatus.LOBBY.equals(getMatchStatus())) return;
 
+        if (this.getX01Result() != null && this.getX01Result().stream().anyMatch(playerResult -> playerResult.getResult() != null)) {
+            setMatchStatus(MatchStatus.CONCLUDED);
+        } else {
+            setMatchStatus(MatchStatus.IN_PLAY);
+        }
+    }
+
+    public void setX01Result(ArrayList<X01PlayerResult> x01Result) {
+        // Set the base match result.
+        ArrayList<MatchPlayerResult> matchPlayerResults = new ArrayList<>();
+        x01Result.forEach(x01PlayerResult -> matchPlayerResults.add(new MatchPlayerResult(x01PlayerResult, getBestOf())));
+
+        super.setMatchResult(matchPlayerResults);
+
+        // Set the x01 result.
+        this.x01Result = x01Result;
+    }
 }

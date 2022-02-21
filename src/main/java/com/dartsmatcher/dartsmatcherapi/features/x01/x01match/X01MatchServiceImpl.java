@@ -96,7 +96,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
 		// Remove the match players that haven't accepted their invite.
 		match.getPlayers().forEach(matchPlayer -> {
 			if (!matchPlayer.getInviteStatus().equals(MatchPlayerInviteStatusEnum.ACCEPTED)) {
-				match.getResult().removeIf(x01PlayerResult -> x01PlayerResult.getPlayerId().equals(matchPlayer.getPlayerId()));
+				match.getX01Result().removeIf(x01PlayerResult -> x01PlayerResult.getPlayerId().equals(matchPlayer.getPlayerId()));
 				match.getStatistics().removeIf(x01PlayerStatistics -> x01PlayerStatistics.getPlayerId().equals(matchPlayer.getPlayerId()));
 				match.getTimeline().stream()
 						.flatMap(x01Set -> {

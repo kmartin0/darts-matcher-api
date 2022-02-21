@@ -47,6 +47,7 @@ public class CurrentThrowTests {
 				LocalDateTime.now(),
 				players.get(0).getPlayerId(),
 				players,
+				null,
 				MatchType.X01,
 				501,
 				false,

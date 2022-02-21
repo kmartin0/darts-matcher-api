@@ -1,6 +1,5 @@
 package com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.x01settings;
 
-import com.dartsmatcher.dartsmatcherapi.features.basematch.MatchStatus;
 import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.bestof.X01BestOf;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,9 +18,6 @@ public class X01MatchSettings {
 	private int x01;
 
 	private boolean trackDoubles;
-
-	@NotNull
-	private MatchStatus matchStatus; // TODO: Move to base match
 
 	@Valid
 	@NotNull

@@ -34,6 +34,9 @@ public class BaseMatch {
 	@Valid
 	private ArrayList<MatchPlayer> players;
 
+	@Valid
+	private ArrayList<MatchPlayerResult> matchResult;
+
 	@NotNull
 	private MatchType matchType;
 
