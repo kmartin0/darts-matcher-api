@@ -171,7 +171,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
 //		dartBotService.dartBotThrow()
 
 		// Add the throw to the leg round.
-		playerAddThrow(leg, legRound, x01Throw, match.getX01());
+		playerAddThrow(leg, legRound, x01Throw, match.getX01MatchSettings().getX01());
 
 		// Update Statistics and Result of the match.
 		match.updateAll(set.getSet());

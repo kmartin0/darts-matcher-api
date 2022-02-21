@@ -64,7 +64,7 @@ public class X01ResultUtils {
 				HashMap<String, Integer> playersRemaining = new HashMap<>();
 				for (X01LegRound legRound : leg.getRounds()) {
 					for (X01LegRoundScore playerScore : legRound.getPlayerScores()) {
-						int previousRemaining = playersRemaining.getOrDefault(playerScore.getPlayerId(), match.getX01());
+						int previousRemaining = playersRemaining.getOrDefault(playerScore.getPlayerId(), match.getX01MatchSettings().getX01());
 
 						playersRemaining.put(playerScore.getPlayerId(), previousRemaining - playerScore.getScore());
 					}
@@ -105,7 +105,7 @@ public class X01ResultUtils {
 		});
 
 		// Number of legs still to play.
-		int legsToGo = match.getBestOf().getLegs() - legsPlayed.get();
+		int legsToGo = match.getX01MatchSettings().getBestOf().getLegs() - legsPlayed.get();
 
 		// Construct a list of players that have won (in case of multiple winners it's a draw).
 		ArrayList<String> setWinners = X01ResultUtils.getWinners(numOfLegsWon, legsToGo);
@@ -152,7 +152,7 @@ public class X01ResultUtils {
 			});
 
 			// Number of sets still to play.
-			int toGo = match.getBestOf().getSets() - numPlayed.get();
+			int toGo = match.getX01MatchSettings().getBestOf().getSets() - numPlayed.get();
 
 			// Construct a list of players that have won (in case of multiple winners it's a draw).
 			matchWinners.addAll(X01ResultUtils.getWinners(setsWon, toGo));

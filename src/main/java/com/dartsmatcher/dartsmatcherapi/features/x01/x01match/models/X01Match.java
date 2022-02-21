@@ -1,7 +1,6 @@
 package com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models;
 
 import com.dartsmatcher.dartsmatcherapi.features.basematch.*;
-import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.bestof.X01BestOf;
 import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.playerresult.X01PlayerResult;
 import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.set.X01Set;
 import com.dartsmatcher.dartsmatcherapi.features.x01.x01match.models.statistics.X01PlayerStatistics;
@@ -17,7 +16,6 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -33,13 +31,11 @@ public class X01Match extends BaseMatch {
 
     public X01Match(ObjectId id, @NotNull LocalDateTime startDate, LocalDateTime endDate, String currentThrower,
                     @NotNull @Valid ArrayList<MatchPlayer> players, @Valid ArrayList<MatchPlayerResult> matchResult,
-                    @NotNull MatchType matchType, @Min(0) int x01, boolean trackDoubles, @NotNull MatchStatus matchStatus,
-                    @Valid @NotNull X01BestOf bestOf, @Valid ArrayList<X01PlayerResult> x01Result,
-                    @Valid ArrayList<X01PlayerStatistics> statistics, @Valid ArrayList<X01Set> timeline) {
+                    @NotNull MatchType matchType, @NotNull MatchStatus matchStatus, @Valid @NotNull X01MatchSettings x01MatchSettings,
+                    @Valid ArrayList<X01PlayerResult> x01Result, @Valid ArrayList<X01PlayerStatistics> statistics,
+                    @Valid ArrayList<X01Set> timeline) {
         super(id, startDate, endDate, currentThrower, matchStatus, players, matchResult, matchType);
-        this.x01 = x01;
-        this.trackDoubles = trackDoubles;
-        this.bestOf = bestOf;
+        this.x01MatchSettings = x01MatchSettings;
         this.x01Result = x01Result;
         this.statistics = statistics;
         this.timeline = timeline;
@@ -47,17 +43,7 @@ public class X01Match extends BaseMatch {
 
     @Valid
     @NotNull
-    private X01MatchSettings matchSettings;
-
-    // TODO: Replace with X01MatchSettings
-    @Min(2)
-    private int x01;
-
-    private boolean trackDoubles;
-
-    @Valid
-    @NotNull
-    private X01BestOf bestOf;
+    private X01MatchSettings x01MatchSettings;
 
     @Valid
     @Setter(AccessLevel.NONE)
@@ -135,7 +121,7 @@ public class X01Match extends BaseMatch {
     public void setX01Result(ArrayList<X01PlayerResult> x01Result) {
         // Set the base match result.
         ArrayList<MatchPlayerResult> matchPlayerResults = new ArrayList<>();
-        x01Result.forEach(x01PlayerResult -> matchPlayerResults.add(new MatchPlayerResult(x01PlayerResult, getBestOf())));
+        x01Result.forEach(x01PlayerResult -> matchPlayerResults.add(new MatchPlayerResult(x01PlayerResult, getX01MatchSettings().getBestOf())));
 
         super.setMatchResult(matchPlayerResults);
 

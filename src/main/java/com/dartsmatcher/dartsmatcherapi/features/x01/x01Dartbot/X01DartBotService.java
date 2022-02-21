@@ -64,7 +64,7 @@ public class X01DartBotService {
 
 		// Generate the X01LegRoundScore containing the score, darts used and doubles missed for this round.
 		X01LegRoundScore roundScore = new X01LegRoundScore(dartBotId, 0, 0, 0);
-		roundScore = createRoundScore(match.getX01(), legScored, legDartsUsed, expectedOneDartAvg, 3, roundScore);
+		roundScore = createRoundScore(match.getX01MatchSettings().getX01(), legScored, legDartsUsed, expectedOneDartAvg, 3, roundScore);
 
 		return new X01Throw(x01DartBotThrow.getMatchId(), dartBotId, x01Leg.getLeg(), x01DartBotThrow.getSet(),
 				x01DartBotThrow.getRound(), roundScore.getScore(), roundScore.getDartsUsed(), roundScore.getDoublesMissed());
