@@ -45,6 +45,7 @@ public class X01Match extends BaseMatch {
     @NotNull
     private X01MatchSettings x01MatchSettings;
 
+    //TODO: This could be removed (total legs/sets won can be moved to statistics). Because match score is in base match.
     @Valid
     @Setter(AccessLevel.NONE)
     private ArrayList<X01PlayerResult> x01Result;

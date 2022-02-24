@@ -39,19 +39,19 @@ user2ObjectId = ObjectId()
 usersResult = db.users.insert([
     {
         "_id": user1ObjectId,
-        "userName": "JohnDoe1",
+        "userName": "JohnDoe",
         "firstName": "John",
         "lastName": "Doe",
-        "email": "johndoe1@email.com",
+        "email": "johndoe@email.com",
         "password": "$2a$12$o3dmbF3ElqPL1ApJ.9R/Qu7cVBMyV8pn80.HPFPdKO/jerqGJiXZe",
         "_class": "User"
     },
     {
         "_id": user2ObjectId,
-        "userName": "JaneDoe1",
+        "userName": "JaneDoe",
         "firstName": "Jane",
         "lastName": "Doe",
-        "email": "janedoe1@email.com",
+        "email": "janedoe@email.com",
         "password": "$2a$12$o3dmbF3ElqPL1ApJ.9R/Qu7cVBMyV8pn80.HPFPdKO/jerqGJiXZe",
         "_class": "User"
     }
@@ -79,114 +79,203 @@ matchesResult = db.matches.insert([
     {
         "startDate": new Date("2021-01-02T14:12:00Z"),
         "endDate": new Date("2021-01-02T14:32:00Z"),
-        "matchType": "X01",
-        "x01": 501,
-        "matchStatus": "CONCLUDED",
-        "throwFirst": user1ObjectId,
-        "bestOf": {
-            "legs": 3,
-            "sets": 1,
-            "type": "LEGS"
+        "x01MatchSettings": {
+            "x01": 501,
+            "trackDoubles": false,
+            "bestOf": {
+                "legs": 3,
+                "sets": 1,
+            },
         },
+        "matchType": "X01",
+        "matchStatus": "CONCLUDED",
+        "currentThrower": null,
         "players": [
+            {"playerId": user1ObjectId, "firstName": "John", "lastName": "Doe", "playerType": "REGISTERED", "inviteStatus": "ACCEPTED"},
+            {"playerId": user2ObjectId, "firstName": "Jane", "lastName": "Doe", "playerType": "REGISTERED", "inviteStatus": "ACCEPTED"}
+        ],
+        "matchResult": [
+            {"playerId": user1ObjectId, "score": 2, "result": "WIN"},
+            {"playerId": user2ObjectId, "score": 1, "result": "LOSE"}
+        ],
+        "x01Result": [
+            {"playerId": user1ObjectId, "legsWon": 2, "setsWon": 1, "result": "WIN"},
+            {"playerId": user2ObjectId, "legsWon": 1, "setsWon": 0, "result": "LOSE"}
+        ],
+        "statistics": [
             {
                 "playerId": user1ObjectId,
-                "playerType": 'REGISTERED',
-                "result": "WIN",
-                "statistics": {
-                    "averageStats": {
-                        "pointsThrown": 1242,
-                        "dartsThrown": 34,
-                        "average": 109,
-                        "pointsThrownFirstNine": 961,
-                        "dartsThrownFirstNine": 24,
-                        "averageFirstNine": 120
-                    },
-                    "scoreStats": {
-                        "tonPlus": 3,
-                        "tonForty": 3,
-                        "tonEighty": 1
-                    },
-                    "checkoutStats": {
-                        "checkoutHighest": 31,
-                        "checkoutTonPlus": 0,
-                        "checkoutPercentage": 28,
-                        "checkoutsMissed": 5,
-                        "checkoutsHit": 2
-                    }
+                "averageStats": {
+                    "pointsThrown": 1242,
+                    "dartsThrown": 34,
+                    "average": 109,
+                    "pointsThrownFirstNine": 961,
+                    "dartsThrownFirstNine": 24,
+                    "averageFirstNine": 120
                 },
-                "timeline": [{
-                    "set": 1,
-                    "result": "WIN",
-                    "legs": [{
-                        "leg": 1,
-                        "result": "WIN",
-                        "dartsUsedFinalThrow": 2,
-                        "doublesMissed": 3,
-                        "scoring": [140, 100, 90, 140, 31]
-                    }, {
-                        "leg": 2,
-                        "result": "LOSE",
-                        "doublesMissed": 0,
-                        "scoring": [140, 100]
-
-                    }, {
-                        "leg": 3,
-                        "result": "WIN",
-                        "dartsUsedFinalThrow": 2,
-                        "doublesMissed": 2,
-                        "scoring": [121, 180, 90, 90, 20]
-                    }]
-                }]
+                "checkoutStats": {
+                    "checkoutHighest": 31,
+                    "checkoutTonPlus": 0,
+                    "checkoutPercentage": 33,
+                    "checkoutsMissed": 4,
+                    "checkoutsHit": 2
+                },
+                "scoresStats": {
+                    "fortyPlus": 0,
+                    "sixtyPlus": 0,
+                    "eightyPlus": 3,
+                    "tonPlus": 3,
+                    "tonForty": 3,
+                    "tonEighty": 1
+                },
             },
             {
-                "playerId": "Jane Doe",
-                "playerType": 'ANONYMOUS',
-                "result": "LOSE",
-                "statistics": {
-                    "averageStats": {
-                        "pointsThrown": 1194,
-                        "dartsThrown": 33,
-                        "average": 108,
-                        "pointsThrownFirstNine": 971,
-                        "dartsThrownFirstNine": 27,
-                        "averageFirstNine": 107
-                    },
-                    "scoreStats": {
-                        "tonPlus": 2,
-                        "tonForty": 1,
-                        "tonEighty": 3,
-                    },
-                    "checkoutStats": {
-                        "checkoutHighest": 141,
-                        "checkoutTonPlus": 1,
-                        "checkoutPercentage": 100,
-                        "checkoutsMissed": 0,
-                        "checkoutsHit": 1
-                    }
+                "playerId": user2ObjectId,
+                "averageStats": {
+                    "pointsThrown": 1194,
+                    "dartsThrown": 33,
+                    "average": 108,
+                    "pointsThrownFirstNine": 971,
+                    "dartsThrownFirstNine": 27,
+                    "averageFirstNine": 107
                 },
-                "timeline": [{
-                    "set": 1,
-                    "result": "LOSE",
-                    "legs": [{
+                "checkoutStats": {
+                    "checkoutHighest": 141,
+                    "checkoutTonPlus": 1,
+                    "checkoutPercentage": 100,
+                    "checkoutsMissed": 0,
+                    "checkoutsHit": 1
+                },
+                "scoresStats": {
+                    "fortyPlus": 1,
+                    "sixtyPlus": 0,
+                    "eightyPlus": 2,
+                    "tonPlus": 2,
+                    "tonForty": 1,
+                    "tonEighty": 3,
+                },
+            }
+        ],
+        "timeline": [
+            {
+                "set": 1,
+                "result": [
+                    {"playerId": user1ObjectId, "legsWon": 2, "result": "WIN"},
+                    {"playerId": user2ObjectId, "legsWon": 1, "result": "LOSE"},
+                ],
+                "legs": [
+                    {
                         "leg": 1,
-                        "result": "LOSE",
-                        "doublesMissed": 0,
-                        "scoring": [120, 88, 27, 180]
-                    }, {
+                        "winner": user1ObjectId,
+                        "throwsFirst": user1ObjectId,
+                        "rounds": [
+                            {
+                                "round": 1,
+                                "playerScores": [
+                                    {"playerId": user1ObjectId, "doublesMissed": 0, "dartsUsed": 3, "score": 140},
+                                    {"playerId": user2ObjectId, "doublesMissed": 0, "dartsUsed": 3, "score": 120},
+                                ]
+                            },
+                            {
+                                "round": 2,
+                                "playerScores": [
+                                    {"playerId": user1ObjectId, "doublesMissed": 0, "dartsUsed": 3, "score": 100},
+                                    {"playerId": user2ObjectId, "doublesMissed": 0, "dartsUsed": 3, "score": 88},
+                                ]
+                            },
+                            {
+                                "round": 3,
+                                "playerScores": [
+                                    {"playerId": user1ObjectId, "doublesMissed": 0, "dartsUsed": 3, "score": 91},
+                                    {"playerId": user2ObjectId, "doublesMissed": 0, "dartsUsed": 3, "score": 27},
+                                ]
+                            },
+                            {
+                                "round": 4,
+                                "playerScores": [
+                                    {"playerId": user1ObjectId, "doublesMissed": 1, "dartsUsed": 3, "score": 140},
+                                    {"playerId": user2ObjectId, "doublesMissed": 0, "dartsUsed": 3, "score": 180},
+                                ]
+                            },
+                            {
+                                "round": 5,
+                                "playerScores": [
+                                    {"playerId": user1ObjectId, "doublesMissed": 1, "dartsUsed": 2, "score": 30}
+                                ]
+                            }
+                        ]
+                    },
+                    {
                         "leg": 2,
-                        "result": "WIN",
-                        "dartsUsedFinalThrow": 3,
-                        "doublesMissed": 0,
-                        "scoring": [180, 180, 141]
-                    }, {
+                        "winner": user2ObjectId,
+                        "throwsFirst": user2ObjectId,
+                        "rounds": [
+                            {
+                                "round": 1,
+                                "playerScores": [
+                                    {"playerId": user1ObjectId, "doublesMissed": 0, "dartsUsed": 3, "score": 140},
+                                    {"playerId": user2ObjectId, "doublesMissed": 0, "dartsUsed": 3, "score": 180},
+                                ]
+                            },
+                            {
+                                "round": 2,
+                                "playerScores": [
+                                    {"playerId": user1ObjectId, "doublesMissed": 0, "dartsUsed": 3, "score": 100},
+                                    {"playerId": user2ObjectId, "doublesMissed": 0, "dartsUsed": 3, "score": 180},
+                                ]
+                            },
+                            {
+                                "round": 3,
+                                "playerScores": [
+                                    {"playerId": user2ObjectId, "doublesMissed": 0, "dartsUsed": 3, "score": 141},
+                                ]
+                            }
+                        ]
+                    },
+                    {
                         "leg": 3,
-                        "result": "LOSE",
-                        "doublesMissed": 0,
-                        "scoring": [120, 88, 27, 43]
-                    }]
-                }]
-            }],
+                        "winner": user1ObjectId,
+                        "throwsFirst": user1ObjectId,
+                        "rounds": [
+                            {
+                                "round": 1,
+                                "playerScores": [
+                                    {"playerId": user1ObjectId, "doublesMissed": 0, "dartsUsed": 3, "score": 121},
+                                    {"playerId": user2ObjectId, "doublesMissed": 0, "dartsUsed": 3, "score": 120},
+                                ]
+                            },
+                            {
+                                "round": 2,
+                                "playerScores": [
+                                    {"playerId": user1ObjectId, "doublesMissed": 0, "dartsUsed": 3, "score": 180},
+                                    {"playerId": user2ObjectId, "doublesMissed": 0, "dartsUsed": 3, "score": 88},
+                                ]
+                            },
+                            {
+                                "round": 3,
+                                "playerScores": [
+                                    {"playerId": user1ObjectId, "doublesMissed": 0, "dartsUsed": 3, "score": 90},
+                                    {"playerId": user2ObjectId, "doublesMissed": 0, "dartsUsed": 3, "score": 27},
+                                ]
+                            },
+                            {
+                                "round": 4,
+                                "playerScores": [
+                                    {"playerId": user1ObjectId, "doublesMissed": 1, "dartsUsed": 3, "score": 90},
+                                    {"playerId": user2ObjectId, "doublesMissed": 0, "dartsUsed": 3, "score": 43},
+                                ]
+                            },
+                            {
+                                "round": 5,
+                                "playerScores": [
+                                    {"playerId": user1ObjectId, "doublesMissed": 1, "dartsUsed": 2, "score": 20}
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
         "_class": "X01Match"
     }
 ])
