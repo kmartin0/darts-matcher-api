@@ -7,9 +7,7 @@ db = conn.getDB("darts-matcher")
 =================================================================*/
 
 // Create the client details collection and add validator.
-db.createCollection("client_details", {
-    validator: clientDetailsSchemaValidator
-})
+db.createCollection("client_details")
 
 // Create unique indexes
 db.client_details.createIndex({"client_id": 1}, {unique: true})
@@ -19,9 +17,7 @@ db.client_details.createIndex({"client_id": 1}, {unique: true})
 =================================================================*/
 
 // Create the users collection and add validator.
-db.createCollection("users", {
-    validator: usersSchemaValidator
-})
+db.createCollection("users")
 
 // Create unique indexes
 db.users.createIndex({"userName": 1}, {unique: true})
@@ -35,9 +31,7 @@ db.users.createIndex({userName: "text", firstName: "text", lastName: "text"})
 =================================================================*/
 
 // Create the password tokens collection and add validator.
-db.createCollection("password_tokens", {
-    validator: passwordTokenValidator
-})
+db.createCollection("password_tokens")
 
 // Create unique indexes
 db.password_tokens.createIndex({"token": 1}, {unique: true})
@@ -47,8 +41,6 @@ db.password_tokens.createIndex({"token": 1}, {unique: true})
 =================================================================*/
 
 // Create the matches collection and add validator.
-result = db.createCollection("matches", {
-    validator: matchesSchemaValidator
-})
+result = db.createCollection("matches")
 
 print(result)
