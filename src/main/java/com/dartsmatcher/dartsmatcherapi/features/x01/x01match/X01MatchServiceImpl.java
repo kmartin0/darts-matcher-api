@@ -318,7 +318,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
 				)
 				.mapToInt(X01LegRoundScore::getScore).sum();
 
-		// If the new scoring result is negative dont allow it (player gets bust which is zero score).
+		// If the new scoring result is negative don't allow it (player gets bust which is zero score).
 		int remaining = x01 - playerScore;
 		if (remaining == 0) {
 			// Validate the checkout

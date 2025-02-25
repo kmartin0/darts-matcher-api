@@ -6,16 +6,25 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class X01Checkout {
 
-	private int checkout;
+    public X01Checkout(X01Checkout x01Checkout) {
+        this(
+                x01Checkout.getCheckout(),
+                x01Checkout.getMinDarts(),
+                x01Checkout.getSuggested() == null ? new ArrayList<>() : x01Checkout.getSuggested().stream().map(Dart::new).collect(Collectors.toCollection(ArrayList::new))
+        );
+    }
 
-	private int minDarts;
+    private int checkout;
 
-	private ArrayList<Dart> suggested;
+    private int minDarts;
+
+    private ArrayList<Dart> suggested;
 
 }

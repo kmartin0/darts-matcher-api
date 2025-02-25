@@ -4,11 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Min;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class X01DartBotSettings {
 
-	private int expectedThreeDartAverage;
+    public static final int MINIMUM_BOT_AVG = 1;
+
+    @Min(MINIMUM_BOT_AVG)
+    private int expectedThreeDartAverage;
 
 }

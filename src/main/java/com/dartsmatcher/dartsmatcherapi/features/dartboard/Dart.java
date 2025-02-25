@@ -9,6 +9,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Dart {
 
+	public Dart(Dart dart) {
+		this(dart.getSection(), dart.getArea());
+	}
+
 	// TODO: Custom validator checks if valid section (1...20, 25, 50)
 	private int section;
 
