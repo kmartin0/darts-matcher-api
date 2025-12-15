@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>nl.kmartin</groupId>
-    <artifactId>darts-matcher-api-v2</artifactId>
+    <artifactId>darts-matcher-api</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>darts-matcher-api-v2</name>
-    <description>darts-matcher-api-v2</description>
+    <name>darts-matcher-api</name>
+    <description>darts-matcher-api</description>
     <url/>
     <licenses>
         <license/>
