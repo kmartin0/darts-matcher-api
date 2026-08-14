@@ -2,6 +2,7 @@ package nl.kmartin.dartsmatcherapi.validators.validdartscore;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
+import nl.kmartin.dartsmatcherapi.common.MessageKeys;
 
 import java.lang.annotation.*;
 
@@ -10,7 +11,7 @@ import java.lang.annotation.*;
 @Target({ ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidDartScore {
-    String message() default "{message.x01.invalid.score}";
+    String message() default "{" + MessageKeys.MESSAGE_X01_INVALID_SCORE + "}";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }

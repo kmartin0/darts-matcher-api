@@ -55,7 +55,7 @@ public class X01MatchRestController {
     @PostMapping(path = RestEndpoints.X01_EDIT_TURN, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public X01Match editTurn(@PathVariable ObjectId matchId, @Valid @RequestBody X01EditTurn editTurn) {
-        return matchService.addTurn(matchId, editTurn);
+        return matchService.editTurn(matchId, editTurn);
     }
 
     @PostMapping(path = RestEndpoints.X01_DELETE_LAST_TURN, produces = MediaType.APPLICATION_JSON_VALUE)

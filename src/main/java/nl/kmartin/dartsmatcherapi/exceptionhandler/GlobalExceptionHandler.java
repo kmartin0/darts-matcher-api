@@ -4,7 +4,6 @@ import jakarta.validation.ConstraintViolationException;
 import nl.kmartin.dartsmatcherapi.common.MessageKeys;
 import nl.kmartin.dartsmatcherapi.common.MessageResolver;
 import nl.kmartin.dartsmatcherapi.exceptionhandler.exception.InvalidArgumentsException;
-import nl.kmartin.dartsmatcherapi.exceptionhandler.exception.ResourceAlreadyExistsException;
 import nl.kmartin.dartsmatcherapi.exceptionhandler.exception.ResourceNotFoundException;
 import nl.kmartin.dartsmatcherapi.exceptionhandler.response.ApiErrorCode;
 import nl.kmartin.dartsmatcherapi.exceptionhandler.response.ErrorResponse;
@@ -248,26 +247,6 @@ public class GlobalExceptionHandler {
         ErrorResponse responseBody = new ErrorResponse(
                 apiErrorCode,
                 messageResolver.getMessage(MessageKeys.EXCEPTION_BODY_NOT_READABLE)
-        );
-
-        return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());
-    }
-
-    /**
-     * Handler for trying to create a resource when it already exists.
-     *
-     * @param e ResourceAlreadyExistsException The exception that was thrown
-     * @return ResponseEntity<ErrorResponse> containing the error details
-     */
-    @ExceptionHandler({ResourceAlreadyExistsException.class})
-    public ResponseEntity<ErrorResponse> handleResourceAlreadyExistsException(ResourceAlreadyExistsException e) {
-        logger.error("handleResourceAlreadyExistsException", e);
-
-        ApiErrorCode apiErrorCode = ApiErrorCode.ALREADY_EXISTS;
-        ErrorResponse responseBody = new ErrorResponse(
-                apiErrorCode,
-                messageResolver.getMessage(MessageKeys.EXCEPTION_RESOURCE_ALREADY_EXISTS, e.getResourceType()),
-                new TargetError(e.getTarget(), messageResolver.getMessage(MessageKeys.MESSAGE_RESOURCE_ALREADY_EXISTS, e.getValue()))
         );
 
         return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());

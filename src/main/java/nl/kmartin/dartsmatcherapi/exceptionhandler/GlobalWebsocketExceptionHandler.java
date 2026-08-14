@@ -5,7 +5,6 @@ import nl.kmartin.dartsmatcherapi.common.MessageKeys;
 import nl.kmartin.dartsmatcherapi.common.MessageResolver;
 import nl.kmartin.dartsmatcherapi.common.WebsocketDestinations;
 import nl.kmartin.dartsmatcherapi.exceptionhandler.exception.InvalidArgumentsException;
-import nl.kmartin.dartsmatcherapi.exceptionhandler.exception.ResourceAlreadyExistsException;
 import nl.kmartin.dartsmatcherapi.exceptionhandler.exception.ResourceNotFoundException;
 import nl.kmartin.dartsmatcherapi.exceptionhandler.response.ApiErrorCode;
 import nl.kmartin.dartsmatcherapi.exceptionhandler.response.TargetError;
@@ -112,20 +111,6 @@ public class GlobalWebsocketExceptionHandler {
                 messageResolver.getMessage(MessageKeys.EXCEPTION_RESOURCE_NOT_FOUND, resourceSimpleName, e.getIdentifier()),
                 stompHeaderAccessor.getDestination(),
                 new TargetError(StringUtils.pascalToCamelCase(resourceSimpleName), userMessage)
-        );
-    }
-
-    // Handler for trying to create a resource when it already exists.
-    @MessageExceptionHandler(ResourceAlreadyExistsException.class)
-    @SendToUser(destinations = WebsocketDestinations.ERROR_QUEUE, broadcast = false)
-    public WebSocketErrorResponse handleResourceAlreadyExistsException(ResourceAlreadyExistsException e, StompHeaderAccessor stompHeaderAccessor) {
-        logger.error("handleResourceAlreadyExistsException", e);
-
-        return new WebSocketErrorResponse(
-                ApiErrorCode.ALREADY_EXISTS,
-                messageResolver.getMessage(MessageKeys.EXCEPTION_RESOURCE_ALREADY_EXISTS, e.getResourceType()),
-                stompHeaderAccessor.getDestination(),
-                new TargetError(e.getTarget(), messageResolver.getMessage(MessageKeys.MESSAGE_RESOURCE_ALREADY_EXISTS, e.getValue()))
         );
     }
 
