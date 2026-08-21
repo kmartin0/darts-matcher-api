@@ -22,23 +22,23 @@ public class ErrorResponse implements Serializable {
 
     // (Optional) Additional user-friendly error information that the client code can use to handle
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Map<String, String> details;
+    private Map<String, String> targetErrors;
 
-    public ErrorResponse(ApiErrorCode apiErrorCode, String description, TargetError... details) {
+    public ErrorResponse(ApiErrorCode apiErrorCode, String description, TargetError... targetErrors) {
         this.code = apiErrorCode.getHttpStatus().value();
         this.description = description;
         this.error = apiErrorCode.name();
-        this.details = detailsArrToHashMap(details);
+        this.targetErrors = targetErrorsArrToHashMap(targetErrors);
     }
 
     public ErrorResponse(ApiErrorCode apiErrorCode, String description) {
         this.code = apiErrorCode.getHttpStatus().value();
         this.description = description;
         this.error = apiErrorCode.name();
-        this.details = new HashMap<>();
+        this.targetErrors = new HashMap<>();
     }
 
-    private HashMap<String, String> detailsArrToHashMap(TargetError... details) {
+    private HashMap<String, String> targetErrorsArrToHashMap(TargetError... details) {
         if (details == null) return null;
 
         HashMap<String, String> tmpDetails = new HashMap<>();
