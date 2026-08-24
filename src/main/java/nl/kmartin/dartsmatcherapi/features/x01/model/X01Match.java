@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@Document(collection = "matches")
+@Document(collection = "x01_matches")
 @TypeAlias("X01Match")
 public class X01Match extends BaseMatch<X01MatchPlayer> {
     @NotNull
