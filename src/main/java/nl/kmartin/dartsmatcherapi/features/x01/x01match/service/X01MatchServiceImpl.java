@@ -12,8 +12,7 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01LegEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.IX01LegRoundService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundEntry;
-import nl.kmartin.dartsmatcherapi.features.x01.x01match.event.X01MatchEvent;
-import nl.kmartin.dartsmatcherapi.features.x01.x01match.event.X01MatchEventType;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.message.X01MatchMessageType;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01EditTurn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
@@ -23,8 +22,9 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01set.IX01SetProgressService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01Set;
 import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01SetEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01statistics.IX01StatisticsService;
+import nl.kmartin.dartsmatcherapi.websocket.WebSocketDestinations;
+import nl.kmartin.dartsmatcherapi.websocket.event.IWebSocketEventPublisher;
 import org.bson.types.ObjectId;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,13 +47,13 @@ public class X01MatchServiceImpl implements IX01MatchService {
     private final IX01LegService legService;
     private final IX01LegRoundService legRoundService;
     private final IX01DartBotService dartBotService;
-    private final ApplicationEventPublisher eventPublisher;
+    private final IWebSocketEventPublisher webSocketEventPublisher;
 
     public X01MatchServiceImpl(IX01MatchRepository matchRepository, IX01MatchSetupService matchSetupService,
                                IX01MatchResultService matchResultService, IX01MatchProgressService matchProgressService,
                                IX01StatisticsService statisticsService, IX01SetProgressService setProgressService,
                                IX01LegService legService, IX01LegRoundService legRoundService, IX01DartBotService dartBotService,
-                               ApplicationEventPublisher eventPublisher) {
+                               IWebSocketEventPublisher webSocketEventPublisher) {
         this.matchRepository = matchRepository;
         this.matchSetupService = matchSetupService;
         this.matchResultService = matchResultService;
@@ -63,7 +63,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
         this.legService = legService;
         this.legRoundService = legRoundService;
         this.dartBotService = dartBotService;
-        this.eventPublisher = eventPublisher;
+        this.webSocketEventPublisher = webSocketEventPublisher;
     }
 
     /**
@@ -79,7 +79,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
         matchSetupService.setupMatch(match);
 
         // Save the match to the repository and return it.
-        saveMatchAndProcessBotTurns(match, X01MatchEventType.PROCESS_MATCH);
+        saveMatchAndProcessBotTurns(match, X01MatchMessageType.PROCESS_MATCH);
         return match;
     }
 
@@ -145,7 +145,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
         addTurnToCurrentPlayer(match, turn);
 
         // Add the turn to the match and save the updated match to the repository.
-        saveMatchAndProcessBotTurns(match, X01MatchEventType.ADD_HUMAN_TURN);
+        saveMatchAndProcessBotTurns(match, X01MatchMessageType.ADD_HUMAN_TURN);
         return match;
     }
 
@@ -177,7 +177,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
         });
 
         // Save the updated match to the repository.
-        saveMatchAndProcessBotTurns(match, X01MatchEventType.EDIT_TURN);
+        saveMatchAndProcessBotTurns(match, X01MatchMessageType.EDIT_TURN);
         return match;
     }
 
@@ -199,7 +199,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
         matchProgressService.removeLastScoreFromMatch(match);
 
         // Save the updated match to the repository.
-        saveMatchAndProcessBotTurns(match, X01MatchEventType.DELETE_LAST_TURN);
+        saveMatchAndProcessBotTurns(match, X01MatchMessageType.DELETE_LAST_TURN);
         return match;
     }
 
@@ -214,7 +214,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
         this.checkMatchExists(matchId);
 
         this.matchRepository.deleteById(matchId);
-        this.eventPublisher.publishEvent(new X01MatchEvent.DeleteMatch(matchId));
+        this.broadcastMatchEvent(matchId, X01MatchMessageType.DELETE_MATCH, matchId);
     }
 
     /**
@@ -233,7 +233,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
         matchSetupService.setupMatch(match);
 
         // Save the reset match to the repository.
-        saveMatchAndProcessBotTurns(match, X01MatchEventType.RESET_MATCH);
+        saveMatchAndProcessBotTurns(match, X01MatchMessageType.RESET_MATCH);
         return match;
     }
 
@@ -244,7 +244,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
         X01Match match = this.getMatch(matchId);
 
         // Update calculated match fields (winner, statistics etc.), process bot turns and save it to the repository.
-        this.saveMatchAndProcessBotTurns(match, X01MatchEventType.PROCESS_MATCH);
+        this.saveMatchAndProcessBotTurns(match, X01MatchMessageType.PROCESS_MATCH);
 
         return match;
     }
@@ -281,14 +281,14 @@ public class X01MatchServiceImpl implements IX01MatchService {
      * Saves the current match and processes Dart Bot turns until the current thrower is no longer a bot.
      *
      * @param match     {@link X01Match} the match to be saved and processed
-     * @param eventType {@link X01MatchEventType} the type of the operation that triggered the save
+     * @param messageType {@link X01MatchMessageType} the type of the operation that triggered the save
      */
-    private void saveMatchAndProcessBotTurns(X01Match match, X01MatchEventType eventType) {
+    private void saveMatchAndProcessBotTurns(X01Match match, X01MatchMessageType messageType) {
         // A match containing 1 bot should have a maximum of 2 bot turns in a row.
         final int MAX_BOT_TURNS = 2;
 
         // Update, Save and Broadcast the match.
-        saveMatch(match, eventType);
+        saveMatch(match, messageType);
 
         // If it's a dart bots' turn. Create and Add the bot turn and then Update, Save and Broadcast the match.
         int botTurnsProcessed = 0;
@@ -298,7 +298,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
 
             X01Turn dartBotTurn = dartBotService.createDartBotTurn(match);
             addTurnToCurrentPlayer(match, dartBotTurn);
-            saveMatch(match, X01MatchEventType.ADD_BOT_TURN);
+            saveMatch(match, X01MatchMessageType.ADD_BOT_TURN);
             botTurnsProcessed++;
         }
     }
@@ -308,18 +308,22 @@ public class X01MatchServiceImpl implements IX01MatchService {
      * and publishing the corresponding match event based on the event type.
      *
      * @param match     the X01Match object to be saved and published
-     * @param eventType the type of event indicating the nature of the save operation
+     * @param messageType the type of event indicating the nature of the save operation
      */
-    private void saveMatch(X01Match match, X01MatchEventType eventType) {
+    private void saveMatch(X01Match match, X01MatchMessageType messageType) {
+        // Guard against event types that are not valid for save operations.
+        if (messageType == X01MatchMessageType.DELETE_MATCH) {
+            throw new IllegalArgumentException("Invalid event type for save operation: " + messageType);
+        }
+
         // Update the match
         updateMatch(match);
 
         // Save the Match
         matchRepository.save(match);
 
-        // Publish the match event.
-        X01MatchEvent publishEvent = createSaveEventFromType(match, eventType);
-        this.eventPublisher.publishEvent(publishEvent);
+        // Broadcast the match event
+        broadcastMatchEvent(match.getId(), messageType, match);
     }
 
     /**
@@ -340,26 +344,6 @@ public class X01MatchServiceImpl implements IX01MatchService {
 
         // Update the publishing version
         match.setBroadcastVersion(match.getBroadcastVersion() + 1);
-    }
-
-    /**
-     * Creates an X01MatchEvent object based on the provided 'save' event type.
-     *
-     * @param match     the X01Match associated with the event
-     * @param eventType the type of event to create
-     * @return an instance of X01MatchEvent corresponding to the eventType
-     * @throws IllegalArgumentException if the eventType is not valid for this operation
-     */
-    private X01MatchEvent createSaveEventFromType(X01Match match, X01MatchEventType eventType) {
-        return switch (eventType) {
-            case PROCESS_MATCH -> new X01MatchEvent.ProcessMatch(match);
-            case ADD_HUMAN_TURN -> new X01MatchEvent.AddHumanTurn(match);
-            case ADD_BOT_TURN -> new X01MatchEvent.AddBotTurn(match);
-            case EDIT_TURN -> new X01MatchEvent.EditTurn(match);
-            case DELETE_LAST_TURN -> new X01MatchEvent.DeleteLastTurn(match);
-            case RESET_MATCH -> new X01MatchEvent.ResetMatch(match);
-            default -> throw new IllegalArgumentException("Invalid event type for this operation: " + eventType);
-        };
     }
 
     /**
@@ -389,5 +373,21 @@ public class X01MatchServiceImpl implements IX01MatchService {
         return match.getPlayers().stream()
                 .filter(matchPlayer -> matchPlayer.getPlayerId().equals(playerId))
                 .findFirst();
+    }
+
+    /**
+     * Broadcasts an X01 match event to subscribers of the match.
+     *
+     * @param matchId   the ID of the match
+     * @param messageType the type of the match event
+     * @param payload   the event payload
+     * @param <P>       the payload type
+     */
+    private <P> void broadcastMatchEvent(ObjectId matchId, X01MatchMessageType messageType, P payload) {
+        this.webSocketEventPublisher.broadcast(
+                WebSocketDestinations.broadcast(WebSocketDestinations.X01.MATCH, matchId),
+                messageType,
+                payload
+        );
     }
 }

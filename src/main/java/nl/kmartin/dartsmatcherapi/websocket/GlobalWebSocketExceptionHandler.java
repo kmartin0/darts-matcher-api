@@ -9,12 +9,9 @@ import nl.kmartin.dartsmatcherapi.error.response.TargetError;
 import nl.kmartin.dartsmatcherapi.i18n.MessageKeys;
 import nl.kmartin.dartsmatcherapi.i18n.MessageResolver;
 import nl.kmartin.dartsmatcherapi.utils.StringUtils;
-import nl.kmartin.dartsmatcherapi.websocket.event.WebSocketErrorEvent;
-import nl.kmartin.dartsmatcherapi.websocket.response.WebSocketErrorResponse;
+import nl.kmartin.dartsmatcherapi.websocket.event.IWebSocketEventPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -30,29 +27,30 @@ import java.util.ArrayList;
 
 @ControllerAdvice
 public class GlobalWebSocketExceptionHandler {
+
     private static final Logger logger = LoggerFactory.getLogger(GlobalWebSocketExceptionHandler.class);
 
     private final MessageResolver messageResolver;
-    private final ApplicationEventPublisher eventPublisher;
+    private final IWebSocketEventPublisher webSocketEventPublisher;
 
-    @Autowired
     public GlobalWebSocketExceptionHandler(
             MessageResolver messageResolver,
-            ApplicationEventPublisher eventPublisher) {
+            IWebSocketEventPublisher webSocketEventPublisher
+    ) {
         this.messageResolver = messageResolver;
-        this.eventPublisher = eventPublisher;
+        this.webSocketEventPublisher = webSocketEventPublisher;
     }
 
     // Handler for all unhandled exceptions.
     @MessageExceptionHandler(Exception.class)
-    public void handleRunTimeException(Exception e, StompHeaderAccessor stompHeaderAccessor) {
+    public void handleRunTimeException(
+            Exception e,
+            StompHeaderAccessor stompHeaderAccessor
+    ) {
         publishError(
                 e,
-                new WebSocketErrorResponse(
-                        ApiErrorCode.INTERNAL,
-                        messageResolver.getMessage(MessageKeys.EXCEPTION_INTERNAL),
-                        stompHeaderAccessor.getDestination()
-                ),
+                ApiErrorCode.INTERNAL,
+                messageResolver.getMessage(MessageKeys.EXCEPTION_INTERNAL),
                 stompHeaderAccessor
         );
     }
@@ -61,19 +59,16 @@ public class GlobalWebSocketExceptionHandler {
     @MessageExceptionHandler(MethodArgumentNotValidException.class)
     public void handleMethodArgumentNotValidException(
             MethodArgumentNotValidException e,
-            StompHeaderAccessor stompHeaderAccessor) {
-
+            StompHeaderAccessor stompHeaderAccessor
+    ) {
         ArrayList<TargetError> errors = ErrorUtil.extractFieldErrors(e);
 
         publishError(
                 e,
-                new WebSocketErrorResponse(
-                        ApiErrorCode.INVALID_ARGUMENTS,
-                        messageResolver.getMessage(MessageKeys.EXCEPTION_INVALID_ARGUMENTS),
-                        stompHeaderAccessor.getDestination(),
-                        errors.toArray(new TargetError[0])
-                ),
-                stompHeaderAccessor
+                ApiErrorCode.INVALID_ARGUMENTS,
+                messageResolver.getMessage(MessageKeys.EXCEPTION_INVALID_ARGUMENTS),
+                stompHeaderAccessor,
+                errors.toArray(new TargetError[0])
         );
     }
 
@@ -81,19 +76,16 @@ public class GlobalWebSocketExceptionHandler {
     @MessageExceptionHandler(ConstraintViolationException.class)
     public void handleConstraintViolationException(
             ConstraintViolationException e,
-            StompHeaderAccessor stompHeaderAccessor) {
-
+            StompHeaderAccessor stompHeaderAccessor
+    ) {
         ArrayList<TargetError> errors = ErrorUtil.extractTargetErrors(e);
 
         publishError(
                 e,
-                new WebSocketErrorResponse(
-                        ApiErrorCode.INVALID_ARGUMENTS,
-                        messageResolver.getMessage(MessageKeys.EXCEPTION_INVALID_ARGUMENTS),
-                        stompHeaderAccessor.getDestination(),
-                        errors.toArray(new TargetError[0])
-                ),
-                stompHeaderAccessor
+                ApiErrorCode.INVALID_ARGUMENTS,
+                messageResolver.getMessage(MessageKeys.EXCEPTION_INVALID_ARGUMENTS),
+                stompHeaderAccessor,
+                errors.toArray(new TargetError[0])
         );
     }
 
@@ -101,17 +93,14 @@ public class GlobalWebSocketExceptionHandler {
     @MessageExceptionHandler(InvalidArgumentsException.class)
     public void handleInvalidArgumentException(
             InvalidArgumentsException e,
-            StompHeaderAccessor stompHeaderAccessor) {
-
+            StompHeaderAccessor stompHeaderAccessor
+    ) {
         publishError(
                 e,
-                new WebSocketErrorResponse(
-                        ApiErrorCode.INVALID_ARGUMENTS,
-                        messageResolver.getMessage(MessageKeys.EXCEPTION_INVALID_ARGUMENTS),
-                        stompHeaderAccessor.getDestination(),
-                        e.getErrors().toArray(new TargetError[0])
-                ),
-                stompHeaderAccessor
+                ApiErrorCode.INVALID_ARGUMENTS,
+                messageResolver.getMessage(MessageKeys.EXCEPTION_INVALID_ARGUMENTS),
+                stompHeaderAccessor,
+                e.getErrors().toArray(new TargetError[0])
         );
     }
 
@@ -119,58 +108,57 @@ public class GlobalWebSocketExceptionHandler {
     @MessageExceptionHandler(ResourceNotFoundException.class)
     public void handleResourceNotFoundException(
             ResourceNotFoundException e,
-            StompHeaderAccessor stompHeaderAccessor) {
-
+            StompHeaderAccessor stompHeaderAccessor
+    ) {
         String resourceSimpleName = e.getResourceClass().getSimpleName();
-        String userResourceType = messageResolver.getMessage(MessageKeys.forResourceType(e.getResourceClass()));
-        String userMessage = messageResolver.getMessage(MessageKeys.MESSAGE_RESOURCE_NOT_FOUND, userResourceType);
+        String userResourceType = messageResolver.getMessage(
+                MessageKeys.forResourceType(e.getResourceClass())
+        );
+        String userMessage = messageResolver.getMessage(
+                MessageKeys.MESSAGE_RESOURCE_NOT_FOUND,
+                userResourceType
+        );
 
         publishError(
                 e,
-                new WebSocketErrorResponse(
-                        ApiErrorCode.RESOURCE_NOT_FOUND,
-                        messageResolver.getMessage(
-                                MessageKeys.EXCEPTION_RESOURCE_NOT_FOUND,
-                                resourceSimpleName,
-                                e.getIdentifier()
-                        ),
-                        stompHeaderAccessor.getDestination(),
-                        new TargetError(StringUtils.pascalToCamelCase(resourceSimpleName), userMessage)
+                ApiErrorCode.RESOURCE_NOT_FOUND,
+                messageResolver.getMessage(
+                        MessageKeys.EXCEPTION_RESOURCE_NOT_FOUND,
+                        resourceSimpleName,
+                        e.getIdentifier()
                 ),
-                stompHeaderAccessor
+                stompHeaderAccessor,
+                new TargetError(
+                        StringUtils.pascalToCamelCase(resourceSimpleName),
+                        userMessage
+                )
         );
     }
 
-    // Handler for sending malformed data or invalid data types (e.g. invalid json, using array instead of string).
+    // Handler for sending malformed data or invalid data types.
     @MessageExceptionHandler(MethodArgumentTypeMismatchException.class)
     public void handleHttpMessageNotReadableException(
             MethodArgumentTypeMismatchException e,
-            StompHeaderAccessor stompHeaderAccessor) {
-
+            StompHeaderAccessor stompHeaderAccessor
+    ) {
         publishError(
                 e,
-                new WebSocketErrorResponse(
-                        ApiErrorCode.MESSAGE_NOT_READABLE,
-                        messageResolver.getMessage(MessageKeys.EXCEPTION_BODY_NOT_READABLE),
-                        stompHeaderAccessor.getDestination()
-                ),
+                ApiErrorCode.MESSAGE_NOT_READABLE,
+                messageResolver.getMessage(MessageKeys.EXCEPTION_BODY_NOT_READABLE),
                 stompHeaderAccessor
         );
     }
 
-    // Handler for when a Message can't be deserialized to the corresponding object (e.g. object requires int but gets an array).
+    // Handler for messages that cannot be deserialized to the corresponding object.
     @MessageExceptionHandler({MessageConversionException.class, ConversionFailedException.class})
     public void handleMessageConversionException(
             Exception e,
-            StompHeaderAccessor stompHeaderAccessor) {
-
+            StompHeaderAccessor stompHeaderAccessor
+    ) {
         publishError(
                 e,
-                new WebSocketErrorResponse(
-                        ApiErrorCode.MESSAGE_NOT_READABLE,
-                        messageResolver.getMessage(MessageKeys.EXCEPTION_BODY_NOT_READABLE),
-                        stompHeaderAccessor.getDestination()
-                ),
+                ApiErrorCode.MESSAGE_NOT_READABLE,
+                messageResolver.getMessage(MessageKeys.EXCEPTION_BODY_NOT_READABLE),
                 stompHeaderAccessor
         );
     }
@@ -179,15 +167,12 @@ public class GlobalWebSocketExceptionHandler {
     @MessageExceptionHandler(MessageHandlingException.class)
     public void handleMessageHandlingException(
             MessageHandlingException e,
-            StompHeaderAccessor stompHeaderAccessor) {
-
+            StompHeaderAccessor stompHeaderAccessor
+    ) {
         publishError(
                 e,
-                new WebSocketErrorResponse(
-                        ApiErrorCode.MESSAGE_NOT_READABLE,
-                        messageResolver.getMessage(MessageKeys.EXCEPTION_BODY_NOT_READABLE),
-                        stompHeaderAccessor.getDestination()
-                ),
+                ApiErrorCode.MESSAGE_NOT_READABLE,
+                messageResolver.getMessage(MessageKeys.EXCEPTION_BODY_NOT_READABLE),
                 stompHeaderAccessor
         );
     }
@@ -196,15 +181,12 @@ public class GlobalWebSocketExceptionHandler {
     @MessageExceptionHandler(DataAccessResourceFailureException.class)
     public void handleDataAccessResourceFailureException(
             DataAccessResourceFailureException e,
-            StompHeaderAccessor stompHeaderAccessor) {
-
+            StompHeaderAccessor stompHeaderAccessor
+    ) {
         publishError(
                 e,
-                new WebSocketErrorResponse(
-                        ApiErrorCode.UNAVAILABLE,
-                        messageResolver.getMessage(MessageKeys.EXCEPTION_SERVICE_UNAVAILABLE),
-                        stompHeaderAccessor.getDestination()
-                ),
+                ApiErrorCode.UNAVAILABLE,
+                messageResolver.getMessage(MessageKeys.EXCEPTION_SERVICE_UNAVAILABLE),
                 stompHeaderAccessor
         );
     }
@@ -213,39 +195,41 @@ public class GlobalWebSocketExceptionHandler {
     @MessageExceptionHandler(OptimisticLockingFailureException.class)
     public void handleOptimisticLockingFailureException(
             OptimisticLockingFailureException e,
-            StompHeaderAccessor stompHeaderAccessor) {
-
+            StompHeaderAccessor stompHeaderAccessor
+    ) {
         publishError(
                 e,
-                new WebSocketErrorResponse(
-                        ApiErrorCode.CONFLICT,
-                        messageResolver.getMessage(MessageKeys.EXCEPTION_CONFLICT),
-                        stompHeaderAccessor.getDestination()
-                ),
+                ApiErrorCode.CONFLICT,
+                messageResolver.getMessage(MessageKeys.EXCEPTION_CONFLICT),
                 stompHeaderAccessor
         );
     }
 
     /**
-     * Logs an exception and publishes its WebSocket error response for the originating session.
+     * Logs an exception and publishes a WebSocket error event for the originating session.
      *
-     * @param exception           - Exception that occurred.
-     * @param errorResponse       - Error response to send.
-     * @param stompHeaderAccessor - Accessor for the incoming STOMP message.
+     * @param exception           the exception that occurred
+     * @param apiErrorCode        the API error code
+     * @param description         the error description
+     * @param stompHeaderAccessor accessor for the incoming STOMP message
+     * @param targetErrors        target-specific errors
      */
     private void publishError(
             Exception exception,
-            WebSocketErrorResponse errorResponse,
-            StompHeaderAccessor stompHeaderAccessor) {
-
+            ApiErrorCode apiErrorCode,
+            String description,
+            StompHeaderAccessor stompHeaderAccessor,
+            TargetError... targetErrors
+    ) {
         logger.error(exception.getClass().getSimpleName(), exception);
 
-        eventPublisher.publishEvent(
-                new WebSocketErrorEvent(
-                        errorResponse,
-                        stompHeaderAccessor.getSessionId(),
-                        stompHeaderAccessor.getFirstNativeHeader(WebSocketHeaders.PUBLISH_ID)
-                )
+        webSocketEventPublisher.sendError(
+                stompHeaderAccessor.getDestination(),
+                apiErrorCode,
+                description,
+                targetErrors,
+                stompHeaderAccessor.getSessionId(),
+                stompHeaderAccessor.getFirstNativeHeader(WebSocketHeaders.PUBLISH_ID)
         );
     }
 }

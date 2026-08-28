@@ -9,6 +9,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ErrorUtil {
     private ErrorUtil() {
@@ -55,6 +57,22 @@ public class ErrorUtil {
                     errors.add(new TargetError(error.getCode(), error.getDefaultMessage()));
                 }
             }
+        }
+
+        return errors;
+    }
+
+    public static Map<String, String> targetErrorsToMap(TargetError... targetErrors) {
+        if (targetErrors == null) return null;
+
+        Map<String, String> errors = new HashMap<>();
+
+        for (TargetError targetError : targetErrors) {
+            String target = targetError.target() != null
+                    ? targetError.target()
+                    : "body";
+
+            errors.put(target, targetError.error());
         }
 
         return errors;

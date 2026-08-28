@@ -1,6 +1,6 @@
-package nl.kmartin.dartsmatcherapi.features.x01.x01match.event;
+package nl.kmartin.dartsmatcherapi.features.x01.x01match.message;
 
-public enum X01MatchEventType {
+public enum X01MatchMessageType {
     PROCESS_MATCH,
     ADD_HUMAN_TURN,
     ADD_BOT_TURN,

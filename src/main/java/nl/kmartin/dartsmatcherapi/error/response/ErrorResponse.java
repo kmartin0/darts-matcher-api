@@ -3,6 +3,7 @@ package nl.kmartin.dartsmatcherapi.error.response;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import nl.kmartin.dartsmatcherapi.error.ErrorUtil;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -28,7 +29,7 @@ public class ErrorResponse implements Serializable {
         this.code = apiErrorCode.getHttpStatus().value();
         this.description = description;
         this.error = apiErrorCode.name();
-        this.targetErrors = targetErrorsArrToHashMap(targetErrors);
+        this.targetErrors = ErrorUtil.targetErrorsToMap(targetErrors);
     }
 
     public ErrorResponse(ApiErrorCode apiErrorCode, String description) {
@@ -36,16 +37,5 @@ public class ErrorResponse implements Serializable {
         this.description = description;
         this.error = apiErrorCode.name();
         this.targetErrors = new HashMap<>();
-    }
-
-    private HashMap<String, String> targetErrorsArrToHashMap(TargetError... targetErrors) {
-        if (targetErrors == null) return null;
-
-        HashMap<String, String> tmpDetails = new HashMap<>();
-        for (TargetError targetError : targetErrors) {
-            String target = targetError.target() != null ? targetError.target() : "body";
-            tmpDetails.put(target, targetError.error());
-        }
-        return tmpDetails;
     }
 }
