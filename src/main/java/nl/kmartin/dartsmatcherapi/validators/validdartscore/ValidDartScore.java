@@ -2,7 +2,7 @@ package nl.kmartin.dartsmatcherapi.validators.validdartscore;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
-import nl.kmartin.dartsmatcherapi.common.MessageKeys;
+import nl.kmartin.dartsmatcherapi.i18n.MessageKeys;
 
 import java.lang.annotation.*;
 

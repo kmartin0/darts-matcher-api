@@ -1,11 +1,20 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01statistics;
 
-import nl.kmartin.dartsmatcherapi.features.x01.model.*;
 import nl.kmartin.dartsmatcherapi.features.x01.x01averagestatistics.IX01AverageStatisticsService;
+import nl.kmartin.dartsmatcherapi.features.x01.x01averagestatistics.model.X01AverageStatistics;
 import nl.kmartin.dartsmatcherapi.features.x01.x01checkoutstatistics.IX01CheckoutStatisticsService;
+import nl.kmartin.dartsmatcherapi.features.x01.x01checkoutstatistics.model.X01CheckoutStatistics;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.IX01LegService;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundEntry;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
 import nl.kmartin.dartsmatcherapi.features.x01.x01resultstatistics.IX01ResultStatisticsService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01scorestatistics.IX01ScoreStatisticsService;
+import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01Set;
+import nl.kmartin.dartsmatcherapi.features.x01.x01statistics.model.X01Statistics;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 

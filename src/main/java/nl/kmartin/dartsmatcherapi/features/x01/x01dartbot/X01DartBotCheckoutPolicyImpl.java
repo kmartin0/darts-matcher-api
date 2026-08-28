@@ -1,8 +1,8 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01dartbot;
 
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.Dart;
-import nl.kmartin.dartsmatcherapi.features.x01.model.X01DartBotLegState;
 import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.IX01CheckoutService;
+import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.model.X01DartBotLegState;
 import org.springframework.stereotype.Service;
 
 @Service

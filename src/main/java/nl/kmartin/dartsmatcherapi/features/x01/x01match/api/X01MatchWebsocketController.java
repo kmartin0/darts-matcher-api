@@ -1,13 +1,13 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01match.api;
 
 import jakarta.validation.Valid;
-import nl.kmartin.dartsmatcherapi.common.Constants;
-import nl.kmartin.dartsmatcherapi.common.WebSocketSendToUserEvent;
-import nl.kmartin.dartsmatcherapi.common.WebsocketDestinations;
-import nl.kmartin.dartsmatcherapi.features.x01.model.X01EditTurn;
-import nl.kmartin.dartsmatcherapi.features.x01.model.X01Turn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.event.X01MatchEvent;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01EditTurn;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Turn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.IX01MatchService;
+import nl.kmartin.dartsmatcherapi.websocket.WebSocketDestinations;
+import nl.kmartin.dartsmatcherapi.websocket.WebSocketHeaders;
+import nl.kmartin.dartsmatcherapi.websocket.response.WebSocketResponseEvent;
 import org.bson.types.ObjectId;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -32,16 +32,16 @@ public class X01MatchWebsocketController {
         this.eventPublisher = eventPublisher;
     }
 
-    @SubscribeMapping(WebsocketDestinations.X01.MATCH)
+    @SubscribeMapping(WebSocketDestinations.X01.MATCH)
     public X01MatchEvent.ProcessMatch subscribeX01Match(@DestinationVariable ObjectId matchId) {
         return new X01MatchEvent.ProcessMatch(matchService.getMatch(matchId));
     }
 
-    @MessageMapping(WebsocketDestinations.X01.ADD_TURN)
+    @MessageMapping(WebSocketDestinations.X01.ADD_TURN)
     public void addTurn(
             @DestinationVariable ObjectId matchId,
             @Valid @Payload X01Turn turn,
-            @Header(value = Constants.PUBLISH_ID_HEADER, required = false) String publishId,
+            @Header(value = WebSocketHeaders.PUBLISH_ID, required = false) String publishId,
             @Header(SimpMessageHeaderAccessor.SESSION_ID_HEADER) String sessionId
     ) {
         publishToUser(
@@ -51,11 +51,11 @@ public class X01MatchWebsocketController {
         );
     }
 
-    @MessageMapping(WebsocketDestinations.X01.EDIT_TURN)
+    @MessageMapping(WebSocketDestinations.X01.EDIT_TURN)
     public void editTurn(
             @DestinationVariable ObjectId matchId,
             @Valid @Payload X01EditTurn editTurn,
-            @Header(value = Constants.PUBLISH_ID_HEADER, required = false) String publishId,
+            @Header(value = WebSocketHeaders.PUBLISH_ID, required = false) String publishId,
             @Header(SimpMessageHeaderAccessor.SESSION_ID_HEADER) String sessionId
     ) {
         publishToUser(
@@ -65,10 +65,10 @@ public class X01MatchWebsocketController {
         );
     }
 
-    @MessageMapping(WebsocketDestinations.X01.DELETE_LAST_TURN)
+    @MessageMapping(WebSocketDestinations.X01.DELETE_LAST_TURN)
     public void deleteLastTurn(
             @DestinationVariable ObjectId matchId,
-            @Header(value = Constants.PUBLISH_ID_HEADER, required = false) String publishId,
+            @Header(value = WebSocketHeaders.PUBLISH_ID, required = false) String publishId,
             @Header(SimpMessageHeaderAccessor.SESSION_ID_HEADER) String sessionId
     ) {
         publishToUser(
@@ -78,10 +78,10 @@ public class X01MatchWebsocketController {
         );
     }
 
-    @MessageMapping(WebsocketDestinations.X01.DELETE_MATCH)
+    @MessageMapping(WebSocketDestinations.X01.DELETE_MATCH)
     public void deleteMatch(
             @DestinationVariable ObjectId matchId,
-            @Header(value = Constants.PUBLISH_ID_HEADER, required = false) String publishId,
+            @Header(value = WebSocketHeaders.PUBLISH_ID, required = false) String publishId,
             @Header(SimpMessageHeaderAccessor.SESSION_ID_HEADER) String sessionId
     ) {
         matchService.deleteMatch(matchId);
@@ -93,10 +93,10 @@ public class X01MatchWebsocketController {
         );
     }
 
-    @MessageMapping(WebsocketDestinations.X01.RESET_MATCH)
+    @MessageMapping(WebSocketDestinations.X01.RESET_MATCH)
     public void resetMatch(
             @DestinationVariable ObjectId matchId,
-            @Header(value = Constants.PUBLISH_ID_HEADER, required = false) String publishId,
+            @Header(value = WebSocketHeaders.PUBLISH_ID, required = false) String publishId,
             @Header(SimpMessageHeaderAccessor.SESSION_ID_HEADER) String sessionId
     ) {
         publishToUser(
@@ -106,10 +106,10 @@ public class X01MatchWebsocketController {
         );
     }
 
-    @MessageMapping(WebsocketDestinations.X01.REPROCESS_MATCH)
+    @MessageMapping(WebSocketDestinations.X01.REPROCESS_MATCH)
     public void reprocessMatch(
             @DestinationVariable ObjectId matchId,
-            @Header(value = Constants.PUBLISH_ID_HEADER, required = false) String publishId,
+            @Header(value = WebSocketHeaders.PUBLISH_ID, required = false) String publishId,
             @Header(SimpMessageHeaderAccessor.SESSION_ID_HEADER) String sessionId
     ) {
         publishToUser(
@@ -121,7 +121,7 @@ public class X01MatchWebsocketController {
 
     private void publishToUser(Object payload, String sessionId, String publishId) {
         eventPublisher.publishEvent(
-                new WebSocketSendToUserEvent(
+                new WebSocketResponseEvent(
                         payload,
                         sessionId,
                         publishId

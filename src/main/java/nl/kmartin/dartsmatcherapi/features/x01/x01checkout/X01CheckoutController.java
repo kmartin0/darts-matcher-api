@@ -1,7 +1,7 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01checkout;
 
-import nl.kmartin.dartsmatcherapi.common.RestEndpoints;
-import nl.kmartin.dartsmatcherapi.features.x01.model.X01Checkout;
+import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.model.X01Checkout;
+import nl.kmartin.dartsmatcherapi.rest.RestEndpoints;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;

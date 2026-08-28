@@ -1,7 +1,11 @@
 package nl.kmartin.dartsmatcherapi.features.x01.common;
 
 import nl.kmartin.dartsmatcherapi.features.basematch.model.MatchPlayer;
-import nl.kmartin.dartsmatcherapi.features.x01.model.*;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
+import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01Set;
 import org.bson.types.ObjectId;
 import org.springframework.util.CollectionUtils;
 
@@ -47,5 +51,9 @@ public class X01MatchUtils {
 
         // Return the ordered list.
         return orderedPlayers;
+    }
+
+    public static double threeDartAvgToOneDartAvg(double threeDartAverage) {
+        return threeDartAverage / 3;
     }
 }

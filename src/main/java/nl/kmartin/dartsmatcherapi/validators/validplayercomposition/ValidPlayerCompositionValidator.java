@@ -2,9 +2,9 @@ package nl.kmartin.dartsmatcherapi.validators.validplayercomposition;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import nl.kmartin.dartsmatcherapi.common.MessageKeys;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.MatchPlayer;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.PlayerType;
+import nl.kmartin.dartsmatcherapi.i18n.MessageKeys;
 import org.hibernate.validator.constraintvalidation.HibernateConstraintValidatorContext;
 import org.springframework.util.CollectionUtils;
 

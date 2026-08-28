@@ -2,7 +2,7 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01match.event;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import nl.kmartin.dartsmatcherapi.features.x01.model.X01Match;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
 import org.bson.types.ObjectId;
 
 public sealed interface X01MatchEvent {

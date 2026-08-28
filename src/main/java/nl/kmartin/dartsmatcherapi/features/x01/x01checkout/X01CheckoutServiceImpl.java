@@ -2,13 +2,13 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01checkout;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import nl.kmartin.dartsmatcherapi.common.MessageKeys;
-import nl.kmartin.dartsmatcherapi.common.MessageResolver;
-import nl.kmartin.dartsmatcherapi.exceptionhandler.exception.InvalidArgumentsException;
-import nl.kmartin.dartsmatcherapi.exceptionhandler.response.TargetError;
+import nl.kmartin.dartsmatcherapi.error.exception.InvalidArgumentsException;
+import nl.kmartin.dartsmatcherapi.error.response.TargetError;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.Dart;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.DartboardSectionArea;
-import nl.kmartin.dartsmatcherapi.features.x01.model.X01Checkout;
+import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.model.X01Checkout;
+import nl.kmartin.dartsmatcherapi.i18n.MessageKeys;
+import nl.kmartin.dartsmatcherapi.i18n.MessageResolver;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;

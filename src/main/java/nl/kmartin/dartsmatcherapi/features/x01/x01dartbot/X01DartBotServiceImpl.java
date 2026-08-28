@@ -1,17 +1,24 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01dartbot;
 
 import jakarta.validation.constraints.NotNull;
-import nl.kmartin.dartsmatcherapi.common.Constants;
-import nl.kmartin.dartsmatcherapi.common.MessageKeys;
-import nl.kmartin.dartsmatcherapi.common.MessageResolver;
-import nl.kmartin.dartsmatcherapi.exceptionhandler.exception.InvalidArgumentsException;
-import nl.kmartin.dartsmatcherapi.exceptionhandler.response.TargetError;
+import nl.kmartin.dartsmatcherapi.error.exception.InvalidArgumentsException;
+import nl.kmartin.dartsmatcherapi.error.response.TargetError;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.PlayerType;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.DartThrow;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.DartboardSectionArea;
-import nl.kmartin.dartsmatcherapi.features.x01.model.*;
+import nl.kmartin.dartsmatcherapi.features.x01.common.X01MatchUtils;
+import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.model.X01DartBotLegState;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.IX01LegResultService;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01LegEntry;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Turn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.IX01MatchProgressService;
+import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01SetEntry;
+import nl.kmartin.dartsmatcherapi.i18n.MessageKeys;
+import nl.kmartin.dartsmatcherapi.i18n.MessageResolver;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
@@ -113,7 +120,7 @@ public class X01DartBotServiceImpl implements IX01DartBotService {
         int dartsUsed = legResultService.calculateDartsUsed(currentLeg, dartBotPlayer.getPlayerId());
 
         // Calculate the 1-dart average of the dart bot in the current leg
-        double targetOneDartAvg = (double) dartBotPlayer.getX01DartBotSettings().getThreeDartAverage() / Constants.NUM_OF_DARTS_IN_A_ROUND;
+        double targetOneDartAvg = X01MatchUtils.threeDartAvgToOneDartAvg(dartBotPlayer.getX01DartBotSettings().getThreeDartAverage());
 
         // Create and return a new dart bot leg state with the calculated values
         return new X01DartBotLegState(
@@ -187,7 +194,7 @@ public class X01DartBotServiceImpl implements IX01DartBotService {
      * throw missed the intended double section and updates the count of missed doubles if applicable.
      *
      * @param dartBotLegState {@link X01DartBotLegState} representing the dart bot's current state in the leg.
-     * @param dartThrow  {@link DartThrow} the dart throw that contains the result to be added to the score
+     * @param dartThrow       {@link DartThrow} the dart throw that contains the result to be added to the score
      */
     private void updateRoundScore(X01DartBotLegState dartBotLegState, DartThrow dartThrow, boolean trackDoubles) {
         X01LegRoundScore roundScore = dartBotLegState.getLegRoundScore();

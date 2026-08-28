@@ -1,8 +1,8 @@
 package nl.kmartin.dartsmatcherapi.validators;
 
 import jakarta.validation.ConstraintValidatorContext;
-import nl.kmartin.dartsmatcherapi.common.MessageKeys;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.MatchPlayer;
+import nl.kmartin.dartsmatcherapi.i18n.MessageKeys;
 import nl.kmartin.dartsmatcherapi.validators.noduplicatematchplayername.NoDuplicateMatchPlayerNameValidator;
 import org.hibernate.validator.constraintvalidation.HibernateConstraintValidatorContext;
 import org.hibernate.validator.constraintvalidation.HibernateConstraintViolationBuilder;

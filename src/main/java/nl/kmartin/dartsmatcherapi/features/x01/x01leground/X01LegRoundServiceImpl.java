@@ -1,8 +1,8 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01leground;
 
 import nl.kmartin.dartsmatcherapi.features.x01.common.X01MatchUtils;
-import nl.kmartin.dartsmatcherapi.features.x01.model.X01LegRound;
-import nl.kmartin.dartsmatcherapi.features.x01.model.X01MatchPlayer;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 

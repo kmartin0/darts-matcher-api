@@ -1,7 +1,7 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01averagestatistics;
 
-import nl.kmartin.dartsmatcherapi.features.x01.model.X01AverageStatistics;
-import nl.kmartin.dartsmatcherapi.features.x01.model.X01LegRoundScore;
+import nl.kmartin.dartsmatcherapi.features.x01.x01averagestatistics.model.X01AverageStatistics;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
 import org.springframework.stereotype.Service;
 
 @Service

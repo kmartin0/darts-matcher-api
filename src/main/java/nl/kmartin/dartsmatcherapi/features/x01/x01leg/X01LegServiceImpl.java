@@ -1,12 +1,17 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01leg;
 
-import nl.kmartin.dartsmatcherapi.common.MessageKeys;
-import nl.kmartin.dartsmatcherapi.common.MessageResolver;
-import nl.kmartin.dartsmatcherapi.exceptionhandler.exception.InvalidArgumentsException;
-import nl.kmartin.dartsmatcherapi.exceptionhandler.response.TargetError;
+import nl.kmartin.dartsmatcherapi.error.exception.InvalidArgumentsException;
+import nl.kmartin.dartsmatcherapi.error.response.TargetError;
 import nl.kmartin.dartsmatcherapi.features.x01.common.X01MatchUtils;
-import nl.kmartin.dartsmatcherapi.features.x01.model.*;
 import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.IX01CheckoutService;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01LegEntry;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundEntry;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Turn;
+import nl.kmartin.dartsmatcherapi.i18n.MessageKeys;
+import nl.kmartin.dartsmatcherapi.i18n.MessageResolver;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +42,7 @@ public class X01LegServiceImpl implements IX01LegService {
      *
      * @param legNumber        int the leg number
      * @param throwsFirstInSet {@link ObjectId} the player that started the set
-     * @param players          {@link List< X01MatchPlayer >} the list of match players
+     * @param players          {@link List<  X01MatchPlayer  >} the list of match players
      * @return {@link X01LegEntry} the created leg
      */
     @Override

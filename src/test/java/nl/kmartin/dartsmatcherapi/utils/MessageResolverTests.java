@@ -1,7 +1,7 @@
 package nl.kmartin.dartsmatcherapi.utils;
 
-import nl.kmartin.dartsmatcherapi.common.MessageResolver;
 import nl.kmartin.dartsmatcherapi.config.LocaleConfig;
+import nl.kmartin.dartsmatcherapi.i18n.MessageResolver;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

@@ -3,9 +3,14 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01set;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.MatchPlayer;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.ResultType;
 import nl.kmartin.dartsmatcherapi.features.x01.common.X01MatchUtils;
-import nl.kmartin.dartsmatcherapi.features.x01.model.*;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.IX01LegProgressService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.IX01LegResultService;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01BestOf;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01ClearByTwoRule;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
+import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01Set;
+import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01SetEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01standings.IX01StandingsService;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
@@ -32,7 +37,7 @@ public class X01SetResultServiceImpl implements IX01SetResultService {
      *
      * @param setEntry {@link X01SetEntry} the set to be updated
      * @param bestOf   {@link X01BestOf} the best of setting for the match
-     * @param players  {@link List< X01MatchPlayer >} the list of match players
+     * @param players  {@link List<  X01MatchPlayer  >} the list of match players
      */
     @Override
     public void updateSetResult(X01SetEntry setEntry, X01BestOf bestOf, List<X01MatchPlayer> players, int x01) {
@@ -125,7 +130,7 @@ public class X01SetResultServiceImpl implements IX01SetResultService {
      * This is useful for cleaning up any trailing legs after a set winner has
      * already been decided, which may happen after score edits or corrections.
      *
-     * @param set        {@link List< X01Leg >} the set to be potentially modified
+     * @param set        {@link List<  X01Leg  >} the set to be potentially modified
      * @param setWinners {@link List<ObjectId>} the list of player IDs who have won (or drawn) the set
      */
     @Override

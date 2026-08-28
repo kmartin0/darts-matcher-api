@@ -1,10 +1,10 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01resultstatistics;
 
 import nl.kmartin.dartsmatcherapi.features.basematch.model.ResultType;
-import nl.kmartin.dartsmatcherapi.features.x01.model.X01Leg;
-import nl.kmartin.dartsmatcherapi.features.x01.model.X01MatchPlayer;
-import nl.kmartin.dartsmatcherapi.features.x01.model.X01ResultStatistics;
-import nl.kmartin.dartsmatcherapi.features.x01.model.X01Set;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
+import nl.kmartin.dartsmatcherapi.features.x01.x01resultstatistics.model.X01ResultStatistics;
+import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01Set;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;

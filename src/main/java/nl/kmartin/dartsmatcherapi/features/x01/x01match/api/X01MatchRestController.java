@@ -1,11 +1,11 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01match.api;
 
 import jakarta.validation.Valid;
-import nl.kmartin.dartsmatcherapi.common.RestEndpoints;
-import nl.kmartin.dartsmatcherapi.features.x01.model.X01EditTurn;
-import nl.kmartin.dartsmatcherapi.features.x01.model.X01Match;
-import nl.kmartin.dartsmatcherapi.features.x01.model.X01Turn;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01EditTurn;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Turn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.IX01MatchService;
+import nl.kmartin.dartsmatcherapi.rest.RestEndpoints;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;

@@ -1,11 +1,16 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01set;
 
-import nl.kmartin.dartsmatcherapi.exceptionhandler.exception.ResourceNotFoundException;
+import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
 import nl.kmartin.dartsmatcherapi.features.x01.common.X01MatchUtils;
-import nl.kmartin.dartsmatcherapi.features.x01.model.*;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.IX01LegProgressService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.IX01LegService;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01LegEntry;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01BestOf;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
 import nl.kmartin.dartsmatcherapi.features.x01.x01rules.IX01RulesService;
+import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01Set;
+import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01SetEntry;
 import nl.kmartin.dartsmatcherapi.utils.NumberUtils;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
@@ -30,7 +35,7 @@ public class X01SetProgressServiceImpl implements IX01SetProgressService {
      *
      * @param set       {@link X01Set} the set
      * @param legNumber int the leg number that needs to be found
-     * @return {@link Optional< X01LegEntry >} the matching leg, empty if no leg is found
+     * @return {@link Optional<  X01LegEntry  >} the matching leg, empty if no leg is found
      */
     @Override
     public Optional<X01LegEntry> getLeg(X01Set set, int legNumber, boolean throwIfNotFound) {
@@ -70,7 +75,7 @@ public class X01SetProgressServiceImpl implements IX01SetProgressService {
      * Creates the next leg for a list of legs but doesn't exceed the maximum number of legs.
      *
      * @param setEntry              {@link X01SetEntry} the set in which a leg has to be added to.
-     * @param players          {@link List< X01MatchPlayer >} the match players.
+     * @param players          {@link List<  X01MatchPlayer  >} the match players.
      * @param bestOf       {@link X01BestOf} the best of setting for the match.
      * @param throwsFirstInSet {@link ObjectId} the player that throws first in the set.
      * @return {@link Optional<X01LegEntry>} the created leg, empty when the maximum number of legs was reached.

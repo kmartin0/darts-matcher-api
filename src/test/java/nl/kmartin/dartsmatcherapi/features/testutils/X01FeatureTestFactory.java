@@ -2,7 +2,6 @@ package nl.kmartin.dartsmatcherapi.features.testutils;
 
 import nl.kmartin.dartsmatcherapi.common.EventPublisherServiceImpl;
 import nl.kmartin.dartsmatcherapi.common.IEventPublisherService;
-import nl.kmartin.dartsmatcherapi.common.MessageResolver;
 import nl.kmartin.dartsmatcherapi.features.dartboard.DartboardServiceImpl;
 import nl.kmartin.dartsmatcherapi.features.dartboard.IDartboardService;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.Dartboard;
@@ -11,15 +10,13 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01averagestatistics.X01AverageSt
 import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.IX01CheckoutService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.X01CheckoutServiceImpl;
 import nl.kmartin.dartsmatcherapi.features.x01.x01checkoutstatistics.IX01CheckoutStatisticsService;
-import nl.kmartin.dartsmatcherapi.features.x01.x01checkoutstatistics.X01CheckoutStatisticsServiceImplService;
+import nl.kmartin.dartsmatcherapi.features.x01.x01checkoutstatistics.X01CheckoutStatisticsServiceImpl;
 import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.*;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.*;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.IX01LegRoundService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.X01LegRoundServiceImpl;
-import nl.kmartin.dartsmatcherapi.features.x01.x01match.api.IX01MatchRepository;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.repository.IX01MatchRepository;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.*;
-import nl.kmartin.dartsmatcherapi.features.x01.x01matchsetup.IX01MatchSetupService;
-import nl.kmartin.dartsmatcherapi.features.x01.x01matchsetup.X01MatchSetupServiceImpl;
 import nl.kmartin.dartsmatcherapi.features.x01.x01resultstatistics.IX01ResultStatisticsService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01resultstatistics.X01ResultStatisticsServiceImpl;
 import nl.kmartin.dartsmatcherapi.features.x01.x01rules.IX01RulesService;
@@ -31,6 +28,7 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01standings.IX01StandingsService
 import nl.kmartin.dartsmatcherapi.features.x01.x01standings.X01StandingsServiceImpl;
 import nl.kmartin.dartsmatcherapi.features.x01.x01statistics.IX01StatisticsService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01statistics.X01StatisticsServiceImpl;
+import nl.kmartin.dartsmatcherapi.i18n.MessageResolver;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -133,7 +131,7 @@ public class X01FeatureTestFactory {
     }
 
     public IX01CheckoutStatisticsService createCheckoutStatisticsService() {
-        return new X01CheckoutStatisticsServiceImplService();
+        return new X01CheckoutStatisticsServiceImpl();
     }
 
     public IX01AverageStatisticsService createAverageStatisticsService() {

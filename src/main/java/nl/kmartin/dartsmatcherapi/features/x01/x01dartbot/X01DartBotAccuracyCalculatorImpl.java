@@ -1,7 +1,6 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01dartbot;
 
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.PolarCoordinate;
-import nl.kmartin.dartsmatcherapi.features.x01.common.PiecewiseLinearGraph;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -88,7 +87,7 @@ public class X01DartBotAccuracyCalculatorImpl implements IX01DartBotAccuracyCalc
      */
     private double getBaseAccuracy(double targetOneDartAvg, NavigableMap<Double, Double> accuracyGraphDataPoints) {
         // Create the piece wise linear graph using the piece wise accuracy curve
-        PiecewiseLinearGraph baseAccuracyGraph = new PiecewiseLinearGraph(accuracyGraphDataPoints);
+        PiecewiseLinearInterpolator baseAccuracyGraph = new PiecewiseLinearInterpolator(accuracyGraphDataPoints);
 
         // The graph x-axis represents the target averages and the y-axis represents the accuracies.
         // Interpolate the accuracy (y) for the target average (x).

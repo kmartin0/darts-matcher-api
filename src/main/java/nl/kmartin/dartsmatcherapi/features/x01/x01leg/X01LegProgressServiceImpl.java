@@ -1,9 +1,13 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01leg;
 
-import nl.kmartin.dartsmatcherapi.exceptionhandler.exception.ResourceNotFoundException;
+import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
 import nl.kmartin.dartsmatcherapi.features.x01.common.X01MatchUtils;
-import nl.kmartin.dartsmatcherapi.features.x01.model.*;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.IX01LegRoundService;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundEntry;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
 import nl.kmartin.dartsmatcherapi.utils.NumberUtils;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
@@ -24,7 +28,7 @@ public class X01LegProgressServiceImpl implements IX01LegProgressService {
      *
      * @param leg         {@link X01Leg} the leg to find the round in
      * @param roundNumber int the round number to find
-     * @return {@link Optional< X01LegRoundEntry >} an optional round containing the round if it exists otherwise empty.
+     * @return {@link Optional<X01LegRoundEntry>} an optional round containing the round if it exists otherwise empty.
      */
     @Override
     public Optional<X01LegRoundEntry> getLegRound(X01Leg leg, int roundNumber, boolean throwIfNotFound) {
@@ -50,7 +54,7 @@ public class X01LegProgressServiceImpl implements IX01LegProgressService {
      * Finds the lowest-numbered round which does not have a score for all players.
      *
      * @param leg     {@link X01Leg} representing the leg for which the current round needs to be found.
-     * @param players {@link List< X01MatchPlayer >} representing the players of the match.
+     * @param players {@link List<X01MatchPlayer>} representing the players of the match.
      * @return Optional X01LegRound entry for the lowest round in play, otherwise empty.
      */
     @Override
@@ -121,7 +125,7 @@ public class X01LegProgressServiceImpl implements IX01LegProgressService {
      *
      * @param leg       {@link X01Leg} the leg in which the last score for a player needs to be found.
      * @param throwerId {@link ObjectId} the player id for which the latest turn needs to be found
-     * @return {@link Optional< X01LegRoundScore >} the round score for a player in their latest round, if no score found empty
+     * @return {@link Optional<X01LegRoundScore>} the round score for a player in their latest round, if no score found empty
      */
     @Override
     public Optional<X01LegRoundScore> getLastScoreForPlayer(X01Leg leg, ObjectId throwerId) {

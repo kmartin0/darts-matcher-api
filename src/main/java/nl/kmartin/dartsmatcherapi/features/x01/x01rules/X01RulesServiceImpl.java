@@ -1,6 +1,6 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01rules;
 
-import nl.kmartin.dartsmatcherapi.features.x01.model.X01ClearByTwoRule;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01ClearByTwoRule;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 

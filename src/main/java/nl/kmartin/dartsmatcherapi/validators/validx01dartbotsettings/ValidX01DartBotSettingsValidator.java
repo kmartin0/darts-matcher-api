@@ -2,10 +2,10 @@ package nl.kmartin.dartsmatcherapi.validators.validx01dartbotsettings;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import nl.kmartin.dartsmatcherapi.common.MessageKeys;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.PlayerType;
-import nl.kmartin.dartsmatcherapi.features.x01.model.X01DartBotSettings;
-import nl.kmartin.dartsmatcherapi.features.x01.model.X01MatchPlayer;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01DartBotSettings;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
+import nl.kmartin.dartsmatcherapi.i18n.MessageKeys;
 import org.hibernate.validator.constraintvalidation.HibernateConstraintValidatorContext;
 
 public class ValidX01DartBotSettingsValidator implements ConstraintValidator<ValidX01DartBotSettings, X01MatchPlayer> {
