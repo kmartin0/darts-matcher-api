@@ -3,6 +3,7 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01match.service;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import nl.kmartin.dartsmatcherapi.common.IEventPublisherService;
 import nl.kmartin.dartsmatcherapi.exceptionhandler.exception.ResourceNotFoundException;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.PlayerType;
 import nl.kmartin.dartsmatcherapi.features.x01.model.*;
@@ -38,13 +39,13 @@ public class X01MatchServiceImpl implements IX01MatchService {
     private final IX01LegService legService;
     private final IX01LegRoundService legRoundService;
     private final IX01DartBotService dartBotService;
-    private final IX01MatchPublishService matchPublishService;
+    private final IEventPublisherService eventPublisherService;
 
     public X01MatchServiceImpl(IX01MatchRepository matchRepository, IX01MatchSetupService matchSetupService,
                                IX01MatchResultService matchResultService, IX01MatchProgressService matchProgressService,
                                IX01StatisticsService statisticsService, IX01SetProgressService setProgressService,
                                IX01LegService legService, IX01LegRoundService legRoundService, IX01DartBotService dartBotService,
-                               IX01MatchPublishService matchPublishService) {
+                               IEventPublisherService eventPublisherService) {
         this.matchRepository = matchRepository;
         this.matchSetupService = matchSetupService;
         this.matchResultService = matchResultService;
@@ -54,7 +55,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
         this.legService = legService;
         this.legRoundService = legRoundService;
         this.dartBotService = dartBotService;
-        this.matchPublishService = matchPublishService;
+        this.eventPublisherService = eventPublisherService;
     }
 
     /**
@@ -202,8 +203,10 @@ public class X01MatchServiceImpl implements IX01MatchService {
     @Override
     @Transactional
     public void deleteMatch(ObjectId matchId) {
+        this.checkMatchExists(matchId);
+
         this.matchRepository.deleteById(matchId);
-        this.matchPublishService.publish(new X01MatchEvent.X01DeleteMatchEvent(matchId));
+        this.eventPublisherService.publish(new X01MatchEvent.DeleteMatch(matchId));
     }
 
     /**
@@ -308,7 +311,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
 
         // Publish the match event.
         X01MatchEvent publishEvent = createSaveEventFromType(match, eventType);
-        this.matchPublishService.publish(publishEvent);
+        this.eventPublisherService.publish(publishEvent);
     }
 
     /**
@@ -341,12 +344,12 @@ public class X01MatchServiceImpl implements IX01MatchService {
      */
     private X01MatchEvent createSaveEventFromType(X01Match match, X01MatchEventType eventType) {
         return switch (eventType) {
-            case PROCESS_MATCH -> new X01MatchEvent.X01ProcessMatchEvent(match);
-            case ADD_HUMAN_TURN -> new X01MatchEvent.X01AddHumanTurnEvent(match);
-            case ADD_BOT_TURN -> new X01MatchEvent.X01AddBotTurnEvent(match);
-            case EDIT_TURN -> new X01MatchEvent.X01EditTurnEvent(match);
-            case DELETE_LAST_TURN -> new X01MatchEvent.X01DeleteLastTurnEvent(match);
-            case RESET_MATCH -> new X01MatchEvent.X01ResetMatchEvent(match);
+            case PROCESS_MATCH -> new X01MatchEvent.ProcessMatch(match);
+            case ADD_HUMAN_TURN -> new X01MatchEvent.AddHumanTurn(match);
+            case ADD_BOT_TURN -> new X01MatchEvent.AddBotTurn(match);
+            case EDIT_TURN -> new X01MatchEvent.EditTurn(match);
+            case DELETE_LAST_TURN -> new X01MatchEvent.DeleteLastTurn(match);
+            case RESET_MATCH -> new X01MatchEvent.ResetMatch(match);
             default -> throw new IllegalArgumentException("Invalid event type for this operation: " + eventType);
         };
     }

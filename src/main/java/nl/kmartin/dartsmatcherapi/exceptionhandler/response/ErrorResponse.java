@@ -38,11 +38,11 @@ public class ErrorResponse implements Serializable {
         this.targetErrors = new HashMap<>();
     }
 
-    private HashMap<String, String> targetErrorsArrToHashMap(TargetError... details) {
-        if (details == null) return null;
+    private HashMap<String, String> targetErrorsArrToHashMap(TargetError... targetErrors) {
+        if (targetErrors == null) return null;
 
         HashMap<String, String> tmpDetails = new HashMap<>();
-        for (TargetError targetError : details) {
+        for (TargetError targetError : targetErrors) {
             String target = targetError.target() != null ? targetError.target() : "body";
             tmpDetails.put(target, targetError.error());
         }

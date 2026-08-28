@@ -1,12 +1,16 @@
 package nl.kmartin.dartsmatcherapi.features;
 
+import nl.kmartin.dartsmatcherapi.common.IEventPublisherService;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.PlayerType;
 import nl.kmartin.dartsmatcherapi.features.x01.model.*;
 import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.IX01DartBotService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.IX01LegService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.IX01LegRoundService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.api.IX01MatchRepository;
-import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.*;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.IX01MatchProgressService;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.IX01MatchResultService;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.IX01MatchService;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.X01MatchServiceImpl;
 import nl.kmartin.dartsmatcherapi.features.x01.x01matchsetup.IX01MatchSetupService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01set.IX01SetProgressService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01statistics.IX01StatisticsService;
@@ -54,7 +58,7 @@ public class X01MatchServiceTests {
     IX01DartBotService dartBotService;
 
     @Mock
-    IX01MatchPublishService matchPublishService;
+    IEventPublisherService eventPublisherService;
 
 
     @BeforeEach
@@ -69,7 +73,7 @@ public class X01MatchServiceTests {
                 legService,
                 legRoundService,
                 dartBotService,
-                matchPublishService
+                eventPublisherService
         );
     }
 

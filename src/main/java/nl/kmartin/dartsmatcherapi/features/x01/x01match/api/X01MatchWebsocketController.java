@@ -1,16 +1,20 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01match.api;
 
 import jakarta.validation.Valid;
+import nl.kmartin.dartsmatcherapi.common.Constants;
+import nl.kmartin.dartsmatcherapi.common.IEventPublisherService;
+import nl.kmartin.dartsmatcherapi.common.WebSocketSendToUserEvent;
 import nl.kmartin.dartsmatcherapi.common.WebsocketDestinations;
 import nl.kmartin.dartsmatcherapi.features.x01.model.X01EditTurn;
-import nl.kmartin.dartsmatcherapi.features.x01.model.X01Match;
 import nl.kmartin.dartsmatcherapi.features.x01.model.X01Turn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.event.X01MatchEvent;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.IX01MatchService;
 import org.bson.types.ObjectId;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.stereotype.Controller;
 
@@ -18,50 +22,110 @@ import org.springframework.stereotype.Controller;
 public class X01MatchWebsocketController {
 
     private final IX01MatchService matchService;
+    private final IEventPublisherService publisherService;
 
-    public X01MatchWebsocketController(IX01MatchService matchService) {
+    public X01MatchWebsocketController(
+            IX01MatchService matchService,
+            IEventPublisherService publisherService
+    ) {
         this.matchService = matchService;
+        this.publisherService = publisherService;
     }
 
-    @SubscribeMapping(WebsocketDestinations.X01_GET_MATCH)
-    public X01MatchEvent.X01ProcessMatchEvent subscribeX01Match(@DestinationVariable ObjectId matchId) {
-        X01Match match = matchService.getMatch(matchId);
-        return new X01MatchEvent.X01ProcessMatchEvent(match);
+    @SubscribeMapping(WebsocketDestinations.X01.MATCH)
+    public X01MatchEvent.ProcessMatch subscribeX01Match(@DestinationVariable ObjectId matchId) {
+        return new X01MatchEvent.ProcessMatch(matchService.getMatch(matchId));
     }
 
-    @MessageMapping(WebsocketDestinations.X01_ADD_TURN)
-    public X01MatchEvent.X01AddHumanTurnEvent addTurn(@DestinationVariable ObjectId matchId, @Valid @Payload X01Turn turn) {
-        X01Match match = matchService.addTurn(matchId, turn);
-        return new X01MatchEvent.X01AddHumanTurnEvent(match);
+    @MessageMapping(WebsocketDestinations.X01.ADD_TURN)
+    public void addTurn(
+            @DestinationVariable ObjectId matchId,
+            @Valid @Payload X01Turn turn,
+            @Header(value = Constants.PUBLISH_ID_HEADER, required = false) String publishId,
+            @Header(SimpMessageHeaderAccessor.SESSION_ID_HEADER) String sessionId
+    ) {
+        publishToUser(
+                new X01MatchEvent.AddHumanTurn(matchService.addTurn(matchId, turn)),
+                sessionId,
+                publishId
+        );
     }
 
-    @MessageMapping(WebsocketDestinations.X01_EDIT_TURN)
-    public X01MatchEvent.X01EditTurnEvent editTurn(@DestinationVariable ObjectId matchId, @Valid @Payload X01EditTurn editTurn) {
-        X01Match updatedMatch = matchService.editTurn(matchId, editTurn);
-        return new X01MatchEvent.X01EditTurnEvent(updatedMatch);
+    @MessageMapping(WebsocketDestinations.X01.EDIT_TURN)
+    public void editTurn(
+            @DestinationVariable ObjectId matchId,
+            @Valid @Payload X01EditTurn editTurn,
+            @Header(value = Constants.PUBLISH_ID_HEADER, required = false) String publishId,
+            @Header(SimpMessageHeaderAccessor.SESSION_ID_HEADER) String sessionId
+    ) {
+        publishToUser(
+                new X01MatchEvent.EditTurn(matchService.editTurn(matchId, editTurn)),
+                sessionId,
+                publishId
+        );
     }
 
-    @MessageMapping(WebsocketDestinations.X01_DELETE_LAST_TURN)
-    public X01MatchEvent.X01DeleteLastTurnEvent deleteLastTurn(@DestinationVariable ObjectId matchId) {
-        X01Match updatedMatch = matchService.deleteLastTurn(matchId);
-        return new X01MatchEvent.X01DeleteLastTurnEvent(updatedMatch);
+    @MessageMapping(WebsocketDestinations.X01.DELETE_LAST_TURN)
+    public void deleteLastTurn(
+            @DestinationVariable ObjectId matchId,
+            @Header(value = Constants.PUBLISH_ID_HEADER, required = false) String publishId,
+            @Header(SimpMessageHeaderAccessor.SESSION_ID_HEADER) String sessionId
+    ) {
+        publishToUser(
+                new X01MatchEvent.DeleteLastTurn(matchService.deleteLastTurn(matchId)),
+                sessionId,
+                publishId
+        );
     }
 
-    @MessageMapping(WebsocketDestinations.X01_DELETE_MATCH)
-    public X01MatchEvent.X01DeleteMatchEvent deleteMatch(@DestinationVariable ObjectId matchId) {
+    @MessageMapping(WebsocketDestinations.X01.DELETE_MATCH)
+    public void deleteMatch(
+            @DestinationVariable ObjectId matchId,
+            @Header(value = Constants.PUBLISH_ID_HEADER, required = false) String publishId,
+            @Header(SimpMessageHeaderAccessor.SESSION_ID_HEADER) String sessionId
+    ) {
         matchService.deleteMatch(matchId);
-        return new X01MatchEvent.X01DeleteMatchEvent(matchId);
+
+        publishToUser(
+                new X01MatchEvent.DeleteMatch(matchId),
+                sessionId,
+                publishId
+        );
     }
 
-    @MessageMapping(WebsocketDestinations.X01_RESET_MATCH)
-    public X01MatchEvent.X01ResetMatchEvent resetMatch(@DestinationVariable ObjectId matchId) {
-        X01Match resetMatch = matchService.resetMatch(matchId);
-        return new X01MatchEvent.X01ResetMatchEvent(resetMatch);
+    @MessageMapping(WebsocketDestinations.X01.RESET_MATCH)
+    public void resetMatch(
+            @DestinationVariable ObjectId matchId,
+            @Header(value = Constants.PUBLISH_ID_HEADER, required = false) String publishId,
+            @Header(SimpMessageHeaderAccessor.SESSION_ID_HEADER) String sessionId
+    ) {
+        publishToUser(
+                new X01MatchEvent.ResetMatch(matchService.resetMatch(matchId)),
+                sessionId,
+                publishId
+        );
     }
 
-    @MessageMapping(WebsocketDestinations.X01_REPROCESS_MATCH)
-    public X01MatchEvent.X01ProcessMatchEvent reprocessMatch(@DestinationVariable ObjectId matchId) {
-        X01Match reProcessedMatch = matchService.reprocessMatch(matchId);
-        return new X01MatchEvent.X01ProcessMatchEvent(reProcessedMatch);
+    @MessageMapping(WebsocketDestinations.X01.REPROCESS_MATCH)
+    public void reprocessMatch(
+            @DestinationVariable ObjectId matchId,
+            @Header(value = Constants.PUBLISH_ID_HEADER, required = false) String publishId,
+            @Header(SimpMessageHeaderAccessor.SESSION_ID_HEADER) String sessionId
+    ) {
+        publishToUser(
+                new X01MatchEvent.ProcessMatch(matchService.reprocessMatch(matchId)),
+                sessionId,
+                publishId
+        );
+    }
+
+    private void publishToUser(Object payload, String sessionId, String publishId) {
+        publisherService.publish(
+                new WebSocketSendToUserEvent(
+                        payload,
+                        sessionId,
+                        publishId
+                )
+        );
     }
 }

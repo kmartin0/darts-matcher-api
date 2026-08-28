@@ -48,14 +48,11 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler({Exception.class})
     public ResponseEntity<ErrorResponse> handleRunTimeException(Exception e) {
-        logger.error("handleRunTimeException", e);
-        ApiErrorCode apiErrorCode = ApiErrorCode.INTERNAL;
-        ErrorResponse responseBody = new ErrorResponse(
-                apiErrorCode,
+        return createErrorResponse(
+                e,
+                ApiErrorCode.INTERNAL,
                 messageResolver.getMessage(MessageKeys.EXCEPTION_INTERNAL)
         );
-
-        return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());
     }
 
     /**
@@ -66,18 +63,14 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler({MethodArgumentNotValidException.class})
     public ResponseEntity<ErrorResponse> handleMethodArgumentsInvalidException(MethodArgumentNotValidException e) {
-        logger.error("handleMethodArgumentsInvalidException", e);
-
         ArrayList<TargetError> errors = ErrorUtil.extractFieldErrors(e);
-        ApiErrorCode apiErrorCode = ApiErrorCode.INVALID_ARGUMENTS;
 
-        ErrorResponse responseBody = new ErrorResponse(
-                apiErrorCode,
+        return createErrorResponse(
+                e,
+                ApiErrorCode.INVALID_ARGUMENTS,
                 messageResolver.getMessage(MessageKeys.EXCEPTION_INVALID_ARGUMENTS),
                 errors.toArray(new TargetError[0])
         );
-
-        return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());
     }
 
     /**
@@ -88,17 +81,14 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler({ConstraintViolationException.class})
     public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException e) {
-        logger.error("handleConstraintViolationException", e);
-
         ArrayList<TargetError> errors = ErrorUtil.extractTargetErrors(e);
-        ApiErrorCode apiErrorCode = ApiErrorCode.INVALID_ARGUMENTS;
-        ErrorResponse responseBody = new ErrorResponse(
-                apiErrorCode,
+
+        return createErrorResponse(
+                e,
+                ApiErrorCode.INVALID_ARGUMENTS,
                 messageResolver.getMessage(MessageKeys.EXCEPTION_INVALID_ARGUMENTS),
                 errors.toArray(new TargetError[0])
         );
-
-        return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());
     }
 
     /**
@@ -109,17 +99,12 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler({InvalidArgumentsException.class})
     public ResponseEntity<ErrorResponse> handleInvalidArgumentException(InvalidArgumentsException e) {
-        logger.error("handleInvalidArgumentException", e);
-
-        ApiErrorCode apiErrorCode = ApiErrorCode.INVALID_ARGUMENTS;
-
-        ErrorResponse responseBody = new ErrorResponse(
-                apiErrorCode,
+        return createErrorResponse(
+                e,
+                ApiErrorCode.INVALID_ARGUMENTS,
                 messageResolver.getMessage(MessageKeys.EXCEPTION_INVALID_ARGUMENTS),
                 e.getErrors().toArray(new TargetError[0])
         );
-
-        return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());
     }
 
     /**
@@ -130,17 +115,12 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler({MissingServletRequestParameterException.class})
     public ResponseEntity<ErrorResponse> handleMissingServletRequestParameterException(MissingServletRequestParameterException e) {
-        logger.error("handleMissingServletRequestParameterException", e);
-
-        ApiErrorCode apiErrorCode = ApiErrorCode.INVALID_ARGUMENTS;
-
-        ErrorResponse responseBody = new ErrorResponse(
-                apiErrorCode,
+        return createErrorResponse(
+                e,
+                ApiErrorCode.INVALID_ARGUMENTS,
                 messageResolver.getMessage(MessageKeys.EXCEPTION_INVALID_ARGUMENTS),
                 new TargetError(e.getParameterName(), messageResolver.getMessage(MessageKeys.VALIDATION_NOT_NULL))
         );
-
-        return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());
     }
 
     /**
@@ -151,15 +131,11 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler({HttpMediaTypeException.class})
     public ResponseEntity<ErrorResponse> handleHttpMediaTypeException(HttpMediaTypeException e) {
-        logger.error("handleHttpMediaTypeException", e);
-
-        ApiErrorCode apiErrorCode = ApiErrorCode.UNSUPPORTED_MEDIA_TYPE;
-        ErrorResponse responseBody = new ErrorResponse(
-                apiErrorCode,
+        return createErrorResponse(
+                e,
+                ApiErrorCode.UNSUPPORTED_MEDIA_TYPE,
                 e.getMessage()
         );
-
-        return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());
     }
 
     /**
@@ -170,15 +146,11 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler({HttpRequestMethodNotSupportedException.class})
     public ResponseEntity<ErrorResponse> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
-        logger.error("handleHttpRequestMethodNotSupportedException", e);
-
-        ApiErrorCode apiErrorCode = ApiErrorCode.METHOD_NOT_ALLOWED;
-        ErrorResponse responseBody = new ErrorResponse(
-                apiErrorCode,
+        return createErrorResponse(
+                e,
+                ApiErrorCode.METHOD_NOT_ALLOWED,
                 e.getMessage()
         );
-
-        return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());
     }
 
     /**
@@ -189,8 +161,6 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler({NoHandlerFoundException.class, NoResourceFoundException.class})
     public ResponseEntity<ErrorResponse> handleNoMappingFoundException(Exception e) {
-        logger.error("handleNoMappingFoundException", e);
-
         // Get request URL from exception
         String requestUrl = (e instanceof NoHandlerFoundException ex) ? ex.getRequestURL()
                 : (e instanceof NoResourceFoundException ex) ? ex.getResourcePath()
@@ -199,13 +169,11 @@ public class GlobalExceptionHandler {
         // noHandler will prefix with forward slash, check for consistency.
         if (!requestUrl.startsWith("/")) requestUrl = "/" + requestUrl;
 
-        ApiErrorCode apiErrorCode = ApiErrorCode.URI_NOT_FOUND;
-        ErrorResponse responseBody = new ErrorResponse(
+        return createErrorResponse(
+                e,
                 ApiErrorCode.URI_NOT_FOUND,
                 messageResolver.getMessage(MessageKeys.EXCEPTION_URI_NOT_FOUND, requestUrl)
         );
-
-        return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());
     }
 
     /**
@@ -216,21 +184,24 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler({ResourceNotFoundException.class})
     public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException e) {
-        logger.error("handleResourceNotFoundException", e);
-
-        ApiErrorCode apiErrorCode = ApiErrorCode.RESOURCE_NOT_FOUND;
         String resourceSimpleName = e.getResourceClass().getSimpleName();
 
         String userResourceType = messageResolver.getMessage(MessageKeys.forResourceType(e.getResourceClass()));
         String userMessage = messageResolver.getMessage(MessageKeys.MESSAGE_RESOURCE_NOT_FOUND, userResourceType);
 
-        ErrorResponse responseBody = new ErrorResponse(
-                apiErrorCode,
-                messageResolver.getMessage(MessageKeys.EXCEPTION_RESOURCE_NOT_FOUND, resourceSimpleName, e.getIdentifier()),
-                new TargetError(StringUtils.pascalToCamelCase(resourceSimpleName), userMessage)
+        return createErrorResponse(
+                e,
+                ApiErrorCode.RESOURCE_NOT_FOUND,
+                messageResolver.getMessage(
+                        MessageKeys.EXCEPTION_RESOURCE_NOT_FOUND,
+                        resourceSimpleName,
+                        e.getIdentifier()
+                ),
+                new TargetError(
+                        StringUtils.pascalToCamelCase(resourceSimpleName),
+                        userMessage
+                )
         );
-
-        return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());
     }
 
     /**
@@ -241,15 +212,11 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class, ConversionFailedException.class})
     public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(Exception e) {
-        logger.error("handleHttpMessageNotReadableException", e);
-
-        ApiErrorCode apiErrorCode = ApiErrorCode.MESSAGE_NOT_READABLE;
-        ErrorResponse responseBody = new ErrorResponse(
-                apiErrorCode,
+        return createErrorResponse(
+                e,
+                ApiErrorCode.MESSAGE_NOT_READABLE,
                 messageResolver.getMessage(MessageKeys.EXCEPTION_BODY_NOT_READABLE)
         );
-
-        return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());
     }
 
     /**
@@ -260,29 +227,73 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler({DataAccessResourceFailureException.class})
     public ResponseEntity<ErrorResponse> handleDataAccessResourceFailureException(DataAccessResourceFailureException e) {
-        logger.error("handleDataAccessResourceFailureException", e);
-
-        ApiErrorCode apiErrorCode = ApiErrorCode.UNAVAILABLE;
-
-        ErrorResponse responseBody = new ErrorResponse(
-                apiErrorCode,
+        return createErrorResponse(
+                e,
+                ApiErrorCode.UNAVAILABLE,
                 messageResolver.getMessage(MessageKeys.EXCEPTION_SERVICE_UNAVAILABLE)
         );
-
-        return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());
     }
 
+    /**
+     * Handler for optimistic locking conflicts.
+     *
+     * @param e OptimisticLockingFailureException The exception that was thrown
+     * @return ResponseEntity<ErrorResponse> containing the error details
+     */
     @ExceptionHandler({OptimisticLockingFailureException.class})
     public ResponseEntity<ErrorResponse> handleOptimisticLockingFailureException(OptimisticLockingFailureException e) {
-        logger.error("handleOptimisticLockingFailureException", e);
-
-        ApiErrorCode apiErrorCode = ApiErrorCode.CONFLICT;
-
-        ErrorResponse responseBody = new ErrorResponse(
-                apiErrorCode,
+        return createErrorResponse(
+                e,
+                ApiErrorCode.CONFLICT,
                 messageResolver.getMessage(MessageKeys.EXCEPTION_CONFLICT)
         );
+    }
 
-        return new ResponseEntity<>(responseBody, apiErrorCode.getHttpStatus());
+    /**
+     * Creates an API error response.
+     *
+     * @param exception    the exception being handled
+     * @param apiErrorCode API error code for the response
+     * @param description  human-readable error description
+     * @return ResponseEntity containing the error response and corresponding HTTP status
+     */
+    private ResponseEntity<ErrorResponse> createErrorResponse(
+            Exception exception,
+            ApiErrorCode apiErrorCode,
+            String description
+    ) {
+        logger.error(exception.getClass().getSimpleName(), exception);
+
+        ErrorResponse responseBody = new ErrorResponse(apiErrorCode, description);
+
+        return new ResponseEntity<>(
+                responseBody,
+                apiErrorCode.getHttpStatus()
+        );
+    }
+
+    /**
+     * Creates an API error response with target-specific errors.
+     *
+     * @param exception    the exception being handled
+     * @param apiErrorCode API error code for the response
+     * @param description  human-readable error description
+     * @param targetErrors target-specific errors
+     * @return ResponseEntity containing the error response and corresponding HTTP status
+     */
+    private ResponseEntity<ErrorResponse> createErrorResponse(
+            Exception exception,
+            ApiErrorCode apiErrorCode,
+            String description,
+            TargetError... targetErrors
+    ) {
+        logger.error(exception.getClass().getSimpleName(), exception);
+
+        ErrorResponse responseBody = new ErrorResponse(apiErrorCode, description, targetErrors);
+
+        return new ResponseEntity<>(
+                responseBody,
+                apiErrorCode.getHttpStatus()
+        );
     }
 }

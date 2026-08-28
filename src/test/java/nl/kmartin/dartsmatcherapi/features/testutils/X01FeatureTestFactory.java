@@ -1,5 +1,7 @@
 package nl.kmartin.dartsmatcherapi.features.testutils;
 
+import nl.kmartin.dartsmatcherapi.common.EventPublisherServiceImpl;
+import nl.kmartin.dartsmatcherapi.common.IEventPublisherService;
 import nl.kmartin.dartsmatcherapi.common.MessageResolver;
 import nl.kmartin.dartsmatcherapi.features.dartboard.DartboardServiceImpl;
 import nl.kmartin.dartsmatcherapi.features.dartboard.IDartboardService;
@@ -56,7 +58,7 @@ public class X01FeatureTestFactory {
                 createLegService(),
                 createLegRoundService(),
                 createDartBotService(),
-                createMatchPublishService()
+                createEventPublishService()
         );
     }
 
@@ -176,8 +178,8 @@ public class X01FeatureTestFactory {
         return new X01DartBotAccuracyCalculatorImpl();
     }
 
-    public IX01MatchPublishService createMatchPublishService() {
-        return new X01MatchPublishServiceImpl(eventPublisherMock);
+    public IEventPublisherService createEventPublishService() {
+        return new EventPublisherServiceImpl(eventPublisherMock);
     }
 
     public IX01StandingsService createStandingsService() {

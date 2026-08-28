@@ -6,13 +6,14 @@ import nl.kmartin.dartsmatcherapi.features.x01.model.X01Match;
 import org.bson.types.ObjectId;
 
 public sealed interface X01MatchEvent {
+
     @JsonProperty("eventType")
     X01MatchEventType eventType();
 
     @JsonIgnore
     ObjectId getMatchId();
 
-    record X01ProcessMatchEvent(X01Match payload) implements X01MatchEvent {
+    record ProcessMatch(X01Match payload) implements X01MatchEvent {
         @Override
         public X01MatchEventType eventType() {
             return X01MatchEventType.PROCESS_MATCH;
@@ -24,7 +25,7 @@ public sealed interface X01MatchEvent {
         }
     }
 
-    record X01AddHumanTurnEvent(X01Match payload) implements X01MatchEvent {
+    record AddHumanTurn(X01Match payload) implements X01MatchEvent {
         @Override
         public X01MatchEventType eventType() {
             return X01MatchEventType.ADD_HUMAN_TURN;
@@ -36,7 +37,7 @@ public sealed interface X01MatchEvent {
         }
     }
 
-    record X01AddBotTurnEvent(X01Match payload) implements X01MatchEvent {
+    record AddBotTurn(X01Match payload) implements X01MatchEvent {
         @Override
         public X01MatchEventType eventType() {
             return X01MatchEventType.ADD_BOT_TURN;
@@ -48,7 +49,7 @@ public sealed interface X01MatchEvent {
         }
     }
 
-    record X01EditTurnEvent(X01Match payload) implements X01MatchEvent {
+    record EditTurn(X01Match payload) implements X01MatchEvent {
         @Override
         public X01MatchEventType eventType() {
             return X01MatchEventType.EDIT_TURN;
@@ -60,7 +61,7 @@ public sealed interface X01MatchEvent {
         }
     }
 
-    record X01DeleteLastTurnEvent(X01Match payload) implements X01MatchEvent {
+    record DeleteLastTurn(X01Match payload) implements X01MatchEvent {
         @Override
         public X01MatchEventType eventType() {
             return X01MatchEventType.DELETE_LAST_TURN;
@@ -72,7 +73,7 @@ public sealed interface X01MatchEvent {
         }
     }
 
-    record X01DeleteMatchEvent(ObjectId payload) implements X01MatchEvent {
+    record DeleteMatch(ObjectId payload) implements X01MatchEvent {
         @Override
         public X01MatchEventType eventType() {
             return X01MatchEventType.DELETE_MATCH;
@@ -84,7 +85,7 @@ public sealed interface X01MatchEvent {
         }
     }
 
-    record X01ResetMatchEvent(X01Match payload) implements X01MatchEvent {
+    record ResetMatch(X01Match payload) implements X01MatchEvent {
         @Override
         public X01MatchEventType eventType() {
             return X01MatchEventType.RESET_MATCH;
@@ -96,5 +97,3 @@ public sealed interface X01MatchEvent {
         }
     }
 }
-
-

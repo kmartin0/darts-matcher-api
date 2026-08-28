@@ -29,9 +29,9 @@ public class WebsocketHandshakeInterceptor implements HandshakeInterceptor {
         if (request instanceof ServletServerHttpRequest servletRequest) {
             HttpSession session = servletRequest.getServletRequest().getSession(false);
             if (session != null) {
-                Object correlationId = session.getAttribute(Constants.CORRELATION_ID_KEY);
+                Object correlationId = session.getAttribute(Constants.WS_CORRELATION_ID_KEY);
                 if (correlationId != null) {
-                    attributes.put(Constants.CORRELATION_ID_KEY, correlationId.toString());
+                    attributes.put(Constants.WS_CORRELATION_ID_KEY, correlationId.toString());
                 }
             }
         }

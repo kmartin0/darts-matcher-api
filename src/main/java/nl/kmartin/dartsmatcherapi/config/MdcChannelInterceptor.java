@@ -25,8 +25,8 @@ public class MdcChannelInterceptor implements ChannelInterceptor {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
         Map<String, Object> sessionAttributes = accessor.getSessionAttributes();
 
-        if (sessionAttributes != null && sessionAttributes.containsKey(Constants.CORRELATION_ID_KEY)) {
-            MDC.put(Constants.CORRELATION_ID_KEY, (String) sessionAttributes.get(Constants.CORRELATION_ID_KEY));
+        if (sessionAttributes != null && sessionAttributes.containsKey(Constants.WS_CORRELATION_ID_KEY)) {
+            MDC.put(Constants.WS_CORRELATION_ID_KEY, (String) sessionAttributes.get(Constants.WS_CORRELATION_ID_KEY));
         }
         return message;
     }

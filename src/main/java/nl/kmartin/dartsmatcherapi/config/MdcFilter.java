@@ -29,8 +29,8 @@ public class MdcFilter extends OncePerRequestFilter {
 
         // Create a correlation ID and add it to the MDC.
         String correlationId = UUID.randomUUID().toString();
-        MDC.put(Constants.CORRELATION_ID_KEY, correlationId);
-        request.getSession().setAttribute(Constants.CORRELATION_ID_KEY, correlationId);
+        MDC.put(Constants.WS_CORRELATION_ID_KEY, correlationId);
+        request.getSession().setAttribute(Constants.WS_CORRELATION_ID_KEY, correlationId);
 
         try {
             filterChain.doFilter(request, response);
