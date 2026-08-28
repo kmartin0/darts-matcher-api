@@ -12,6 +12,7 @@ import nl.kmartin.dartsmatcherapi.utils.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -30,14 +31,14 @@ public class GlobalWebsocketExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalWebsocketExceptionHandler.class);
 
     private final MessageResolver messageResolver;
-    private final IEventPublisherService eventPublisherService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Autowired
     public GlobalWebsocketExceptionHandler(
             MessageResolver messageResolver,
-            IEventPublisherService eventPublisherService) {
+            ApplicationEventPublisher eventPublisher) {
         this.messageResolver = messageResolver;
-        this.eventPublisherService = eventPublisherService;
+        this.eventPublisher = eventPublisher;
     }
 
     // Handler for all unhandled exceptions.
@@ -226,8 +227,8 @@ public class GlobalWebsocketExceptionHandler {
     /**
      * Logs an exception and publishes its WebSocket error response for the originating session.
      *
-     * @param exception - Exception that occurred.
-     * @param errorResponse - Error response to send.
+     * @param exception           - Exception that occurred.
+     * @param errorResponse       - Error response to send.
      * @param stompHeaderAccessor - Accessor for the incoming STOMP message.
      */
     private void publishError(
@@ -237,7 +238,7 @@ public class GlobalWebsocketExceptionHandler {
 
         logger.error(exception.getClass().getSimpleName(), exception);
 
-        eventPublisherService.publish(
+        eventPublisher.publishEvent(
                 new WebSocketExceptionEvent(
                         errorResponse,
                         stompHeaderAccessor.getSessionId(),

@@ -3,7 +3,6 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01match.service;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import nl.kmartin.dartsmatcherapi.common.IEventPublisherService;
 import nl.kmartin.dartsmatcherapi.exceptionhandler.exception.ResourceNotFoundException;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.PlayerType;
 import nl.kmartin.dartsmatcherapi.features.x01.model.*;
@@ -17,6 +16,7 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01matchsetup.IX01MatchSetupServi
 import nl.kmartin.dartsmatcherapi.features.x01.x01set.IX01SetProgressService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01statistics.IX01StatisticsService;
 import org.bson.types.ObjectId;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,13 +39,13 @@ public class X01MatchServiceImpl implements IX01MatchService {
     private final IX01LegService legService;
     private final IX01LegRoundService legRoundService;
     private final IX01DartBotService dartBotService;
-    private final IEventPublisherService eventPublisherService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public X01MatchServiceImpl(IX01MatchRepository matchRepository, IX01MatchSetupService matchSetupService,
                                IX01MatchResultService matchResultService, IX01MatchProgressService matchProgressService,
                                IX01StatisticsService statisticsService, IX01SetProgressService setProgressService,
                                IX01LegService legService, IX01LegRoundService legRoundService, IX01DartBotService dartBotService,
-                               IEventPublisherService eventPublisherService) {
+                               ApplicationEventPublisher eventPublisher) {
         this.matchRepository = matchRepository;
         this.matchSetupService = matchSetupService;
         this.matchResultService = matchResultService;
@@ -55,7 +55,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
         this.legService = legService;
         this.legRoundService = legRoundService;
         this.dartBotService = dartBotService;
-        this.eventPublisherService = eventPublisherService;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
@@ -206,7 +206,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
         this.checkMatchExists(matchId);
 
         this.matchRepository.deleteById(matchId);
-        this.eventPublisherService.publish(new X01MatchEvent.DeleteMatch(matchId));
+        this.eventPublisher.publishEvent(new X01MatchEvent.DeleteMatch(matchId));
     }
 
     /**
@@ -311,7 +311,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
 
         // Publish the match event.
         X01MatchEvent publishEvent = createSaveEventFromType(match, eventType);
-        this.eventPublisherService.publish(publishEvent);
+        this.eventPublisher.publishEvent(publishEvent);
     }
 
     /**

@@ -2,7 +2,6 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01match.api;
 
 import jakarta.validation.Valid;
 import nl.kmartin.dartsmatcherapi.common.Constants;
-import nl.kmartin.dartsmatcherapi.common.IEventPublisherService;
 import nl.kmartin.dartsmatcherapi.common.WebSocketSendToUserEvent;
 import nl.kmartin.dartsmatcherapi.common.WebsocketDestinations;
 import nl.kmartin.dartsmatcherapi.features.x01.model.X01EditTurn;
@@ -10,6 +9,7 @@ import nl.kmartin.dartsmatcherapi.features.x01.model.X01Turn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.event.X01MatchEvent;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.IX01MatchService;
 import org.bson.types.ObjectId;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -22,14 +22,14 @@ import org.springframework.stereotype.Controller;
 public class X01MatchWebsocketController {
 
     private final IX01MatchService matchService;
-    private final IEventPublisherService publisherService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public X01MatchWebsocketController(
             IX01MatchService matchService,
-            IEventPublisherService publisherService
+            ApplicationEventPublisher eventPublisher
     ) {
         this.matchService = matchService;
-        this.publisherService = publisherService;
+        this.eventPublisher = eventPublisher;
     }
 
     @SubscribeMapping(WebsocketDestinations.X01.MATCH)
@@ -120,7 +120,7 @@ public class X01MatchWebsocketController {
     }
 
     private void publishToUser(Object payload, String sessionId, String publishId) {
-        publisherService.publish(
+        eventPublisher.publishEvent(
                 new WebSocketSendToUserEvent(
                         payload,
                         sessionId,
