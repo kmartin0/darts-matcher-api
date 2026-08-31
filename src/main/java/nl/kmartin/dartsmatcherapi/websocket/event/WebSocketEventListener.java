@@ -1,6 +1,6 @@
 package nl.kmartin.dartsmatcherapi.websocket.event;
 
-import nl.kmartin.dartsmatcherapi.error.ErrorUtil;
+import nl.kmartin.dartsmatcherapi.error.util.ErrorUtil;
 import nl.kmartin.dartsmatcherapi.websocket.WebSocketDestinations;
 import nl.kmartin.dartsmatcherapi.websocket.WebSocketHeaders;
 import nl.kmartin.dartsmatcherapi.websocket.event.model.WebSocketBroadcastEvent;

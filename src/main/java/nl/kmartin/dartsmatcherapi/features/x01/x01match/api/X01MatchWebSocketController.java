@@ -93,15 +93,14 @@ public class X01MatchWebSocketController {
             @Header(value = WebSocketHeaders.PUBLISH_ID, required = false) String publishId,
             @Header(SimpMessageHeaderAccessor.SESSION_ID_HEADER) String sessionId
     ) {
-        throw new IllegalArgumentException();
-//        matchService.deleteMatch(matchId);
-//
-//        webSocketEventPublisher.sendToUser(
-//                X01MatchMessageType.DELETE_MATCH,
-//                matchId,
-//                sessionId,
-//                publishId
-//        );
+        matchService.deleteMatch(matchId);
+
+        webSocketEventPublisher.sendToUser(
+                X01MatchMessageType.DELETE_MATCH,
+                matchId,
+                sessionId,
+                publishId
+        );
     }
 
     @MessageMapping(WebSocketDestinations.X01.RESET_MATCH)

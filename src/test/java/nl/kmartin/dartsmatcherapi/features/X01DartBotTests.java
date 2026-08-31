@@ -2,7 +2,7 @@ package nl.kmartin.dartsmatcherapi.features;
 
 import nl.kmartin.dartsmatcherapi.features.basematch.model.PlayerType;
 import nl.kmartin.dartsmatcherapi.features.testutils.X01FeatureTestFactory;
-import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.IX01DartBotService;
+import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.service.IX01DartBotService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
@@ -11,6 +11,7 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01match.repository.IX01MatchRepo
 import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01Set;
 import nl.kmartin.dartsmatcherapi.i18n.MessageResolver;
 import org.bson.types.ObjectId;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -74,7 +75,7 @@ public class X01DartBotTests {
         match.setSets(new TreeMap<>(Map.of(1, x01Set)));
         match.setPlayers(new ArrayList<>(Collections.singletonList(dartBotPlayer)));
 
-        System.out.printf(TargetDartsBoundaries.create(targetAvg, match.getMatchSettings().getX01()) + "\n");
+        System.out.println(TargetDartsBoundaries.create(targetAvg, match.getMatchSettings().getX01()));
 
         Map<Integer, Integer> dartsUsedMap = new TreeMap<>();
         for (int j = 0; j < ITERATION_PER_TARGET; j++) {
@@ -157,6 +158,7 @@ public class X01DartBotTests {
         }
 
         @Override
+        @NotNull
         public String toString() {
             return String.format("Lower Target: %-10dTarget: %-10dUpper Target: %-10d",
                     lowerTargetNumOfDarts, targetNumOfDarts, upperTargetNumOfDarts);

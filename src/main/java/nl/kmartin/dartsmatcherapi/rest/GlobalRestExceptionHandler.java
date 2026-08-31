@@ -1,7 +1,7 @@
 package nl.kmartin.dartsmatcherapi.rest;
 
 import jakarta.validation.ConstraintViolationException;
-import nl.kmartin.dartsmatcherapi.error.ErrorUtil;
+import nl.kmartin.dartsmatcherapi.error.util.ErrorUtil;
 import nl.kmartin.dartsmatcherapi.error.exception.InvalidArgumentsException;
 import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
 import nl.kmartin.dartsmatcherapi.error.response.ApiErrorCode;

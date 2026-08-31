@@ -3,7 +3,7 @@ package nl.kmartin.dartsmatcherapi.error.response;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import nl.kmartin.dartsmatcherapi.error.ErrorUtil;
+import nl.kmartin.dartsmatcherapi.error.util.ErrorUtil;
 
 import java.io.Serializable;
 import java.util.HashMap;

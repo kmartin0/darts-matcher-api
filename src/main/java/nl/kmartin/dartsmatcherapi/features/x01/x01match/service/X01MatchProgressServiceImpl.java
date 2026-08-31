@@ -2,17 +2,17 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01match.service;
 
 import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
 import nl.kmartin.dartsmatcherapi.features.x01.common.X01MatchUtils;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leg.IX01LegProgressService;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leg.service.IX01LegProgressService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01LegEntry;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leground.IX01LegRoundService;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.service.IX01LegRoundService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01BestOf;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchProgress;
-import nl.kmartin.dartsmatcherapi.features.x01.x01rules.IX01RulesService;
-import nl.kmartin.dartsmatcherapi.features.x01.x01set.IX01SetProgressService;
-import nl.kmartin.dartsmatcherapi.features.x01.x01set.IX01SetService;
+import nl.kmartin.dartsmatcherapi.features.x01.x01rules.service.IX01RulesService;
+import nl.kmartin.dartsmatcherapi.features.x01.x01set.service.IX01SetProgressService;
+import nl.kmartin.dartsmatcherapi.features.x01.x01set.service.IX01SetService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01Set;
 import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01SetEntry;
 import nl.kmartin.dartsmatcherapi.utils.NumberUtils;
@@ -148,7 +148,7 @@ public class X01MatchProgressServiceImpl implements IX01MatchProgressService {
      *
      * @param match           {@link X01Match}  the match for which the current leg needs to be determined
      * @param currentSetEntry {@link X01SetEntry} the current set in play.
-     * @return {@link Optional<  X01LegEntry  >} the current leg in play.
+     * @return {@link Optional<X01LegEntry>} the current leg in play.
      */
     @Override
     public Optional<X01LegEntry> getCurrentLegOrCreate(X01Match match, X01SetEntry currentSetEntry) {
