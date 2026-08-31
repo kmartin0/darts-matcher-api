@@ -4,12 +4,13 @@ import jakarta.validation.constraints.Max;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.model.X01Checkout;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class X01CheckoutStatistics {
-    @Max(170)
+    @Max(X01Checkout.MAXIMUM_CHECKOUT)
     private int checkoutHighest;
 
     private int checkoutTonPlus;

@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class X01CheckoutServiceImpl implements IX01CheckoutService {
+    private static final Set<Integer> INVALID_CHECKOUTS = Set.of(169, 168, 166, 165, 163, 162, 159);
 
     private final MessageResolver messageResolver;
     private final Map<Integer, X01Checkout> checkoutsMap;
@@ -98,9 +99,7 @@ public class X01CheckoutServiceImpl implements IX01CheckoutService {
      */
     @Override
     public boolean isScoreCheckout(int score) {
-        Set<Integer> invalidCheckouts = new HashSet<>(Arrays.asList(169, 168, 166, 165, 163, 162, 159));
-
-        return score <= 170 && !invalidCheckouts.contains(score);
+        return score <= X01Checkout.MAXIMUM_CHECKOUT && !INVALID_CHECKOUTS.contains(score);
     }
 
     /**

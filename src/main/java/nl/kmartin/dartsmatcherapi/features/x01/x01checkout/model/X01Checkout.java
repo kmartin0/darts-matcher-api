@@ -11,6 +11,8 @@ import java.util.ArrayList;
 @AllArgsConstructor
 @NoArgsConstructor
 public class X01Checkout {
+    public static final int MAXIMUM_CHECKOUT = 170;
+
     private int checkout;
     private int minDarts;
     private ArrayList<Dart> suggested;

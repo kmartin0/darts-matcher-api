@@ -20,13 +20,16 @@ import java.util.stream.Collectors;
 @Data
 @NoArgsConstructor
 public class X01Leg {
+    public static final int MINIMUM_CHECKOUT_DARTS_USED = 1;
+    public static final int MAXIMUM_CHECKOUT_DARTS_USED = 3;
+
     private ObjectId winner;
 
     @NotNull
     private ObjectId throwsFirst;
 
-    @Min(1)
-    @Max(3)
+    @Min(MINIMUM_CHECKOUT_DARTS_USED)
+    @Max(MAXIMUM_CHECKOUT_DARTS_USED)
     private Integer checkoutDartsUsed;
 
     @Valid

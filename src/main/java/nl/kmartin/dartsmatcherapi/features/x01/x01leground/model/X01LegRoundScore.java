@@ -11,15 +11,19 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Turn;
 @AllArgsConstructor
 @NoArgsConstructor
 public class X01LegRoundScore {
-    @Min(0)
-    @Max(3)
+    public static final int MINIMUM_SCORE = 0;
+    public static final int MAXIMUM_SCORE = 180;
+    public static final int MINIMUM_REMAINING = 0;
+
+    @Min(X01Turn.MINIMUM_DOUBLES_MISSED)
+    @Max(X01Turn.MAXIMUM_DOUBLES_MISSED)
     private Integer doublesMissed;
 
-    @Min(0)
-    @Max(180)
+    @Min(MINIMUM_SCORE)
+    @Max(MAXIMUM_SCORE)
     private int score;
 
-    @Min(0)
+    @Min(MINIMUM_REMAINING)
     private int remaining;
 
     public X01LegRoundScore(X01Turn turn, boolean trackDoubles) {

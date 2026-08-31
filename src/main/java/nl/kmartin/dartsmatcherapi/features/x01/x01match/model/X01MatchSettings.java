@@ -12,8 +12,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class X01MatchSettings {
-    @Min(101)
-    @Max(1001)
+    public static final int MINIMUM_X01 = 101;
+    public static final int MAXIMUM_X01 = 1001;
+
+    @Min(MINIMUM_X01)
+    @Max(MAXIMUM_X01)
     private int x01;
 
     private boolean trackDoubles;

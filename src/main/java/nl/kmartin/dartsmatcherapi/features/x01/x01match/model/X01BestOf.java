@@ -13,12 +13,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class X01BestOf {
-    @Min(1)
-    @Max(49)
+    public static final int MINIMUM_BEST_OF = 1;
+    public static final int MAXIMUM_BEST_OF = 49;
+
+    @Min(MINIMUM_BEST_OF)
+    @Max(MAXIMUM_BEST_OF)
     private int sets;
 
-    @Min(1)
-    @Max(49)
+    @Min(MINIMUM_BEST_OF)
+    @Max(MAXIMUM_BEST_OF)
     private int legs;
 
     @NotNull

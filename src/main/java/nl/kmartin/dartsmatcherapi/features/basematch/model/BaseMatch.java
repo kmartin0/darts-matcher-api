@@ -17,6 +17,9 @@ import java.util.ArrayList;
 @Data
 @NoArgsConstructor
 public abstract class BaseMatch<PlayerType extends MatchPlayer> {
+    public static final int MINIMUM_PLAYERS = 1;
+    public static final int MAXIMUM_PLAYERS = 4;
+
     @MongoId
     private ObjectId id;
 
@@ -33,7 +36,7 @@ public abstract class BaseMatch<PlayerType extends MatchPlayer> {
 
     @Valid
     @NotNull
-    @Size(min = 1, max = 4)
+    @Size(min = MINIMUM_PLAYERS, max = MAXIMUM_PLAYERS)
     @NoDuplicateMatchPlayerName
     @ValidPlayerComposition
     private ArrayList<PlayerType> players = new ArrayList<>();

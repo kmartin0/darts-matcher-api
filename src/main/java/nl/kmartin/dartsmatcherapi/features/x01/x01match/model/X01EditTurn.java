@@ -13,6 +13,10 @@ import org.bson.types.ObjectId;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class X01EditTurn extends X01Turn {
+    public static final int MINIMUM_SET_NUMBER = 1;
+    public static final int MINIMUM_LEG_NUMBER = 1;
+    public static final int MINIMUM_ROUND_NUMBER = 1;
+
     public X01EditTurn(int score, int dartsUsed, Integer doublesMissed, ObjectId playerId, int set, int leg, int round) {
         super(score, dartsUsed, doublesMissed);
         this.playerId = playerId;
@@ -24,12 +28,12 @@ public class X01EditTurn extends X01Turn {
     @NotNull
     private ObjectId playerId;
 
-    @Min(1)
+    @Min(MINIMUM_SET_NUMBER)
     private int set;
 
-    @Min(1)
+    @Min(MINIMUM_LEG_NUMBER)
     private int leg;
 
-    @Min(1)
+    @Min(MINIMUM_ROUND_NUMBER)
     private int round;
 }

@@ -12,14 +12,20 @@ import nl.kmartin.dartsmatcherapi.validators.validdartscore.ValidDartScore;
 @AllArgsConstructor
 @NoArgsConstructor
 public class X01Turn {
+    public static final int MINIMUM_CHECKOUT_DARTS_USED = 1;
+    public static final int MAXIMUM_CHECKOUT_DARTS_USED = 3;
+    public static final int MINIMUM_DOUBLES_MISSED = 0;
+    public static final int MAXIMUM_DOUBLES_MISSED = 3;
+
     @ValidDartScore
     int score;
 
-    @Min(1)
-    @Max(3)
+    @Min(MINIMUM_CHECKOUT_DARTS_USED)
+    @Max(MAXIMUM_CHECKOUT_DARTS_USED)
+
     Integer checkoutDartsUsed;
 
-    @Min(0)
-    @Max(3)
+    @Min(MINIMUM_DOUBLES_MISSED)
+    @Max(MAXIMUM_DOUBLES_MISSED)
     Integer doublesMissed;
 }
