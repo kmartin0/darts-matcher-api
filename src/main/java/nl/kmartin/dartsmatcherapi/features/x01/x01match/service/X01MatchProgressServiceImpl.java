@@ -52,28 +52,22 @@ public class X01MatchProgressServiceImpl implements IX01MatchProgressService {
     }
 
     /**
-     * Finds a set by number.
+     * Gets a set in a match by its set number.
      *
-     * @param match           the match containing the sets
-     * @param setNumber       the set number
-     * @param throwIfNotFound whether to throw when the set cannot be found
-     * @return the matching set, or empty when no set is found
+     * @param match the match containing the sets
+     * @param setNumber the set number
+     * @return the matching set entry
+     * @throws ResourceNotFoundException when the set does not exist
      */
     @Override
-    public Optional<X01SetEntry> getSet(X01Match match, int setNumber, boolean throwIfNotFound) {
-        ResourceNotFoundException notFoundException = new ResourceNotFoundException(X01Set.class, setNumber);
-
+    public X01SetEntry getSetOrThrow(X01Match match, int setNumber) {
         if (X01MatchUtils.isSetsEmpty(match) || setNumber < 1) {
-            if (throwIfNotFound) throw notFoundException;
-            return Optional.empty();
+            throw new ResourceNotFoundException(X01Set.class, setNumber);
         }
 
-        Optional<X01SetEntry> setEntry = Optional.ofNullable(match.getSets().get(setNumber))
-                .map(set -> new X01SetEntry(setNumber, set));
-
-        if (throwIfNotFound && setEntry.isEmpty()) throw notFoundException;
-
-        return setEntry;
+        return Optional.ofNullable(match.getSets().get(setNumber))
+                .map(set -> new X01SetEntry(setNumber, set))
+                .orElseThrow(() -> new ResourceNotFoundException(X01Set.class, setNumber));
     }
 
     /**

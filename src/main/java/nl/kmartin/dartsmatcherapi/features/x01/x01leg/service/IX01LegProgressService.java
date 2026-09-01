@@ -2,17 +2,14 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01leg.service;
 
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundEntry;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
-import org.bson.types.ObjectId;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 
 public interface IX01LegProgressService {
-    Optional<X01LegRoundEntry> getLegRound(X01Leg leg, int roundNumber, boolean throwIfNotFound);
+    X01LegRoundEntry getLegRoundOrThrow(X01Leg leg, int roundNumber);
 
     Optional<X01LegRoundEntry> getCurrentLegRound(X01Leg leg, List<X01MatchPlayer> players);
 

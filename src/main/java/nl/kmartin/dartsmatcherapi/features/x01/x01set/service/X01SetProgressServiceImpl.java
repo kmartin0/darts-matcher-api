@@ -40,30 +40,22 @@ public class X01SetProgressServiceImpl implements IX01SetProgressService {
     }
 
     /**
-     * Finds a leg in a set by its leg number.
+     * Gets a leg in a set by its leg number.
      *
-     * @param set             the set to search
-     * @param legNumber       the leg number
-     * @param throwIfNotFound whether to throw when the leg does not exist
-     * @return the leg entry, or empty when it does not exist
-     * @throws ResourceNotFoundException when the leg does not exist and {@code throwIfNotFound} is true
+     * @param set       the set to search
+     * @param legNumber the leg number
+     * @return the matching leg entry
+     * @throws ResourceNotFoundException when the leg does not exist
      */
     @Override
-    public Optional<X01LegEntry> getLeg(X01Set set, int legNumber, boolean throwIfNotFound) {
-        ResourceNotFoundException notFoundException = new ResourceNotFoundException(X01Leg.class, legNumber);
-
+    public X01LegEntry getLegOrThrow(X01Set set, int legNumber) {
         if (X01MatchUtils.isLegsEmpty(set) || legNumber < 1) {
-            if (throwIfNotFound) throw notFoundException;
-            else return Optional.empty();
+            throw new ResourceNotFoundException(X01Leg.class, legNumber);
         }
 
-        // Find the requested leg by its numbered entry.
-        Optional<X01LegEntry> legEntry = Optional.ofNullable(set.getLegs().get(legNumber))
-                .map(leg -> new X01LegEntry(legNumber, leg));
-
-        if (throwIfNotFound && legEntry.isEmpty()) throw notFoundException;
-
-        return legEntry;
+        return Optional.ofNullable(set.getLegs().get(legNumber))
+                .map(leg -> new X01LegEntry(legNumber, leg))
+                .orElseThrow(() -> new ResourceNotFoundException(X01Leg.class, legNumber));
     }
 
     /**

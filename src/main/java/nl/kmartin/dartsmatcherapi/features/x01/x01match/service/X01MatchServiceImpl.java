@@ -152,7 +152,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
      * Adds a turn for the current thrower and processes the resulting match state.
      *
      * @param matchId the match id
-     * @param turn the turn to add
+     * @param turn    the turn to add
      * @return the updated match
      */
     @Override
@@ -170,7 +170,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
     /**
      * Replaces an existing turn and reprocesses the resulting match state.
      *
-     * @param matchId the match id
+     * @param matchId  the match id
      * @param editTurn the edited turn and its match position
      * @return the updated match
      */
@@ -180,23 +180,22 @@ public class X01MatchServiceImpl implements IX01MatchService {
         X01Match match = getMatch(matchId);
 
         // Resolve the leg containing the turn being edited.
-        Optional<X01LegEntry> legEntry = matchProgressService.getSet(match, editTurn.getSet(), true)
-                .flatMap(setEntry -> setProgressService.getLeg(setEntry.set(), editTurn.getLeg(), true));
+        X01SetEntry setEntry = matchProgressService.getSetOrThrow(match, editTurn.getSet());
+        X01LegEntry legEntry = setProgressService.getLegOrThrow(setEntry.set(), editTurn.getLeg());
 
         // Replace the turn and let the leg service rebuild state affected by the edit.
-        legEntry.ifPresent(entry -> {
-            int x01 = match.getMatchSettings().getX01();
-            boolean trackDoubles = match.getMatchSettings().isTrackDoubles();
 
-            legService.applyTurn(
-                    x01,
-                    entry.leg(),
-                    editTurn.getRound(),
-                    editTurn,
-                    editTurn.getPlayerId(),
-                    trackDoubles
-            );
-        });
+        int x01 = match.getMatchSettings().getX01();
+        boolean trackDoubles = match.getMatchSettings().isTrackDoubles();
+
+        legService.applyTurn(
+                x01,
+                legEntry.leg(),
+                editTurn.getRound(),
+                editTurn,
+                editTurn.getPlayerId(),
+                trackDoubles
+        );
 
         saveMatchAndProcessBotTurns(match, X01MatchMessageType.EDIT_TURN);
         return match;
@@ -273,7 +272,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
      * Applies a turn to the current thrower in the active round.
      *
      * @param match the match to update
-     * @param turn the turn to apply
+     * @param turn  the turn to apply
      */
     private void addTurnToCurrentPlayer(@NotNull X01Match match, @NotNull @Valid X01Turn turn) {
         // Resolve or create the active set, leg and round.
@@ -310,7 +309,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
     /**
      * Saves a match and automatically processes consecutive Dart Bot turns.
      *
-     * @param match the match to save
+     * @param match       the match to save
      * @param messageType the message type for the triggering operation
      */
     private void saveMatchAndProcessBotTurns(X01Match match, X01MatchMessageType messageType) {
@@ -338,7 +337,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
     /**
      * Rebuilds, persists and broadcasts the current match state.
      *
-     * @param match the match to save
+     * @param match       the match to save
      * @param messageType the message type to publish
      */
     private void saveMatch(X01Match match, X01MatchMessageType messageType) {
@@ -392,7 +391,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
     /**
      * Finds a match player by id.
      *
-     * @param match the match containing the players
+     * @param match    the match containing the players
      * @param playerId the player id
      * @return the matching player, or empty when the player is not found
      */
@@ -407,10 +406,10 @@ public class X01MatchServiceImpl implements IX01MatchService {
     /**
      * Broadcasts an X01 match event to match subscribers.
      *
-     * @param matchId the match id
+     * @param matchId     the match id
      * @param messageType the message type
-     * @param payload the event payload
-     * @param <P> the payload type
+     * @param payload     the event payload
+     * @param <P>         the payload type
      */
     private <P> void broadcastMatchEvent(ObjectId matchId, X01MatchMessageType messageType, P payload) {
         webSocketEventPublisher.broadcast(

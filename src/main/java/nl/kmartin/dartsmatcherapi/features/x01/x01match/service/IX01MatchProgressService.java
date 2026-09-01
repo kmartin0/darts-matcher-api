@@ -7,10 +7,9 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
 import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01SetEntry;
 
 import java.util.Optional;
-import java.util.Set;
 
 public interface IX01MatchProgressService {
-    Optional<X01SetEntry> getSet(X01Match match, int setNumber, boolean throwIfNotFound);
+    X01SetEntry getSetOrThrow(X01Match match, int setNumber);
 
     Optional<X01SetEntry> getCurrentSet(X01Match match);
 

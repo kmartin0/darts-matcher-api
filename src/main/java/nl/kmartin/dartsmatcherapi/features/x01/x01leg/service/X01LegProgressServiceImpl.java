@@ -25,32 +25,22 @@ public class X01LegProgressServiceImpl implements IX01LegProgressService {
     }
 
     /**
-     * Finds a round in a leg by its round number.
+     * Gets a round in a leg by its round number.
      *
-     * @param leg             the leg to search
-     * @param roundNumber     the round number
-     * @param throwIfNotFound whether to throw when the round does not exist
-     * @return the round entry, or empty when it does not exist
-     * @throws ResourceNotFoundException when the round does not exist and {@code throwIfNotFound} is true
+     * @param leg         the leg to search
+     * @param roundNumber the round number
+     * @return the matching round entry
+     * @throws ResourceNotFoundException when the round does not exist
      */
     @Override
-    public Optional<X01LegRoundEntry> getLegRound(X01Leg leg, int roundNumber, boolean throwIfNotFound) {
-        ResourceNotFoundException notFoundException = new ResourceNotFoundException(X01LegRound.class, roundNumber);
-
-        // If the round can't exist. Early exit.
+    public X01LegRoundEntry getLegRoundOrThrow(X01Leg leg, int roundNumber) {
         if (X01MatchUtils.isRoundsEmpty(leg) || roundNumber < 1) {
-            if (throwIfNotFound) throw notFoundException;
-            else return Optional.empty();
+            throw new ResourceNotFoundException(X01LegRound.class, roundNumber);
         }
 
-        // Find the first round in the rounds list matching the round number.
-        Optional<X01LegRoundEntry> roundEntry = Optional.ofNullable(leg.getRounds().get(roundNumber))
-                .map(round -> new X01LegRoundEntry(roundNumber, round));
-
-        if (throwIfNotFound && roundEntry.isEmpty()) throw notFoundException;
-
-        // Return the first round with the round number otherwise empty.
-        return roundEntry;
+        return Optional.ofNullable(leg.getRounds().get(roundNumber))
+                .map(round -> new X01LegRoundEntry(roundNumber, round))
+                .orElseThrow(() -> new ResourceNotFoundException(X01LegRound.class, roundNumber));
     }
 
     /**

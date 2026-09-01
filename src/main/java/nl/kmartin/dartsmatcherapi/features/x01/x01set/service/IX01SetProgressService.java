@@ -5,14 +5,12 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01BestOf;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
 import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01Set;
 import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01SetEntry;
-import org.bson.types.ObjectId;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 public interface IX01SetProgressService {
-    Optional<X01LegEntry> getLeg(X01Set set, int legNumber, boolean throwIfNotFound);
+    X01LegEntry getLegOrThrow(X01Set set, int legNumber);
 
     Optional<X01LegEntry> getCurrentLeg(X01Set set);
 

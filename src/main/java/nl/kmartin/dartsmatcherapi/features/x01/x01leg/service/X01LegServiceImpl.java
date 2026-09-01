@@ -175,7 +175,7 @@ public class X01LegServiceImpl implements IX01LegService {
      * @return the stored round score, or null when the round cannot be resolved
      */
     private X01LegRoundScore addRoundScore(X01Leg leg, int roundNumber, X01Turn turn, ObjectId throwerId, boolean trackDoubles) {
-        Optional<X01LegRoundEntry> legRoundEntry = legProgressService.getLegRound(leg, roundNumber, true);
+        Optional<X01LegRoundEntry> legRoundEntry = legProgressService.getLegRoundOrThrow(leg, roundNumber, true);
         if (legRoundEntry.isEmpty()) return null;
 
         X01LegRoundScore roundScore = new X01LegRoundScore(turn, trackDoubles);
