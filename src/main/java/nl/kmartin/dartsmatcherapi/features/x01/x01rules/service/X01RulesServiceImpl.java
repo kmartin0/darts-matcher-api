@@ -7,17 +7,22 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.TreeMap;
 
+/**
+ * Applies the rules used to determine progression and winners in X01 matches.
+ *
+ * Handles standard best-of limits together with optional clear-by-two rules.
+ */
 @Service
 public class X01RulesServiceImpl implements IX01RulesService {
 
     /**
-     * Get the maximum number to play:
-     * - When clear by two is enabled; sum of bestOf and clear by two limit.
-     * - When clear by two is disabled; sum of bestOf.
+     * Calculates the maximum number that can be played.
      *
-     * @param bestOf         the best of setting.
-     * @param clearByTwoRule the clear by two rule.
-     * @return the maximum number to play.
+     * When clear by two is enabled, its configured limit is added to the best-of value.
+     *
+     * @param bestOf         the best-of setting
+     * @param clearByTwoRule the clear-by-two rule
+     * @return the maximum number that can be played
      */
     @Override
     public int getMaxToPlay(int bestOf, X01ClearByTwoRule clearByTwoRule) {
@@ -25,73 +30,69 @@ public class X01RulesServiceImpl implements IX01RulesService {
     }
 
     /**
-     * Checks if the match has only one player.
+     * Determines whether the standings represent a single-player match.
      *
-     * @param standings     The current standings map.
-     * @param leaderScore   The highest score.
-     * @param runnerUpScore The second-highest score, or null if none (all players same score).
-     * @return true if there is exactly one player, false otherwise.
+     * @param standings     the current standings
+     * @param leaderScore   the highest score
+     * @param runnerUpScore the second-highest score, or null when there is no runner-up
+     * @return whether the match contains exactly one player
      */
     @Override
     public boolean isSinglePlayerMatch(TreeMap<Integer, List<ObjectId>> standings, int leaderScore, Integer runnerUpScore) {
-        // A match has only one player if there is exactly 1 leader and there are no runner-ups.
+        // A single-player match has one leader and no runner-up score.
         return runnerUpScore == null && standings.get(leaderScore).size() == 1;
     }
 
     /**
-     * Determines if the winner is confirmed. First checks if the winner cannot be caught by the standard best of rules.
-     * Then checks if the clear by two rule is satisfied.
+     * Determines whether the current leader can be confirmed as the winner.
      *
-     * @param diff            The difference in score won between the leader and runner-up.
-     * @param bestOfRemaining The number remaining to be played.
-     * @param played          The number already played.
-     * @param bestOf          the best of setting.
-     * @param clearByTwoRule  The clear-by-two rule settings.
-     * @return true if the winner can be confirmed, false otherwise.
+     * The leader must be impossible to catch and satisfy the configured clear-by-two rule.
+     *
+     * @param diff            the score difference between the leader and runner-up
+     * @param bestOfRemaining the number remaining to be played
+     * @param played          the number already played
+     * @param bestOf          the best-of setting
+     * @param clearByTwoRule  the clear-by-two rule
+     * @return whether the winner can be confirmed
      */
     @Override
     public boolean isWinnerConfirmed(int diff, int bestOfRemaining, int played, int bestOf, X01ClearByTwoRule clearByTwoRule) {
-        return winnerCannotBeCaught(diff, bestOfRemaining) &&
-                isClearByTwoSatisfied(diff, played, bestOf, clearByTwoRule);
+        return winnerCannotBeCaught(diff, bestOfRemaining)
+                && isClearByTwoSatisfied(diff, played, bestOf, clearByTwoRule);
     }
 
     /**
-     * Determines if the leader cannot be caught by the runner-up given the remaining number to be played.
+     * Determines whether the leader can no longer be caught by the runner-up.
      *
-     * @param diff            The difference score between the leader and runner-up.
-     * @param bestOfRemaining The number remaining to be played.
-     * @return true if the leader's lead is greater than the remaining number to be played, or if there is none remaining.
+     * @param diff            the score difference between the leader and runner-up
+     * @param bestOfRemaining the number remaining to be played
+     * @return whether the leader can no longer be caught
      */
-    @Override
-    public boolean winnerCannotBeCaught(int diff, int bestOfRemaining) {
+    private boolean winnerCannotBeCaught(int diff, int bestOfRemaining) {
         return bestOfRemaining == 0 || diff > bestOfRemaining;
     }
 
     /**
-     * Checks if the clear-by-two rule is satisfied. it is satisfied when:
-     * - The rule is disabled
-     * - Difference between winner and runner-up is two
-     * - The match has reached the best of limit + clear by two limit.
+     * Determines whether the clear-by-two rule has been satisfied.
      *
-     * @param diff           The difference between the leader and runner-up.
-     * @param played         The number for already played.
-     * @param bestOf         the best of setting.
-     * @param clearByTwoRule The clear-by-two rule settings.
-     * @return true if the clear-by-two condition is met or the match should end due to limit, false otherwise.
+     * The rule is satisfied when it is disabled, the leader is ahead by at least two,
+     * or the maximum number allowed by the clear-by-two limit has been reached.
+     *
+     * @param diff           the score difference between the leader and runner-up
+     * @param played         the number already played
+     * @param bestOf         the best-of setting
+     * @param clearByTwoRule the clear-by-two rule
+     * @return whether the clear-by-two rule is satisfied
      */
-    @Override
-    public boolean isClearByTwoSatisfied(int diff, int played, int bestOf, X01ClearByTwoRule clearByTwoRule) {
-        // Clear by two is disabled, so it is always satisfied.
+    private boolean isClearByTwoSatisfied(int diff, int played, int bestOf, X01ClearByTwoRule clearByTwoRule) {
+        // When clear by two is disabled, the rule is always satisfied.
         if (!clearByTwoRule.isEnabled()) return true;
 
-        // Difference is 2 or more so clear by two is satisfied.
+        // A lead of two or more satisfies the clear-by-two requirement.
         if (diff >= 2) return true;
 
-        // Calculate the maximum number that can be played.
+        // The match must also end when the configured maximum is reached.
         int maxToPlay = getMaxToPlay(bestOf, clearByTwoRule);
-
-        // Match ends if played equals or exceeds max.
         return played >= maxToPlay;
     }
-
 }

@@ -1,11 +1,11 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01statistics.service;
 
-import nl.kmartin.dartsmatcherapi.features.x01.x01averagestatistics.service.IX01AverageStatisticsService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01averagestatistics.model.X01AverageStatistics;
-import nl.kmartin.dartsmatcherapi.features.x01.x01checkoutstatistics.service.IX01CheckoutStatisticsService;
+import nl.kmartin.dartsmatcherapi.features.x01.x01averagestatistics.service.IX01AverageStatisticsService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01checkoutstatistics.model.X01CheckoutStatistics;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leg.service.IX01LegService;
+import nl.kmartin.dartsmatcherapi.features.x01.x01checkoutstatistics.service.IX01CheckoutStatisticsService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leg.service.IX01LegService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
@@ -21,10 +21,15 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * Orchestrates the calculation of statistics for all players in an X01 match.
+ *
+ * Rebuilds player statistics from the match history by processing sets, legs, rounds
+ * and individual player scores through the specialized statistics services.
+ */
 @Service
 public class X01StatisticsServiceImpl implements IX01StatisticsService {
     private final IX01ResultStatisticsService resultStatisticsService;
@@ -33,10 +38,13 @@ public class X01StatisticsServiceImpl implements IX01StatisticsService {
     private final IX01AverageStatisticsService averageStatisticsService;
     private final IX01LegService legService;
 
-    public X01StatisticsServiceImpl(IX01ResultStatisticsService resultStatisticsService, IX01ScoreStatisticsService scoreStatisticsService,
-                                    IX01CheckoutStatisticsService checkoutStatisticsService,
-                                    IX01AverageStatisticsService averageStatisticsService,
-                                    IX01LegService legService) {
+    public X01StatisticsServiceImpl(
+            IX01ResultStatisticsService resultStatisticsService,
+            IX01ScoreStatisticsService scoreStatisticsService,
+            IX01CheckoutStatisticsService checkoutStatisticsService,
+            IX01AverageStatisticsService averageStatisticsService,
+            IX01LegService legService
+    ) {
         this.resultStatisticsService = resultStatisticsService;
         this.scoreStatisticsService = scoreStatisticsService;
         this.checkoutStatisticsService = checkoutStatisticsService;
@@ -45,153 +53,184 @@ public class X01StatisticsServiceImpl implements IX01StatisticsService {
     }
 
     /**
-     * Recalculates and sets the statistics for all match players from a match.
+     * Recalculates the statistics for all players from the complete match history.
      *
-     * @param match {@link X01Match} the match for which the player statistics need to be updated.
+     * Existing statistics are reset before all sets, legs, rounds and scores are processed again.
+     *
+     * @param match the match for which player statistics should be recalculated
      */
     @Override
     public void updatePlayerStatistics(X01Match match) {
         if (match == null) return;
 
-        // Reset the statistics for all players
+        // Reset all player statistics before rebuilding them from the match history.
         resetPlayerStatistics(match.getPlayers());
 
-        // Convert the players list to a players map for quicker access.
+        // Map players by ID so scores can quickly be associated with their player.
         Map<ObjectId, X01MatchPlayer> playersMap = match.getPlayers()
                 .stream()
                 .collect(Collectors.toMap(X01MatchPlayer::getPlayerId, Function.identity()));
 
-        // Process and update the player statistics using the data of all the sets
+        // Rebuild statistics by processing the match from sets down to individual scores.
         processSets(match.getSets(), match.getMatchSettings().isTrackDoubles(), playersMap);
     }
 
     /**
-     * Process and update the player statistics from the data of all the sets
+     * Processes the sets and updates set and leg statistics.
      *
-     * @param sets         NavigableMap<Integer, X01Set> the map of sets containing the player turns
-     * @param trackDoubles boolean whether to track doubles missed
-     * @param playersMap   Map<ObjectId, X01MatchPlayer> the players for which the statistics need to be updated
+     * @param sets         the match sets
+     * @param trackDoubles whether missed doubles should be tracked
+     * @param playersMap   the players mapped by player ID
      */
-    private void processSets(NavigableMap<Integer, X01Set> sets, boolean trackDoubles,
-                             Map<ObjectId, X01MatchPlayer> playersMap) {
-        if (sets == null || playersMap == null) return;
+    private void processSets(NavigableMap<Integer, X01Set> sets, boolean trackDoubles, Map<ObjectId, X01MatchPlayer> playersMap) {
+        if (sets == null) return;
 
-        // Process and update the player statistics using the data of all the legs
         sets.values().forEach(set -> {
-            this.resultStatisticsService.updateSetsWonStatistics(set, playersMap);
+            resultStatisticsService.updateSetsWonStatistics(set, playersMap);
             processLegs(set.getLegs(), trackDoubles, playersMap);
         });
     }
 
     /**
-     * Process and update the player statistics using the data of all the legs
+     * Processes the legs and updates leg and round statistics.
      *
-     * @param legs         {@link List<X01Leg>} the list of legs containing the player turns
-     * @param trackDoubles boolean whether to track doubles missed
-     * @param playersMap   Map<ObjectId, X01MatchPlayer> the players for which the statistics need to be updated
+     * @param legs         the set legs
+     * @param trackDoubles whether missed doubles should be tracked
+     * @param playersMap   the players mapped by player ID
      */
-    private void processLegs(NavigableMap<Integer, X01Leg> legs, boolean trackDoubles, Map<ObjectId, X01MatchPlayer> playersMap) {
-        if (legs == null || playersMap == null) return;
+    private void processLegs(
+            NavigableMap<Integer, X01Leg> legs,
+            boolean trackDoubles,
+            Map<ObjectId, X01MatchPlayer> playersMap
+    ) {
+        if (legs == null) return;
 
-        // Process and update the player statistics using the data of all the leg rounds
         legs.values().forEach(leg -> {
-            this.resultStatisticsService.updateLegsWonStatistics(leg, playersMap);
+            resultStatisticsService.updateLegsWonStatistics(leg, playersMap);
             processLegRounds(leg.getRounds(), leg, trackDoubles, playersMap);
         });
     }
 
     /**
-     * Process and update the player statistics using the data of all the leg rounds
+     * Processes all rounds belonging to a leg.
      *
-     * @param rounds       {@link List<X01LegRound>} the list of leg rounds containing the player turns
-     * @param leg          {@link X01Leg} the leg from which the rounds originate
-     * @param trackDoubles boolean whether to track doubles missed
-     * @param playersMap   Map<ObjectId, X01MatchPlayer> the players for which the statistics need to be updated
+     * @param rounds       the leg rounds
+     * @param leg          the leg containing the rounds
+     * @param trackDoubles whether missed doubles should be tracked
+     * @param playersMap   the players mapped by player ID
      */
-    private void processLegRounds(NavigableMap<Integer, X01LegRound> rounds, X01Leg leg,
-                                  boolean trackDoubles, Map<ObjectId, X01MatchPlayer> playersMap) {
-        if (rounds == null || leg == null || playersMap == null) return;
+    private void processLegRounds(
+            NavigableMap<Integer, X01LegRound> rounds,
+            X01Leg leg,
+            boolean trackDoubles,
+            Map<ObjectId, X01MatchPlayer> playersMap
+    ) {
+        if (rounds == null) return;
 
-        // Process and update player statistics based on the scores from all rounds
-        rounds.entrySet().stream()
+        rounds.entrySet()
+                .stream()
                 .map(X01LegRoundEntry::new)
-                .forEach(roundEntry -> processRoundScores(roundEntry.round().getScores(), leg, roundEntry, trackDoubles, playersMap));
+                .forEach(roundEntry ->
+                        processRoundScores(
+                                roundEntry.round().getScores(),
+                                leg,
+                                roundEntry,
+                                trackDoubles,
+                                playersMap
+                        )
+                );
     }
 
     /**
-     * Process and update player statistics based on the scores from a round
+     * Processes all player scores belonging to a round.
      *
-     * @param roundScores   Map<ObjectId, X01LegRoundScore> the player scores made in a round
-     * @param leg           {@link X01Leg} the leg from which the scores originate
-     * @param legRoundEntry Map entry for the round from which the score originates
-     * @param trackDoubles  boolean whether to track doubles missed
-     * @param playersMap    Map<ObjectId, X01MatchPlayer> the players for which the statistics need to be updated
+     * @param roundScores   the player scores in the round
+     * @param leg           the leg containing the round
+     * @param legRoundEntry the round entry
+     * @param trackDoubles  whether missed doubles should be tracked
+     * @param playersMap    the players mapped by player ID
      */
-    private void processRoundScores(Map<ObjectId, X01LegRoundScore> roundScores, X01Leg leg,
-                                    X01LegRoundEntry legRoundEntry, boolean trackDoubles, Map<ObjectId, X01MatchPlayer> playersMap) {
-        if (roundScores == null || leg == null || legRoundEntry == null || playersMap == null) return;
+    private void processRoundScores(
+            Map<ObjectId, X01LegRoundScore> roundScores,
+            X01Leg leg,
+            X01LegRoundEntry legRoundEntry,
+            boolean trackDoubles,
+            Map<ObjectId, X01MatchPlayer> playersMap
+    ) {
+        if (roundScores == null) return;
 
-        // Update the player statistics for all players that scored in this round
+        // Process statistics for each player that recorded a score in the round.
         roundScores.forEach((playerId, roundScore) -> {
-            // Find the player that scored this turn
-            Optional<X01MatchPlayer> playerOpt = Optional.ofNullable(playersMap.get(playerId));
+            X01MatchPlayer player = playersMap.get(playerId);
 
-            // Check if the player from this turn exists.
-            if (playerOpt.isPresent()) {
-                // If the player does not have statistics, initialize them
-                if (playerOpt.get().getStatistics() == null) {
-                    playerOpt.get().setStatistics(new X01Statistics());
-                }
-
-                // Update the player statistics for the player that scored this turn
-                processPlayerScore(playerOpt.get(), leg, legRoundEntry, roundScore, trackDoubles);
+            if (player != null) {
+                processPlayerScore(player, leg, legRoundEntry, roundScore, trackDoubles);
             }
         });
     }
 
     /**
-     * Update the player statistics for the player that scored
+     * Updates all statistics affected by a player's round score.
      *
-     * @param player        {@link X01MatchPlayer} the player that scored
-     * @param leg           {@link X01Leg} the leg from which the score originates
-     * @param legRoundEntry Map entry for the round from which the score originates
-     * @param playerScore   {@link X01LegRoundScore} the object containing the score and associated statistics for the player's turn
+     * @param player        the player that scored
+     * @param leg           the leg containing the score
+     * @param legRoundEntry the round containing the score
+     * @param playerScore   the player's round score
+     * @param trackDoubles  whether missed doubles should be tracked
      */
-    private void processPlayerScore(X01MatchPlayer player, X01Leg leg, X01LegRoundEntry legRoundEntry,
-                                    X01LegRoundScore playerScore, boolean trackDoubles) {
-        if (player == null || leg == null || legRoundEntry == null || playerScore == null) return;
-
-        // Get the player's current statistics
+    private void processPlayerScore(
+            X01MatchPlayer player,
+            X01Leg leg,
+            X01LegRoundEntry legRoundEntry,
+            X01LegRoundScore playerScore,
+            boolean trackDoubles
+    ) {
         X01Statistics playerStats = player.getStatistics();
-        boolean isScoreCheckout = legService.isPlayerCheckoutRound(leg, legRoundEntry.roundNumber(), player.getPlayerId());
 
-        // Update score stats
+        boolean isScoreCheckout = legService.isPlayerCheckoutRound(
+                leg,
+                legRoundEntry.roundNumber(),
+                player.getPlayerId()
+        );
+
+        // Update the score-range statistics.
         scoreStatisticsService.updateScoreStatistics(playerStats.getScoreStatistics(), playerScore);
 
-        // Update checkout stats
-        X01CheckoutStatistics playerCheckoutStats = playerStats.getCheckoutStats();
-        checkoutStatisticsService.updateCheckoutStatistics(playerCheckoutStats, playerScore, isScoreCheckout, trackDoubles);
+        // Update checkout statistics using the checkout and double-tracking state.
+        X01CheckoutStatistics checkoutStats = playerStats.getCheckoutStats();
+        checkoutStatisticsService.updateCheckoutStatistics(
+                checkoutStats,
+                playerScore,
+                isScoreCheckout,
+                trackDoubles
+        );
 
-        // Update average stats
-        X01AverageStatistics playerAverageStats = playerStats.getAverageStats();
+        // Update overall and first-nine averages.
+        X01AverageStatistics averageStats = playerStats.getAverageStats();
         Integer checkoutDartsUsed = isScoreCheckout ? leg.getCheckoutDartsUsed() : null;
-        averageStatisticsService.updateAverageStats(playerAverageStats, playerScore, legRoundEntry.roundNumber(), checkoutDartsUsed);
+
+        averageStatisticsService.updateAverageStats(
+                averageStats,
+                playerScore,
+                legRoundEntry.roundNumber(),
+                checkoutDartsUsed
+        );
     }
 
     /**
-     * Resets the statistics for all players in the match.
-     * If a player does not have statistics, a new {@link X01Statistics} object is created for them.
+     * Resets the statistics for all match players.
      *
-     * @param matchPlayers {@link List<X01MatchPlayer>} the list of players whose statistics need to be reset.
+     * Players without an existing statistics object are initialized with a new one.
+     *
+     * @param matchPlayers the players whose statistics should be reset
      */
     private void resetPlayerStatistics(List<X01MatchPlayer> matchPlayers) {
         matchPlayers.forEach(matchPlayer -> {
-            // If a player doesn't already have statistics, initialize them with a new X01Statistics object
             if (matchPlayer.getStatistics() == null) {
                 matchPlayer.setStatistics(new X01Statistics());
+                return;
             }
 
-            // Reset the player's statistics to the default state
             matchPlayer.getStatistics().reset();
         });
     }

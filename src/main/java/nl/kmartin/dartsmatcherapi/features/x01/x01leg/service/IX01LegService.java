@@ -11,13 +11,7 @@ import java.util.List;
 public interface IX01LegService {
     X01LegEntry createNewLeg(int legNumber, ObjectId throwsFirstInSet, List<X01MatchPlayer> players);
 
-    void addScore(int x01, X01Leg leg, int roundNumber, X01Turn turn, List<X01MatchPlayer> players, ObjectId throwerId, boolean trackDoubles);
-
-    void checkLegEditable(X01Leg leg, ObjectId playerId);
+    void applyTurn(int x01, X01Leg leg, int roundNumber, X01Turn turn, ObjectId throwerId, boolean trackDoubles);
 
     boolean isPlayerCheckoutRound(X01Leg leg, int roundNumber, ObjectId playerId);
-
-    boolean validateLegForPlayer(X01Leg leg, int x01, ObjectId throwerId);
-
-    ObjectId calcThrowsFirstInLeg(int legNumber, ObjectId throwsFirstInSet, List<X01MatchPlayer> players);
 }

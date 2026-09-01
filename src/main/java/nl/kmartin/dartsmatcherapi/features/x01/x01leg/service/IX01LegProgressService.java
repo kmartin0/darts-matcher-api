@@ -18,12 +18,6 @@ public interface IX01LegProgressService {
 
     Optional<X01LegRoundEntry> createNextLegRound(X01Leg leg);
 
-    Set<Integer> getLegRoundNumbers(X01Leg leg);
-
-    Optional<X01LegRoundEntry> getLastRound(X01Leg leg);
-
-    Optional<X01LegRoundScore> getLastScoreForPlayer(X01Leg leg, ObjectId throwerId);
-
     boolean isLegConcluded(X01Leg leg);
 
     boolean removeLastScoreFromLeg(X01Leg leg);

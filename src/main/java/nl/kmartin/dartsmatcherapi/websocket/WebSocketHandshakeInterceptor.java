@@ -13,36 +13,56 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 import java.util.Map;
 
 /**
- * Intercepts the native WebSocket handshake process before it completes.
+ * Propagates the HTTP session correlation ID to the WebSocket session during the handshake.
  *
- * Copies the correlationId from the initial HTTP
- * session to the attributes of the WebSocket session, enabling
- * consistent logging context across the connection's lifecycle.
+ * This allows the same correlation ID to be used for logging throughout subsequent
+ * WebSocket message processing.
  */
 @Component
 public class WebSocketHandshakeInterceptor implements HandshakeInterceptor {
+
+    /**
+     * Copies the correlation ID from the existing HTTP session to the WebSocket session attributes.
+     *
+     * @param request the handshake request
+     * @param response the handshake response
+     * @param wsHandler the target WebSocket handler
+     * @param attributes the WebSocket session attributes
+     * @return true to continue the handshake
+     */
     @Override
-    public boolean beforeHandshake(@NonNull ServerHttpRequest request,
-                                   @NonNull ServerHttpResponse response,
-                                   @NonNull WebSocketHandler wsHandler,
-                                   @NonNull Map<String, Object> attributes) {
-        if (request instanceof ServletServerHttpRequest servletRequest) {
-            HttpSession session = servletRequest.getServletRequest().getSession(false);
-            if (session != null) {
-                Object correlationId = session.getAttribute(MdcKeys.CORRELATION_ID);
-                if (correlationId != null) {
-                    attributes.put(MdcKeys.CORRELATION_ID, correlationId.toString());
-                }
-            }
+    public boolean beforeHandshake(
+            @NonNull ServerHttpRequest request,
+            @NonNull ServerHttpResponse response,
+            @NonNull WebSocketHandler wsHandler,
+            @NonNull Map<String, Object> attributes
+    ) {
+        if (!(request instanceof ServletServerHttpRequest servletRequest)) {
+            return true;
         }
+
+        HttpSession session = servletRequest.getServletRequest().getSession(false);
+        if (session == null) {
+            return true;
+        }
+
+        Object correlationId = session.getAttribute(MdcKeys.CORRELATION_ID);
+        if (correlationId != null) {
+            attributes.put(MdcKeys.CORRELATION_ID, correlationId.toString());
+        }
+
         return true;
     }
 
+    /**
+     * Performs no additional processing after the WebSocket handshake completes.
+     */
     @Override
-    public void afterHandshake(@NonNull ServerHttpRequest request,
-                               @NonNull ServerHttpResponse response,
-                               @NonNull WebSocketHandler wsHandler,
-                               Exception exception) {
-        // No action needed
+    public void afterHandshake(
+            @NonNull ServerHttpRequest request,
+            @NonNull ServerHttpResponse response,
+            @NonNull WebSocketHandler wsHandler,
+            Exception exception
+    ) {
     }
 }

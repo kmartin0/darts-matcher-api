@@ -1,30 +1,26 @@
 package nl.kmartin.dartsmatcherapi.error.exception;
 
 import lombok.Getter;
-import lombok.Setter;
 import nl.kmartin.dartsmatcherapi.error.response.TargetError;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 
-@Setter
+/**
+ * Thrown when one or more supplied arguments are invalid.
+ *
+ * Stores the target-specific errors so they can be included in the API error response.
+ */
 @Getter
 public class InvalidArgumentsException extends RuntimeException {
-	// Errors map where the key is the target and the value is the error message.
-	private ArrayList<TargetError> errors;
+    private final List<TargetError> errors;
 
-	public InvalidArgumentsException() {
-		super("Invalid arguments have been supplied.");
-		this.errors = new ArrayList<>();
-	}
-
-	public InvalidArgumentsException(ArrayList<TargetError> errors) {
-		super("Invalid arguments have been supplied.");
-		this.errors = errors;
-	}
-
-	public InvalidArgumentsException(TargetError... errors) {
-		super("Invalid arguments have been supplied.");
-		this.errors = new ArrayList<>(Arrays.asList(errors));
-	}
+    /**
+     * Creates an invalid arguments exception containing the supplied target errors.
+     *
+     * @param errors the target-specific validation errors
+     */
+    public InvalidArgumentsException(TargetError... errors) {
+        super("Invalid arguments have been supplied.");
+        this.errors = List.of(errors);
+    }
 }

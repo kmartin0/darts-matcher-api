@@ -1,11 +1,9 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01set.service;
 
-import nl.kmartin.dartsmatcherapi.features.basematch.model.MatchPlayer;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.ResultType;
 import nl.kmartin.dartsmatcherapi.features.x01.common.X01MatchUtils;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leg.service.IX01LegProgressService;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leg.service.IX01LegResultService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leg.service.IX01LegResultService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01BestOf;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01ClearByTwoRule;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
@@ -14,35 +12,43 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01SetEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01standings.service.IX01StandingsService;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+/**
+ * Rebuilds X01 set results from the processed leg history.
+ *
+ * Reprocesses leg results, removes stale history and determines the player results for the set.
+ */
 @Service
 public class X01SetResultServiceImpl implements IX01SetResultService {
 
-    private final IX01LegProgressService legProgressService;
     private final IX01LegResultService legResultService;
     private final IX01StandingsService standingsService;
 
-    public X01SetResultServiceImpl(IX01LegProgressService legProgressService, IX01LegResultService legResultService, IX01StandingsService standingsService) {
-        this.legProgressService = legProgressService;
+    public X01SetResultServiceImpl(
+            IX01LegResultService legResultService,
+            IX01StandingsService standingsService
+    ) {
         this.legResultService = legResultService;
         this.standingsService = standingsService;
     }
 
     /**
-     * Updates the player results for a set.
+     * Rebuilds all result-related state for a set.
      *
-     * @param setEntry {@link X01SetEntry} the set to be updated
-     * @param bestOf   {@link X01BestOf} the best of setting for the match
-     * @param players  {@link List<X01MatchPlayer>} the list of match players
+     * @param setEntry the set to process
+     * @param bestOf   the match format
+     * @param players  the match players
+     * @param x01      the starting X01 score
      */
     @Override
     public void updateSetResult(X01SetEntry setEntry, X01BestOf bestOf, List<X01MatchPlayer> players, int x01) {
-        // If the set is null exit early, if the players are null clear the set result and exit early.
         if (setEntry == null || setEntry.set() == null) return;
+
         X01Set set = setEntry.set();
 
         if (X01MatchUtils.isPlayersEmpty(players)) {
@@ -50,153 +56,150 @@ public class X01SetResultServiceImpl implements IX01SetResultService {
             return;
         }
 
-        // Update all leg results within this set.
-        updateLegResults(set, players, x01);
+        // Rebuild leg results and find the current unfinished leg.
+        Integer currentLegNumber = updateLegResults(set, x01);
 
-        // Update the set results map.
-        List<ObjectId> setWinners = getSetWinners(setEntry, bestOf, players);
-        updatePlayerResults(set, players, setWinners);
-    }
-
-    /**
-     * Updates the leg result for all legs in a set
-     *
-     * @param set     {@link X01Set} the set for which the legs need to be updated
-     * @param players {@link List<X01MatchPlayer>} the list of match players
-     * @param x01     int the x01 setting for the legs
-     */
-    @Override
-    public void updateLegResults(X01Set set, List<X01MatchPlayer> players, int x01) {
-        if (X01MatchUtils.isLegsEmpty(set)) return;
-
-        // For each leg update the leg result.
-        set.getLegs().values().forEach(x01Leg -> legResultService.updateLegResult(x01Leg, players, x01));
-    }
-
-    /**
-     * A list of object ids is created containing all players that have won the set. Multiple set winners
-     * means a draw has occurred.
-     *
-     * @param setEntry {@link X01SetEntry} The set for which the winners are being determined.
-     * @param bestOf   {@link X01BestOf} the best of setting for the match
-     * @param players  {@link List<X01MatchPlayer>} the list of match players
-     * @return {@link List<ObjectId>} containing the IDs of players who won the set. multiple winners indicates a draw.
-     */
-    @Override
-    public List<ObjectId> getSetWinners(X01SetEntry setEntry, X01BestOf bestOf, List<X01MatchPlayer> players) {
-        if (setEntry == null || X01MatchUtils.isLegsEmpty(setEntry.set()) || X01MatchUtils.isPlayersEmpty(players))
-            return Collections.emptyList();
-
-        // Get the standings for the set.
-        TreeMap<Integer, List<ObjectId>> setStandings = getSetStandings(setEntry.set(), players);
-
-        // Get the parameters for determine winners method.
-        int legsPlayedInSet = calcLegsPlayed(setEntry.set());
-        int bestOfLegs = bestOf.getLegs();
-        X01ClearByTwoRule clearByTwoLegsRule = bestOf.getClearByTwoLegsRuleForSet(setEntry.setNumber());
-
-        // Get the player(s) that have won the set
-        return standingsService.determineWinners(setStandings, legsPlayedInSet, bestOfLegs, clearByTwoLegsRule);
-    }
-
-    /**
-     * Determines the number of legs each player has won for a given set
-     *
-     * @param set     {@link X01Set} the set for which standings need to be calculated
-     * @param players {@link List<X01MatchPlayer>} the list of match players
-     * @return TreeMap<Integer, List<ObjectId>> containing the number of legs each player has won
-     */
-    @Override
-    public TreeMap<Integer, List<ObjectId>> getSetStandings(X01Set set, List<X01MatchPlayer> players) {
-        if (set == null || X01MatchUtils.isPlayersEmpty(players)) return new TreeMap<>();
-
-        // Initialize standings map with all players and 0 wins
-        Map<ObjectId, Long> winsPerPlayer = players.stream()
-                .collect(Collectors.toMap(MatchPlayer::getPlayerId, player -> 0L));
-
-        // Update the map with the number of wins from the legs for each player
-        set.getLegs().values().stream()
-                .filter(x01Leg -> x01Leg.getWinner() != null)  // Filter out legs with no winner
-                .forEach(x01Leg -> winsPerPlayer.merge(x01Leg.getWinner(), 1L, Long::sum)); // Increment win count for the winner
-
-        // Step 3: Group players by number of wins in a tree map.
-        return standingsService.groupByWinCounts(winsPerPlayer);
-    }
-
-    /**
-     * Removes all legs from the given list that occur after the last leg won by a player
-     * present in the setWinners list.
-     *
-     * This is useful for cleaning up any trailing legs after a set winner has
-     * already been decided, which may happen after score edits or corrections.
-     *
-     * @param set        {@link List<X01Leg>} the set to be potentially modified
-     * @param setWinners {@link List<ObjectId>} the list of player IDs who have won (or drawn) the set
-     */
-    @Override
-    public void removeLegsAfterSetWinner(X01Set set, List<ObjectId> setWinners) {
-        if (X01MatchUtils.isLegsEmpty(set) || CollectionUtils.isEmpty(setWinners)) return;
-
-        // Iterate legs backwards, removing any legs that come after a set winner. Stop when a winner is matched.
-        Iterator<Integer> iterator = set.getLegs().descendingKeySet().iterator();
-        while (iterator.hasNext()) {
-            Integer legKey = iterator.next();
-            X01Leg leg = set.getLegs().get(legKey);
-            if (setWinners.contains(leg.getWinner())) break;
-            iterator.remove();
+        // History after the current leg could not have been played and is stale.
+        if (currentLegNumber != null) {
+            removeLegsAfter(set, currentLegNumber);
         }
+
+        // Find the first leg at which the remaining history concludes the set.
+        WinnerSearch winnerSearch = findSetWinners(setEntry, bestOf, players);
+
+        // History after the first set-concluding leg is stale.
+        if (winnerSearch.legNumber() != null) {
+            removeLegsAfter(set, winnerSearch.legNumber());
+        }
+
+        // Convert the determined winners into player results.
+        updatePlayerResults(set, players, winnerSearch.winners());
     }
 
     /**
-     * Updates the player results for a given set based on the list of set winners.
-     * If there are one or more winners:
-     * - A single winner is marked with {@link ResultType#WIN}.
-     * - Multiple winners are marked with {@link ResultType#DRAW}.
-     * - All other players are marked with {@link ResultType#LOSS}.
+     * Rebuilds leg results chronologically and finds the current unfinished leg.
      *
-     * If no winners are present, the set result is set to null
-     * Additionally, lingering legs after the winners' final leg get removed.
+     * @param set the set whose leg results should be rebuilt
+     * @param x01 the starting X01 score
+     * @return the current leg number in play, or null when all processed legs are concluded
+     */
+    private Integer updateLegResults(X01Set set, int x01) {
+        if (X01MatchUtils.isLegsEmpty(set)) return null;
+
+        // Reprocess legs chronologically until the current unfinished leg is reached.
+        for (Map.Entry<Integer, X01Leg> legEntry : set.getLegs().entrySet()) {
+            X01Leg leg = legEntry.getValue();
+            legResultService.updateLegResult(leg, x01);
+
+            if (leg.getWinner() == null) {
+                return legEntry.getKey();
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Finds the set winners and the first leg at which the set becomes concluded.
      *
-     * @param set        {@link X01Set} the set to update the player results for.
-     * @param players    {@link List<X01MatchPlayer>} the players playing the match.
-     * @param setWinners {@link List<ObjectId>} the winners of the set (be empty if no result)
+     * @param setEntry the set to inspect
+     * @param bestOf   the match format
+     * @param players  the match players
+     * @return the winner search result
+     */
+    private WinnerSearch findSetWinners(X01SetEntry setEntry, X01BestOf bestOf, List<X01MatchPlayer> players) {
+        X01Set set = setEntry.set();
+        if (X01MatchUtils.isLegsEmpty(set)) return new WinnerSearch(List.of(), null);
+
+        Map<ObjectId, Long> winsPerPlayer = createEmptyWinCountMap(players);
+        X01ClearByTwoRule clearByTwoRule = bestOf.getClearByTwoLegsRuleForSet(setEntry.setNumber());
+        int legsPlayed = 0;
+
+        // Build the standings chronologically until the rules determine that the set is concluded.
+        for (Map.Entry<Integer, X01Leg> legEntry : set.getLegs().entrySet()) {
+            X01Leg leg = legEntry.getValue();
+            if (leg.getWinner() == null) break;
+
+            winsPerPlayer.merge(leg.getWinner(), 1L, Long::sum);
+            legsPlayed++;
+
+            List<ObjectId> winners =
+                    determineSetWinners(winsPerPlayer, legsPlayed, bestOf.getLegs(), clearByTwoRule);
+
+            if (!winners.isEmpty()) {
+                return new WinnerSearch(winners, legEntry.getKey());
+            }
+        }
+
+        return new WinnerSearch(List.of(), null);
+    }
+
+    /**
+     * Creates a win-count map containing every player with zero leg wins.
+     *
+     * @param players the match players
+     * @return the initialized win counts
+     */
+    private Map<ObjectId, Long> createEmptyWinCountMap(List<X01MatchPlayer> players) {
+        return players.stream()
+                .collect(Collectors.toMap(X01MatchPlayer::getPlayerId, player -> 0L));
+    }
+
+    /**
+     * Determines whether the current leg win counts have concluded the set.
+     *
+     * @param winsPerPlayer  the current leg win counts
+     * @param legsPlayed     the number of concluded legs
+     * @param bestOfLegs     the configured best-of legs value
+     * @param clearByTwoRule the applicable clear-by-two rule
+     * @return the set winners, or an empty list when the set is not yet concluded
+     */
+    private List<ObjectId> determineSetWinners(Map<ObjectId, Long> winsPerPlayer, int legsPlayed, int bestOfLegs, X01ClearByTwoRule clearByTwoRule) {
+        TreeMap<Integer, List<ObjectId>> standings = standingsService.groupByWinCounts(winsPerPlayer);
+
+        return standingsService.determineWinners(standings, legsPlayed, bestOfLegs, clearByTwoRule);
+    }
+
+    /**
+     * Removes all legs after the given leg number.
+     *
+     * @param set       the set containing the legs
+     * @param legNumber the final leg number to retain
+     */
+    private void removeLegsAfter(X01Set set, int legNumber) {
+        set.getLegs().tailMap(legNumber, false).clear();
+    }
+
+    /**
+     * Updates the set result from the determined winners.
+     *
+     * @param set        the set whose result should be updated
+     * @param players    the match players
+     * @param setWinners the determined set winners
      */
     private void updatePlayerResults(X01Set set, List<X01MatchPlayer> players, List<ObjectId> setWinners) {
-        if (!setWinners.isEmpty()) { // The set has a result
-            // If multiple players have won the set, that means they have drawn.
-            ResultType winOrDrawType = setWinners.size() > 1 ? ResultType.DRAW : ResultType.WIN;
-
-            // Map and set the player results in the set. Players in the setWinners list get a win/draw. The rest gets a loss
-            set.setResult(players.stream()
-                    .collect(Collectors.toMap(
-                            X01MatchPlayer::getPlayerId,
-                            player -> setWinners.contains(player.getPlayerId()) ? winOrDrawType : ResultType.LOSS
-                    ))
-            );
-
-            // Clears legs that might linger after the set winners.
-            removeLegsAfterSetWinner(set, setWinners);
-        } else { // The set has no result
+        if (setWinners.isEmpty()) {
             set.setResult(null);
+            return;
         }
+
+        ResultType winnerResult = setWinners.size() > 1 ? ResultType.DRAW : ResultType.WIN;
+
+        Map<ObjectId, ResultType> playerResults = players.stream()
+                .collect(Collectors.toMap(
+                        X01MatchPlayer::getPlayerId,
+                        player -> setWinners.contains(player.getPlayerId()) ? winnerResult : ResultType.LOSS
+                ));
+
+        set.setResult(playerResults);
     }
 
     /**
-     * Calculates the number of legs that have been played (concluded) within the given set.
+     * Stores the winners found during a chronological search and the leg that concluded the set.
      *
-     * @param set {@link X01Set} the set to calculate legs played for
-     * @return int the count of concluded legs in the set
+     * @param winners   the determined winners
+     * @param legNumber the concluding leg number, or null when the set is unfinished
      */
-    private int calcLegsPlayed(X01Set set) {
-        if (set == null) return 0;
-
-        // Count the number of concluded legs
-        long completedLegs = set.getLegs().values().stream()
-                .filter(legProgressService::isLegConcluded)
-                .count();
-
-        // Return the number of concluded legs
-        return (int) completedLegs;
+    private record WinnerSearch(List<ObjectId> winners, Integer legNumber) {
     }
-
 }

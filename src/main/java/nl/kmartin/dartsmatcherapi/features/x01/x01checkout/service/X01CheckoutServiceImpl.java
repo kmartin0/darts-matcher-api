@@ -18,6 +18,12 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * Provides checkout information and validation for X01 matches.
+ *
+ * Loads the configured checkout table and provides operations for retrieving checkouts
+ * and determining whether scores or remaining points are valid checkout states.
+ */
 @Service
 public class X01CheckoutServiceImpl implements IX01CheckoutService {
     private static final Set<Integer> INVALID_CHECKOUTS = Set.of(169, 168, 166, 165, 163, 162, 159);
@@ -32,13 +38,13 @@ public class X01CheckoutServiceImpl implements IX01CheckoutService {
     }
 
     /**
-     * Loads and parses X01 checkout data from a JSON resource file into an unmodifiable Map.
+     * Loads the checkout data from the resource file and maps it by checkout score.
      *
-     * @param checkoutsResourceFile {@link Resource}
-     * @return {@code Map<Integer,X01Checkout>} an unmodifiable map where the key is the checkout score and the value is the checkout
-     * @throws IllegalStateException if the checkout map is empty or an io error occurred.
+     * @param checkoutsResourceFile the checkout data resource
+     * @return an unmodifiable map of checkouts by score
+     * @throws IllegalStateException if the checkout data cannot be loaded or is empty
      */
-    public static Map<Integer, X01Checkout> createCheckoutMap(Resource checkoutsResourceFile) {
+    private static Map<Integer, X01Checkout> createCheckoutMap(Resource checkoutsResourceFile) {
         try {
             ObjectMapper mapper = new ObjectMapper();
 
@@ -53,26 +59,16 @@ public class X01CheckoutServiceImpl implements IX01CheckoutService {
                 throw new IllegalStateException("Checkouts not found or empty");
             }
 
-            return checkoutsList.stream().collect(Collectors.toUnmodifiableMap(X01Checkout::getCheckout, Function.identity()));
+            return checkoutsList.stream().collect(Collectors.toUnmodifiableMap(X01Checkout::checkout, Function.identity()));
         } catch (IOException e) {
             throw new IllegalStateException("Failed to initialize X01CheckoutService due to IO error", e);
         }
     }
 
     /**
-     * Return the checkouts map
+     * Returns all available checkouts as a list.
      *
-     * @return Map<Integer, X01Checkout> map of all available x01 checkouts.
-     */
-    @Override
-    public Map<Integer, X01Checkout> getCheckouts() {
-        return checkoutsMap;
-    }
-
-    /**
-     * Returns the checkouts in a list
-     *
-     * @return List<X01Checkout> list of all available x01 checkouts.
+     * @return all available checkouts
      */
     @Override
     public List<X01Checkout> getCheckoutsAsList() {
@@ -80,10 +76,10 @@ public class X01CheckoutServiceImpl implements IX01CheckoutService {
     }
 
     /**
-     * Retrieves the checkout information based on the remaining score in a x01 match.
+     * Gets the checkout for a remaining score.
      *
-     * @param remaining int The value to search for in the checkouts.
-     * @return Optional<X01Checkout> containing the matching checkout. if no checkout available an empty Optional.
+     * @param remaining the remaining score
+     * @return the checkout, or empty if no checkout is available
      */
     @Override
     public Optional<X01Checkout> getCheckout(int remaining) {
@@ -92,22 +88,25 @@ public class X01CheckoutServiceImpl implements IX01CheckoutService {
 
 
     /**
-     * Determine if a score could be a checkout
+     * Determines whether a score can be checked out.
      *
-     * @param score int the score that needs to be verified
-     * @return boolean whether the score could be a checkout
+     * @param score the score to check
+     * @return whether the score can be checked out
      */
     @Override
     public boolean isScoreCheckout(int score) {
-        return score <= X01Checkout.MAXIMUM_CHECKOUT && !INVALID_CHECKOUTS.contains(score);
+        return score >= X01Checkout.MINIMUM_CHECKOUT
+                && score <= X01Checkout.MAXIMUM_CHECKOUT
+                && !INVALID_CHECKOUTS.contains(score);
     }
 
     /**
-     * Determine if a score could be a checkout, will also check if the minimum darts needed for the checkout have been used
+     * Determines whether a score can be checked out with the given number of darts.
      *
-     * @param score     int the score that needs to be verified
-     * @param dartsUsed int the darts used to reach the score
-     * @return boolean whether the score could be a checkout and if the minimum darts needed were used
+     * @param score     the score to check
+     * @param dartsUsed the number of darts used
+     * @return whether the score can be checked out
+     * @throws InvalidArgumentsException if the checkout requires more darts than were used
      */
     @Override
     public boolean isScoreCheckout(int score, int dartsUsed) {
@@ -129,10 +128,10 @@ public class X01CheckoutServiceImpl implements IX01CheckoutService {
     }
 
     /**
-     * Checks if the remaining score is either zero (successful checkout) or a bust (invalid score).
+     * Determines whether the remaining score is zero or a bust.
      *
      * @param remaining the remaining score
-     * @return true if the remaining score is zero or a bust, false otherwise
+     * @return whether the remaining score is zero or a bust
      */
     @Override
     public boolean isRemainingZeroOrBust(int remaining) {
@@ -140,21 +139,21 @@ public class X01CheckoutServiceImpl implements IX01CheckoutService {
     }
 
     /**
-     * Determines if the remaining score is a bust. A bust occurs when the score is less than 2 but not exactly zero.
+     * Determines whether the remaining score is a bust.
      *
      * @param remaining the remaining score
-     * @return true if the remaining score is a bust, false otherwise
+     * @return whether the remaining score is a bust
      */
     @Override
     public boolean isRemainingBust(int remaining) {
-        return remaining < 2 && remaining != 0;
+        return remaining < X01Checkout.MINIMUM_CHECKOUT && !isRemainingZero(remaining);
     }
 
     /**
-     * Checks if the remaining score is exactly zero. This indicates a successful checkout.
+     * Determines whether the remaining score is zero.
      *
      * @param remaining the remaining score
-     * @return true if the remaining score is zero, false otherwise
+     * @return whether the remaining score is zero
      */
     @Override
     public boolean isRemainingZero(int remaining) {
@@ -162,28 +161,30 @@ public class X01CheckoutServiceImpl implements IX01CheckoutService {
     }
 
     /**
-     * Determines if the checkout is valid.
-     * A valid checkout occurs when the remaining score is zero and the last dart lands in a double area.
+     * Determines whether a checkout is valid.
+     *
+     * A checkout is valid when the remaining score is zero and the final dart
+     * lands in a double area.
      *
      * @param remaining the remaining score
-     * @param lastDart  the last dart thrown
-     * @return true if the checkout is valid, false otherwise
+     * @param lastDart  the final dart thrown
+     * @return whether the checkout is valid
      */
     @Override
     public boolean isValidCheckout(int remaining, Dart lastDart) {
-        DartboardSectionArea lastDartArea = lastDart.getArea();
+        DartboardSectionArea lastDartArea = lastDart.area();
 
         return isRemainingZero(remaining) && lastDartArea.isDouble();
     }
 
     /**
-     * Checks if the number of darts used meets or exceeds the minimum required for a checkout.
+     * Determines whether enough darts were used for the checkout.
      *
-     * @param checkout  the X01 checkout instance
+     * @param checkout  the checkout
      * @param dartsUsed the number of darts used
-     * @return true if the minimum darts requirement is met, false otherwise
+     * @return whether enough darts were used
      */
     private boolean isEnoughDartsUsedForCheckout(X01Checkout checkout, int dartsUsed) {
-        return checkout != null && dartsUsed >= checkout.getMinDarts();
+        return dartsUsed >= checkout.minDarts();
     }
 }

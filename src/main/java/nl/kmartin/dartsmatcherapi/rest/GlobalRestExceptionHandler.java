@@ -30,6 +30,12 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.ArrayList;
 
+/**
+ * Handles exceptions raised by REST requests and converts them into consistent API error responses.
+ *
+ * Maps validation, resource, request, database and unexpected errors to the appropriate
+ * API error code, HTTP status and optional target-specific errors.
+ */
 @RestControllerAdvice
 public class GlobalRestExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalRestExceptionHandler.class);

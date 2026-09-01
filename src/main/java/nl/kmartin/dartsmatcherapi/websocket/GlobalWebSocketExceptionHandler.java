@@ -25,6 +25,9 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 import java.util.ArrayList;
 
+/**
+ * Handles exceptions raised during WebSocket message processing and converts them into consistent error responses.
+ */
 @ControllerAdvice
 public class GlobalWebSocketExceptionHandler {
 

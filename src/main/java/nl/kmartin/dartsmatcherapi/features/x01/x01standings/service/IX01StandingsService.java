@@ -9,9 +9,9 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public interface IX01StandingsService {
+    void updateMatchStandings(X01Match match);
+
     List<ObjectId> determineWinners(TreeMap<Integer, List<ObjectId>> standings, int played, int bestOf, X01ClearByTwoRule clearByTwoRule);
 
     TreeMap<Integer, List<ObjectId>> groupByWinCounts(Map<ObjectId, Long> winsPerPlayer);
-
-    void updateMatchStandings(X01Match match);
 }

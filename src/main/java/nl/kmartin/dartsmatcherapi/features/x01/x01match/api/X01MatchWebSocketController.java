@@ -19,6 +19,11 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.stereotype.Controller;
 
+/**
+ * Handles WebSocket subscriptions and commands for X01 matches.
+ *
+ * Match updates are processed by the match service and published back through the WebSocket event publisher.
+ */
 @Controller
 public class X01MatchWebSocketController {
 
@@ -33,6 +38,12 @@ public class X01MatchWebSocketController {
         this.webSocketEventPublisher = webSocketEventPublisher;
     }
 
+    /**
+     * Returns the current match when a client subscribes to an X01 match.
+     *
+     * @param matchId the match id
+     * @return a message containing the current match
+     */
     @SubscribeMapping(WebSocketDestinations.X01.MATCH)
     public WebSocketMessage<X01MatchMessageType, X01Match> subscribeX01Match(
             @DestinationVariable ObjectId matchId
@@ -43,6 +54,14 @@ public class X01MatchWebSocketController {
         );
     }
 
+    /**
+     * Adds a turn and publishes the updated match.
+     *
+     * @param matchId   the match id
+     * @param turn      the turn to add
+     * @param publishId the optional client publish id
+     * @param sessionId the WebSocket session id
+     */
     @MessageMapping(WebSocketDestinations.X01.ADD_TURN)
     public void addTurn(
             @DestinationVariable ObjectId matchId,
@@ -58,6 +77,14 @@ public class X01MatchWebSocketController {
         );
     }
 
+    /**
+     * Edits a turn and publishes the updated match.
+     *
+     * @param matchId   the match id
+     * @param editTurn  the turn edit
+     * @param publishId the optional client publish id
+     * @param sessionId the WebSocket session id
+     */
     @MessageMapping(WebSocketDestinations.X01.EDIT_TURN)
     public void editTurn(
             @DestinationVariable ObjectId matchId,
@@ -73,6 +100,13 @@ public class X01MatchWebSocketController {
         );
     }
 
+    /**
+     * Deletes the last turn and publishes the updated match.
+     *
+     * @param matchId   the match id
+     * @param publishId the optional client publish id
+     * @param sessionId the WebSocket session id
+     */
     @MessageMapping(WebSocketDestinations.X01.DELETE_LAST_TURN)
     public void deleteLastTurn(
             @DestinationVariable ObjectId matchId,
@@ -87,6 +121,13 @@ public class X01MatchWebSocketController {
         );
     }
 
+    /**
+     * Deletes an X01 match.
+     *
+     * @param matchId   the match id
+     * @param publishId the optional client publish id
+     * @param sessionId the WebSocket session id
+     */
     @MessageMapping(WebSocketDestinations.X01.DELETE_MATCH)
     public void deleteMatch(
             @DestinationVariable ObjectId matchId,
@@ -103,6 +144,13 @@ public class X01MatchWebSocketController {
         );
     }
 
+    /**
+     * Resets a match and publishes the reset state.
+     *
+     * @param matchId   the match id
+     * @param publishId the optional client publish id
+     * @param sessionId the WebSocket session id
+     */
     @MessageMapping(WebSocketDestinations.X01.RESET_MATCH)
     public void resetMatch(
             @DestinationVariable ObjectId matchId,
@@ -117,6 +165,13 @@ public class X01MatchWebSocketController {
         );
     }
 
+    /**
+     * Reprocesses a match and publishes the rebuilt state.
+     *
+     * @param matchId   the match id
+     * @param publishId the optional client publish id
+     * @param sessionId the WebSocket session id
+     */
     @MessageMapping(WebSocketDestinations.X01.REPROCESS_MATCH)
     public void reprocessMatch(
             @DestinationVariable ObjectId matchId,

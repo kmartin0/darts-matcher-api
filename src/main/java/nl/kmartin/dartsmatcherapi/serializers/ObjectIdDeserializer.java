@@ -7,9 +7,20 @@ import org.bson.types.ObjectId;
 
 import java.io.IOException;
 
+/**
+ * Deserializes hexadecimal ObjectId strings into MongoDB ObjectIds.
+ */
 public class ObjectIdDeserializer extends JsonDeserializer<ObjectId> {
+
+    /**
+     * Creates an ObjectId from the JSON string value.
+     *
+     * @param jsonParser the JSON parser
+     * @param context    the deserialization context
+     * @return the deserialized ObjectId
+     */
     @Override
-    public ObjectId deserialize(JsonParser p, DeserializationContext context) throws IOException {
-        return new ObjectId(p.getText());
+    public ObjectId deserialize(JsonParser jsonParser, DeserializationContext context) throws IOException {
+        return new ObjectId(jsonParser.getText());
     }
 }

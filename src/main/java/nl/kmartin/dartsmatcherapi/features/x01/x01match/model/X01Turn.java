@@ -1,31 +1,37 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01match.model;
 
-
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import nl.kmartin.dartsmatcherapi.validators.validdartscore.ValidDartScore;
 
-@Data
+/**
+ * Represents a single turn played in an X01 match.
+ */
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class X01Turn {
+
+    public static final String FIELD_SCORE = "score";
+
     public static final int MINIMUM_CHECKOUT_DARTS_USED = 1;
     public static final int MAXIMUM_CHECKOUT_DARTS_USED = 3;
     public static final int MINIMUM_DOUBLES_MISSED = 0;
     public static final int MAXIMUM_DOUBLES_MISSED = 3;
 
     @ValidDartScore
-    int score;
+    private int score;
 
     @Min(MINIMUM_CHECKOUT_DARTS_USED)
     @Max(MAXIMUM_CHECKOUT_DARTS_USED)
-
-    Integer checkoutDartsUsed;
+    private Integer checkoutDartsUsed;
 
     @Min(MINIMUM_DOUBLES_MISSED)
     @Max(MAXIMUM_DOUBLES_MISSED)
-    Integer doublesMissed;
+    private Integer doublesMissed;
 }

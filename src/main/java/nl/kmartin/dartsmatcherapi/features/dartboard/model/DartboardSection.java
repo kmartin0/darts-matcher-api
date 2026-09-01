@@ -1,6 +1,14 @@
 package nl.kmartin.dartsmatcherapi.features.dartboard.model;
 
-public enum DartBoardSection {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+/**
+ * Defines the numbered sections of a dartboard, including bull and miss.
+ */
+@Getter
+@AllArgsConstructor
+public enum DartboardSection {
     ONE(1),
     TWO(2),
     THREE(3),
@@ -26,14 +34,12 @@ public enum DartBoardSection {
 
     private final int sectionNumber;
 
-    DartBoardSection(int sectionNumber) {
-        this.sectionNumber = sectionNumber;
-    }
-
-    public int getSectionNumber() {
-        return sectionNumber;
-    }
-
+    /**
+     * Calculates the score for this section in the given scoring area.
+     *
+     * @param area the scoring area
+     * @return the resulting dart score
+     */
     public int getScore(DartboardSectionArea area) {
         return sectionNumber * area.getMultiplier();
     }

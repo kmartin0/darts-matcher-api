@@ -11,116 +11,123 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
+/**
+ * Simulates scoring and checkout throws for the X01 dart bot.
+ *
+ * Determines whether the bot should score or attempt a checkout, selects the appropriate target,
+ * applies the bot's calculated throw deviation, and validates the resulting dart against the
+ * bot's checkout policy.
+ */
 @Service
 public class X01DartBotThrowSimulatorImpl implements IX01DartBotThrowSimulator {
     private final IDartboardService dartboardService;
     private final IX01CheckoutService checkoutService;
     private final IX01DartBotCheckoutPolicy dartBotCheckoutPolicy;
-    private final IX01DartBotAccuracyCalculator dartBotAccuracyCalculator;
+    private final IX01DartBotDeviationCalculator dartBotDeviationCalculator;
     private final IX01DartBotScoringStrategy dartBotScoringStrategy;
 
-    public X01DartBotThrowSimulatorImpl(IDartboardService dartboardService,
-                                        IX01CheckoutService checkoutService,
-                                        IX01DartBotCheckoutPolicy dartBotCheckoutPolicy,
-                                        IX01DartBotAccuracyCalculator dartBotAccuracyCalculator,
-                                        IX01DartBotScoringStrategy dartBotScoringStrategy) {
+    public X01DartBotThrowSimulatorImpl(
+            IDartboardService dartboardService,
+            IX01CheckoutService checkoutService,
+            IX01DartBotCheckoutPolicy dartBotCheckoutPolicy,
+            IX01DartBotDeviationCalculator dartBotDeviationCalculator,
+            IX01DartBotScoringStrategy dartBotScoringStrategy
+    ) {
         this.dartboardService = dartboardService;
         this.checkoutService = checkoutService;
         this.dartBotCheckoutPolicy = dartBotCheckoutPolicy;
-        this.dartBotAccuracyCalculator = dartBotAccuracyCalculator;
+        this.dartBotDeviationCalculator = dartBotDeviationCalculator;
         this.dartBotScoringStrategy = dartBotScoringStrategy;
     }
 
     /**
-     * Generates the next dart throws for the dart bot based on the current state of the leg.
-     * If the remaining points are within checkout range, the bot will aim for a checkout.
-     * Otherwise, the bot will aim for a scoring throw.
+     * Generates the next dart throws for the dart bot based on the current leg state.
      *
-     * When aiming for a scoring throw, the list will contain 1 {@link DartThrow}.
-     * When aiming for a checkout, the list will contain 1 {@link DartThrow} or, if the bot needs
-     * to complete a checkout sequence, it will contain the dart throws required for the checkout,
-     * but the number of dart throws will not exceed the maximum darts the bot can still throw in the round.
+     * When the remaining score is outside checkout range, a single scoring throw is generated.
+     * When a checkout is available, either a single checkout attempt or the required part of a
+     * guaranteed checkout sequence is generated.
      *
-     * @param dartBotLegState {@link X01DartBotLegState} the current state of the dart bot in the leg
-     * @return {@link List<DartThrow>} a list containing the dart throws for the next turn.
+     * @param dartBotLegState the current dart bot leg state
+     * @return the dart throws generated for the next part of the turn
      */
     @Override
     public List<DartThrow> getNextDartThrows(X01DartBotLegState dartBotLegState) {
-        // When the bot is outside checkout range, create a scoring throw. Otherwise, create a checkout throw.
+        // Determine whether the bot should aim for scoring or a checkout.
         boolean isRemainingCheckout = checkoutService.isScoreCheckout(dartBotLegState.getRemainingPoints());
+
         return isRemainingCheckout
                 ? createCheckoutThrowResult(dartBotLegState)
                 : List.of(createScoringThrowResult(dartBotLegState));
     }
 
     /**
-     * Creates a scoring throw for the dart bot based on the current leg state.
-     * The method generates a dart throw aimed at the scoring target based on the dart bot's
-     * target one-dart average and current one-dart average.
-     * It validates the throw to ensure that a scoring throw doesn't accidentally throw an invalid check out.
+     * Creates a scoring throw for the dart bot.
      *
-     * @param dartBotLegState {@link X01DartBotLegState} the current state of the dart bot in the leg
-     * @return {@link DartThrow} the dart throw generated for the scoring attempt
+     * A scoring target is selected based on the bot's target one-dart average. The throw deviation
+     * is based on both the target and current one-dart averages. The result is then validated to
+     * prevent the scoring throw from producing an invalid checkout result.
+     *
+     * @param dartBotLegState the current dart bot leg state
+     * @return the generated scoring throw
      */
     private DartThrow createScoringThrowResult(X01DartBotLegState dartBotLegState) {
-        // Generate a dart throw aimed at a generated scoring target
+        // Simulate a throw at a scoring target.
         DartThrow dartThrow = throwAtTarget(
                 dartBotLegState.getTargetOneDartAvg(),
                 dartBotLegState.getCurrentOneDartAvg(),
                 dartBotScoringStrategy.createScoringTarget(dartBotLegState.getTargetOneDartAvg())
         );
 
-        // Validate the result. If for some reason a scoring throw has checked out while it shouldn't, sets the result to a MISS.
-        validateResult(dartThrow.getResult(), dartBotLegState);
+        // Replace an invalid result with a miss.
+        Dart result = validateResult(dartThrow.result(), dartBotLegState);
 
-        // Return the dart throw created for the scoring attempt
-        return dartThrow;
+        // Return the scoring target together with the validated result.
+        return new DartThrow(dartThrow.target(), result);
     }
 
     /**
-     * Creates a checkout throw for the dart bot based on the current state of the leg.
-     * If the remaining points are in checkout range, it will create a sequence of dart throws
-     * aimed at achieving the checkout. If no checkout is available for the current remaining points,
-     * a scoring throw will be created instead.
+     * Creates the next checkout throw or throws for the dart bot.
      *
-     * If the bot doesn't have to check out yet, the list will contain only one dart throw, aimed at the next target
-     * in the checkout sequence. If the bot has to check out complete the checkout in the next dart throws,
-     * but only using the darts remaining in the round.
+     * If checkout information is available, the bot follows its suggested checkout sequence.
+     * When no checkout sequence is available, a scoring throw is generated instead.
      *
-     * @param dartBotLegState {@link X01DartBotLegState} the current state of the dart bot in the leg
-     * @return {@link List<DartThrow>} a list of dart throws that were thrown aiming at a checkout
+     * @param dartBotLegState the current dart bot leg state
+     * @return the generated checkout or fallback scoring throws
      */
     private List<DartThrow> createCheckoutThrowResult(X01DartBotLegState dartBotLegState) {
         Optional<X01Checkout> checkout = checkoutService.getCheckout(dartBotLegState.getRemainingPoints());
 
-        // When there is no checkout, return a scoring throw.
+        // When there is no checkout sequence available, fall back to a scoring throw.
         if (checkout.isEmpty()) {
             return List.of(createScoringThrowResult(dartBotLegState));
         }
 
-        // Simulate throwing at the next target in the checkout sequence.
+        // Simulate throwing at the checkout sequence.
         return throwAtCheckout(checkout.get(), dartBotLegState);
     }
 
     /**
-     * Simulates the dart throws for the bot when it is aiming for a checkout.
-     * This method checks if the bot needs to finish the game (i.e., checkout)
-     * or if it can continue throwing at the first target in the checkout sequence.
+     * Simulates dart throws while the bot is aiming for a checkout.
      *
-     * If the bot has to check out, the appropriate dart throws for the checkout sequence are generated.
-     * If the bot doesn't have to check out yet, it will aim at the first target in the checkout sequence.
+     * When completing the checkout would reach or exceed the bot's target number of darts,
+     * a guaranteed checkout sequence is generated. Otherwise, a single simulated throw is
+     * made at the first target in the checkout sequence.
      *
-     * @param checkout        {@link X01Checkout} the checkout sequence to be followed
-     * @param dartBotLegState {@link X01DartBotLegState} the current state of the dart bot in the leg
-     * @return {@link List<DartThrow>} a list of dart throws: either a sequence of throws for the checkout or a single dart throw aimed at the next target in the checkout sequence
+     * @param checkout        the checkout sequence to follow
+     * @param dartBotLegState the current dart bot leg state
+     * @return the generated checkout throws
      */
     private List<DartThrow> throwAtCheckout(X01Checkout checkout, X01DartBotLegState dartBotLegState) {
-        // Check if the bot has to complete the checkout based on if the checkout sequence will equal or surpass the target number of darts
-        int dartsUsedAfterCheckout = dartBotLegState.getDartsUsedInLeg() + checkout.getMinDarts();
+        // Calculate how many darts will have been used after completing the checkout sequence.
+        int dartsUsedAfterCheckout = dartBotLegState.getDartsUsedInLeg() + checkout.minDarts();
 
-        boolean hasToCheckout = dartBotCheckoutPolicy.isTargetNumOfDartsReached(dartsUsedAfterCheckout, dartBotLegState.getTargetNumOfDarts());
+        // Determine whether the bot has reached the point where it should complete the checkout.
+        boolean hasToCheckout = dartBotCheckoutPolicy.isTargetNumOfDartsReached(
+                dartsUsedAfterCheckout,
+                dartBotLegState.getTargetNumOfDarts()
+        );
+
         if (hasToCheckout) {
             return createGuaranteedCheckoutThrows(checkout, dartBotLegState.getDartsLeftInRound());
         }
@@ -129,66 +136,76 @@ public class X01DartBotThrowSimulatorImpl implements IX01DartBotThrowSimulator {
         DartThrow dartThrow = throwAtTarget(
                 dartBotLegState.getTargetOneDartAvg(),
                 dartBotLegState.getCurrentOneDartAvg(),
-                checkout.getSuggested().get(0)
+                checkout.suggested().get(0)
         );
 
-        // Validates the result, creates a MISS if the checkout is invalid (bust, no double finish, above target avg)
-        validateResult(dartThrow.getResult(), dartBotLegState);
+        // Replace an invalid checkout result with a miss.
+        Dart result = validateResult(dartThrow.result(), dartBotLegState);
 
-        // Return the simulated dart throw aimed at the first target in the checkout sequence
-        return List.of(dartThrow);
+        // Return the checkout target together with the validated result.
+        return List.of(new DartThrow(dartThrow.target(), result));
     }
 
     /**
-     * Creates a list of dart throws for the checkout sequence. This method generates the dart throws
-     * necessary to complete the checkout based on the checkout sequence and how many darts remain in the round
+     * Creates guaranteed throws following the checkout sequence.
      *
-     * @param checkout       {@link X01Checkout} the checkout sequence to be followed
-     * @param dartsRemaining int the number of darts remaining in the current round
-     * @return {@link List<DartThrow>} a list of dart throws to complete the checkout sequence
+     * Each generated throw hits its intended target exactly. The number of throws is limited
+     * to the number of darts remaining in the current round.
+     *
+     * @param checkout       the checkout sequence to follow
+     * @param dartsRemaining the number of darts remaining in the round
+     * @return the guaranteed checkout throws
      */
     private List<DartThrow> createGuaranteedCheckoutThrows(X01Checkout checkout, int dartsRemaining) {
-        // Determine the number of darts to use based on darts remaining and darts required
-        int dartsRequired = checkout.getSuggested().size();
+        // Determine how much of the checkout sequence can be thrown in the current round.
+        int dartsRequired = checkout.suggested().size();
         int dartsToUse = Math.min(dartsRemaining, dartsRequired);
 
-        // Create and return a list of DartThrow objects for the required darts
-        return checkout.getSuggested().stream().limit(dartsToUse).map(dart -> new DartThrow(dart, dart)).collect(Collectors.toList());
+        // Create throws where the result exactly matches the intended checkout target.
+        return checkout.suggested()
+                .stream()
+                .limit(dartsToUse)
+                .map(dart -> new DartThrow(dart, dart))
+                .toList();
     }
 
     /**
-     * Virtually throws a dart at a target on a dartboard with both an angle and a radial offset based on the target average
-     * and the current average (over performing will result in a higher offset, under performing will result in a lower offset).
+     * Simulates a dart throw at the given target.
      *
-     * @param targetOneDartAvg  double The expected one dart average of bot.
-     * @param currentOneDartAvg double The current one dart average of bot in the leg.
-     * @param target            {@link Dart} The target to be thrown at.
-     * @return {@link DartThrow} The result of where the dart landed on the board.
+     * The bot's target and current one-dart averages determine the maximum radial and angular
+     * deviation. These offsets are applied by the dartboard service to determine where the dart lands.
+     *
+     * @param targetOneDartAvg  the target one-dart average
+     * @param currentOneDartAvg the current one-dart average
+     * @param target            the dartboard target
+     * @return the target and resulting dart
      */
     private DartThrow throwAtTarget(double targetOneDartAvg, double currentOneDartAvg, Dart target) {
-        // Generate the offset of the angle and radial.
-        double offsetR = dartBotAccuracyCalculator.createOffsetR(targetOneDartAvg, currentOneDartAvg);
-        double offsetTheta = dartBotAccuracyCalculator.createOffsetTheta(targetOneDartAvg, currentOneDartAvg);
+        // Generate the radial and angular offsets for the throw.
+        double offsetR = dartBotDeviationCalculator.createOffsetR(targetOneDartAvg, currentOneDartAvg);
+        double offsetTheta = dartBotDeviationCalculator.createOffsetTheta(targetOneDartAvg, currentOneDartAvg);
 
-        // Determine the final dart result based on the calculated offsets.
+        // Apply the offsets to the target and determine where the dart actually lands.
         Dart result = dartboardService.getScore(target, offsetR, offsetTheta);
 
-        // Create and return the DartThrow containing the target and result
+        // Return both the intended target and actual result.
         return new DartThrow(target, result);
     }
 
     /**
-     * This method checks if the dart throw adheres to the rules defined by the bot's checkout policy.
-     * If the result is not valid, it adjusts the result area to MISS, simulating a missed throw.
+     * Validates a dart result against the bot's checkout policy.
      *
-     * @param result          {@link Dart} the dart result that needs validation
-     * @param dartBotLegState {@link X01DartBotLegState} the current state of the dart bot in the leg
+     * An invalid result is replaced with a miss while preserving the resulting board section.
+     *
+     * @param result          the dart result to validate
+     * @param dartBotLegState the current dart bot leg state
+     * @return the original result when valid, otherwise a missed dart
      */
-    private void validateResult(Dart result, X01DartBotLegState dartBotLegState) {
-        // Check if the dart result is valid based on the current leg state and checkout policy
+    private Dart validateResult(Dart result, X01DartBotLegState dartBotLegState) {
         if (!dartBotCheckoutPolicy.isDartResultValid(result, dartBotLegState)) {
-            // If the result is invalid, mark it as a MISS
-            result.setArea(DartboardSectionArea.MISS);
+            return new Dart(result.section(), DartboardSectionArea.MISS);
         }
+
+        return result;
     }
 }

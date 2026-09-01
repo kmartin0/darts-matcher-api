@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
+import java.util.List;
 import java.util.Map;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,8 +35,8 @@ public class X01CheckoutTests {
 
     @Test
     void testReadCheckouts() {
-        Map<Integer, X01Checkout> checkouts = checkoutService.getCheckouts();
-        Assertions.assertEquals(checkouts.size(), 162);
+        List<X01Checkout> checkouts = checkoutService.getCheckoutsAsList();
+        Assertions.assertEquals(162, checkouts.size());
     }
 
 }

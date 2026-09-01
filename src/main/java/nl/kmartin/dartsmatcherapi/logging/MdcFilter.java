@@ -13,20 +13,33 @@ import java.io.IOException;
 import java.util.UUID;
 
 /**
- * Creates a unique correlation ID for each incoming HTTP request and adds it to the MDC.
+ * Adds request-specific logging information to the MDC for incoming HTTP requests.
+ *
+ * Stores the client IP address and a generated correlation ID for the duration
+ * of the request. The correlation ID is also stored in the HTTP session so it
+ * can be propagated to WebSocket messages.
  */
 @Component
 public class MdcFilter extends OncePerRequestFilter {
-    @Override
-    protected void doFilterInternal(@NonNull HttpServletRequest request,
-                                    @NonNull HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
 
-        // Retrieve and put the client ip address in the mdc.
+    /**
+     * Adds request logging information to the MDC and clears it after processing.
+     *
+     * @param request     the incoming HTTP request
+     * @param response    the HTTP response
+     * @param filterChain the request filter chain
+     */
+    @Override
+    protected void doFilterInternal(
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain
+    ) throws ServletException, IOException {
+        // Store the originating client IP address for request logging.
         String clientIp = getClientIpAddress(request);
         MDC.put(MdcKeys.CLIENT_IP, clientIp);
 
-        // Create a correlation ID and add it to the MDC.
+        // Generate a correlation ID and make it available to HTTP and WebSocket processing.
         String correlationId = UUID.randomUUID().toString();
         MDC.put(MdcKeys.CORRELATION_ID, correlationId);
         request.getSession().setAttribute(MdcKeys.CORRELATION_ID, correlationId);
@@ -34,24 +47,29 @@ public class MdcFilter extends OncePerRequestFilter {
         try {
             filterChain.doFilter(request, response);
         } finally {
-            // Clear the MDC after the request is complete
+            // Prevent request logging information from leaking into another request.
             MDC.clear();
         }
     }
 
     /**
-     * Utility method to get the client IP address using the X-Forwarded-For header.
-     * @param request The HttpServletRequest.
-     * @return The client IP address.
+     * Resolves the originating client IP address.
+     *
+     * Uses the first address in the X-Forwarded-For header when the request passed
+     * through a proxy, otherwise the direct connection address is returned.
+     *
+     * @param request the incoming HTTP request
+     * @return the resolved client IP address
      */
     private String getClientIpAddress(HttpServletRequest request) {
-        // Get the forwarded for header.
         String xForwardedForHeader = request.getHeader("X-Forwarded-For");
-        if (xForwardedForHeader != null && !xForwardedForHeader.isEmpty()) {
-            // X-Forwarded-For format comma seperated entries with client_ip as the first entry.
-            return xForwardedForHeader.split(",")[0].trim();
+
+        // The first X-Forwarded-For entry represents the original client.
+        if (xForwardedForHeader != null && !xForwardedForHeader.isBlank()) {
+            return xForwardedForHeader.split(",", 2)[0].trim();
         }
-        // If no proxy header, use the direct connection address
+
+        // When no proxy header is present, use the direct connection address.
         return request.getRemoteAddr();
     }
 }

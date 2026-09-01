@@ -10,24 +10,28 @@ import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
 import java.time.Clock;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Configures application localization, validation messages and the system clock.
+ */
 @Configuration
 public class LocaleConfig {
-    private final Locale ENG_LOCALE = new Locale("en");
-    private final Locale NL_LOCALE = new Locale("nl");
+    private static final Locale ENGLISH_LOCALE = Locale.ENGLISH;
+    private static final Locale DUTCH_LOCALE = Locale.forLanguageTag("nl");
 
-    private final Locale DEFAULT_LOCALE = ENG_LOCALE;
+    private static final Locale DEFAULT_LOCALE = ENGLISH_LOCALE;
 
-    private final List<Locale> SUPPORTED_LOCALES = Arrays.asList(
-            ENG_LOCALE,
-            NL_LOCALE
+    private static final List<Locale> SUPPORTED_LOCALES = List.of(
+            ENGLISH_LOCALE,
+            DUTCH_LOCALE
     );
 
     /**
-     * @return LocaleResolver configured with the supported locales.
+     * Creates the locale resolver using the configured supported and default locales.
+     *
+     * @return the configured locale resolver
      */
     @Bean
     public LocaleResolver localeResolver() {
@@ -38,24 +42,37 @@ public class LocaleConfig {
     }
 
     /**
-     * @return MessageSource configured with application message resource bundle(s)
+     * Creates the message source used to resolve application messages.
+     *
+     * @return the configured message source
      */
     @Bean
     public MessageSource messageSource() {
-        ReloadableResourceBundleMessageSource bean = new ReloadableResourceBundleMessageSource();
-        bean.setBasename("classpath:messages");
-        bean.setDefaultEncoding("UTF-8");
-        return bean;
+        ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+        messageSource.setBasename("classpath:messages");
+        messageSource.setDefaultEncoding("UTF-8");
+        return messageSource;
     }
 
+    /**
+     * Creates the validator using the application's localized validation messages.
+     *
+     * @param messageSource the application message source
+     * @return the configured validator
+     */
     @Bean
     @Primary
-    public LocalValidatorFactoryBean validator() {
-        LocalValidatorFactoryBean bean = new LocalValidatorFactoryBean();
-        bean.setValidationMessageSource(messageSource());
-        return bean;
+    public LocalValidatorFactoryBean validator(MessageSource messageSource) {
+        LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
+        validator.setValidationMessageSource(messageSource);
+        return validator;
     }
 
+    /**
+     * Creates the clock used for application time calculations.
+     *
+     * @return the system clock
+     */
     @Bean
     public Clock clock() {
         return Clock.systemDefaultZone();

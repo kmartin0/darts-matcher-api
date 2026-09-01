@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface IX01CheckoutService {
-    Map<Integer, X01Checkout> getCheckouts();
-
     List<X01Checkout> getCheckoutsAsList();
 
     Optional<X01Checkout> getCheckout(int remaining);

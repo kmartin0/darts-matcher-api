@@ -1,10 +1,7 @@
 package nl.kmartin.dartsmatcherapi.features.testutils;
 
-import nl.kmartin.dartsmatcherapi.common.EventPublisherServiceImpl;
-import nl.kmartin.dartsmatcherapi.common.IEventPublisherService;
 import nl.kmartin.dartsmatcherapi.features.dartboard.service.DartboardServiceImpl;
 import nl.kmartin.dartsmatcherapi.features.dartboard.service.IDartboardService;
-import nl.kmartin.dartsmatcherapi.features.dartboard.model.Dartboard;
 import nl.kmartin.dartsmatcherapi.features.x01.x01averagestatistics.service.IX01AverageStatisticsService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01averagestatistics.service.X01AverageStatisticsServiceImpl;
 import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.service.IX01CheckoutService;
@@ -29,6 +26,8 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01standings.service.X01Standings
 import nl.kmartin.dartsmatcherapi.features.x01.x01statistics.service.IX01StatisticsService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01statistics.service.X01StatisticsServiceImpl;
 import nl.kmartin.dartsmatcherapi.i18n.MessageResolver;
+import nl.kmartin.dartsmatcherapi.websocket.event.IWebSocketEventPublisher;
+import nl.kmartin.dartsmatcherapi.websocket.event.WebSocketEventPublisherImpl;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -39,7 +38,11 @@ public class X01FeatureTestFactory {
     private final MessageResolver messageResolverMock;
     private final ApplicationEventPublisher eventPublisherMock;
 
-    public X01FeatureTestFactory(IX01MatchRepository matchRepositoryMock, MessageResolver messageResolverMock, ApplicationEventPublisher eventPublisherMock) {
+    public X01FeatureTestFactory(
+            IX01MatchRepository matchRepositoryMock,
+            MessageResolver messageResolverMock,
+            ApplicationEventPublisher eventPublisherMock
+    ) {
         this.matchRepositoryMock = matchRepositoryMock;
         this.messageResolverMock = messageResolverMock;
         this.eventPublisherMock = eventPublisherMock;
@@ -56,12 +59,17 @@ public class X01FeatureTestFactory {
                 createLegService(),
                 createLegRoundService(),
                 createDartBotService(),
-                createEventPublishService()
+                createWebsocketEventPublisher(),
+                createStandingsService()
         );
     }
 
+    public IX01MatchSetupService createMatchSetupService() {
+        return new X01MatchSetupServiceImpl();
+    }
+
     public IX01MatchResultService createMatchResultService() {
-        return new X01MatchResultServiceImpl(createSetResultService(), createSetProgressService(), createStandingsService());
+        return new X01MatchResultServiceImpl(createSetResultService(), createStandingsService());
     }
 
     public IX01MatchProgressService createMatchProgressService() {
@@ -79,7 +87,7 @@ public class X01FeatureTestFactory {
     }
 
     public IX01SetResultService createSetResultService() {
-        return new X01SetResultServiceImpl(createLegProgressService(), createLegResultService(), createStandingsService());
+        return new X01SetResultServiceImpl(createLegResultService(), createStandingsService());
     }
 
     public IX01SetProgressService createSetProgressService() {
@@ -91,7 +99,7 @@ public class X01FeatureTestFactory {
                 messageResolverMock,
                 createLegProgressService(),
                 createLegResultService(),
-                createCheckoutService()
+                createLegRoundService()
         );
     }
 
@@ -104,16 +112,14 @@ public class X01FeatureTestFactory {
     }
 
     public IX01LegRoundService createLegRoundService() {
-        return new X01LegRoundServiceImpl();
+        return new X01LegRoundServiceImpl(createCheckoutService());
     }
 
-    public IX01CheckoutService createCheckoutService() {
-        Resource checkoutsResource = new ClassPathResource("data/checkouts.json");
-        return new X01CheckoutServiceImpl(checkoutsResource, messageResolverMock);
-    }
-
-    public IX01MatchSetupService createMatchSetupService() {
-        return new X01MatchSetupServiceImpl();
+    public IX01StandingsService createStandingsService() {
+        return new X01StandingsServiceImpl(
+                createMatchProgressService(),
+                createRulesService()
+        );
     }
 
     public IX01StatisticsService createStatisticsService() {
@@ -130,6 +136,10 @@ public class X01FeatureTestFactory {
         return new X01ResultStatisticsServiceImpl();
     }
 
+    public IX01ScoreStatisticsService createScoreStatisticsService() {
+        return new X01ScoreStatisticsServiceImpl();
+    }
+
     public IX01CheckoutStatisticsService createCheckoutStatisticsService() {
         return new X01CheckoutStatisticsServiceImpl();
     }
@@ -138,15 +148,10 @@ public class X01FeatureTestFactory {
         return new X01AverageStatisticsServiceImpl();
     }
 
-    public IX01ScoreStatisticsService createScoreStatisticsService() {
-        return new X01ScoreStatisticsServiceImpl();
-    }
-
     public IX01DartBotService createDartBotService() {
         return new X01DartBotServiceImpl(
                 createMatchProgressService(),
                 createDartBotThrowSimulator(),
-                messageResolverMock,
                 createLegResultService()
         );
     }
@@ -157,11 +162,8 @@ public class X01FeatureTestFactory {
                 createCheckoutService(),
                 createDartBotCheckoutPolicy(),
                 createDartBotAccuracyCalculator(),
-                createDartBotScoringStrategy());
-    }
-
-    public IDartboardService createDartboardService() {
-        return new DartboardServiceImpl(new Dartboard());
+                createDartBotScoringStrategy()
+        );
     }
 
     public IX01DartBotScoringStrategy createDartBotScoringStrategy() {
@@ -172,22 +174,24 @@ public class X01FeatureTestFactory {
         return new X01DartBotCheckoutPolicyImpl(createCheckoutService());
     }
 
-    public IX01DartBotAccuracyCalculator createDartBotAccuracyCalculator() {
-        return new X01DartBotAccuracyCalculatorImpl();
+    public IX01DartBotDeviationCalculator createDartBotAccuracyCalculator() {
+        return new X01DartBotDeviationCalculatorImpl();
     }
 
-    public IEventPublisherService createEventPublishService() {
-        return new EventPublisherServiceImpl(eventPublisherMock);
+    public IX01CheckoutService createCheckoutService() {
+        Resource checkoutsResource = new ClassPathResource("data/checkouts.json");
+        return new X01CheckoutServiceImpl(checkoutsResource, messageResolverMock);
     }
 
-    public IX01StandingsService createStandingsService() {
-        return new X01StandingsServiceImpl(
-                createMatchProgressService(),
-                createRulesService()
-        );
+    public IDartboardService createDartboardService() {
+        return new DartboardServiceImpl();
     }
 
     public IX01RulesService createRulesService() {
         return new X01RulesServiceImpl();
+    }
+
+    public IWebSocketEventPublisher createWebsocketEventPublisher() {
+        return new WebSocketEventPublisherImpl(eventPublisherMock);
     }
 }

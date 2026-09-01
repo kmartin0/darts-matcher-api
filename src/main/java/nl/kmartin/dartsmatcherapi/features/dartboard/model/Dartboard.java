@@ -1,51 +1,59 @@
 package nl.kmartin.dartsmatcherapi.features.dartboard.model;
 
-import lombok.Data;
-import org.springframework.stereotype.Component;
-
 import java.util.List;
 
-@Data
-@Component
-public class Dartboard {
-    private final List<DartBoardSection> sections;
-    private final List<DartboardSectionAreaDimen> areaDimensions;
+/**
+ * Defines the fixed dimensions, geometry and section order of a standard dartboard.
+ */
+public final class Dartboard {
+    public static final int NUMBER_OF_SECTIONS = 20;
 
-    public Dartboard() {
-        // Sections starting at 6 counting counterclockwise. Reasoning is that for polar planes
-        // the convention is to start at 0 degrees on the x-axis and then increases counterclockwise.
-        this.sections = List.of(
-                DartBoardSection.SIX,
-                DartBoardSection.THIRTEEN,
-                DartBoardSection.FOUR,
-                DartBoardSection.EIGHTEEN,
-                DartBoardSection.ONE,
-                DartBoardSection.TWENTY,
-                DartBoardSection.FIVE,
-                DartBoardSection.TWELVE,
-                DartBoardSection.NINE,
-                DartBoardSection.FOURTEEN,
-                DartBoardSection.ELEVEN,
-                DartBoardSection.EIGHT,
-                DartBoardSection.SIXTEEN,
-                DartBoardSection.SEVEN,
-                DartBoardSection.NINETEEN,
-                DartBoardSection.THREE,
-                DartBoardSection.SEVENTEEN,
-                DartBoardSection.TWO,
-                DartBoardSection.FIFTEEN,
-                DartBoardSection.TEN,
-                DartBoardSection.SIX
-        );
+    public static final double SECTION_ANGLE_RADIANS = (Math.PI * 2) / NUMBER_OF_SECTIONS;
 
-        this.areaDimensions = List.of(
-                new DartboardSectionAreaDimen(DartboardSectionArea.DOUBLE_BULL, 0, 7),
-                new DartboardSectionAreaDimen(DartboardSectionArea.SINGLE_BULL, 7, 17),
-                new DartboardSectionAreaDimen(DartboardSectionArea.INNER_SINGLE, 17, 97),
-                new DartboardSectionAreaDimen(DartboardSectionArea.TRIPLE, 97, 107),
-                new DartboardSectionAreaDimen(DartboardSectionArea.OUTER_SINGLE, 107, 160),
-                new DartboardSectionAreaDimen(DartboardSectionArea.DOUBLE, 160, 170),
-                new DartboardSectionAreaDimen(DartboardSectionArea.MISS, 170, Integer.MAX_VALUE)
-        );
+    public static final double HALF_SECTION_ANGLE_RADIANS = SECTION_ANGLE_RADIANS / 2;
+
+    public static final int DOUBLE_BULL_INNER_RADIUS_MM = 0;
+    public static final int DOUBLE_BULL_OUTER_RADIUS_MM = 7;
+    public static final int SINGLE_BULL_OUTER_RADIUS_MM = 17;
+    public static final int TRIPLE_INNER_RADIUS_MM = 97;
+    public static final int TRIPLE_OUTER_RADIUS_MM = 107;
+    public static final int DOUBLE_INNER_RADIUS_MM = 160;
+    public static final int DOUBLE_OUTER_RADIUS_MM = 170;
+
+    private Dartboard() {
     }
+
+    public static final List<DartboardSection> SECTIONS = List.of(
+            DartboardSection.SIX,
+            DartboardSection.THIRTEEN,
+            DartboardSection.FOUR,
+            DartboardSection.EIGHTEEN,
+            DartboardSection.ONE,
+            DartboardSection.TWENTY,
+            DartboardSection.FIVE,
+            DartboardSection.TWELVE,
+            DartboardSection.NINE,
+            DartboardSection.FOURTEEN,
+            DartboardSection.ELEVEN,
+            DartboardSection.EIGHT,
+            DartboardSection.SIXTEEN,
+            DartboardSection.SEVEN,
+            DartboardSection.NINETEEN,
+            DartboardSection.THREE,
+            DartboardSection.SEVENTEEN,
+            DartboardSection.TWO,
+            DartboardSection.FIFTEEN,
+            DartboardSection.TEN,
+            DartboardSection.SIX
+    );
+
+    public static final List<DartboardSectionAreaDimen> AREA_DIMENSIONS = List.of(
+            new DartboardSectionAreaDimen(DartboardSectionArea.DOUBLE_BULL, DOUBLE_BULL_INNER_RADIUS_MM, DOUBLE_BULL_OUTER_RADIUS_MM),
+            new DartboardSectionAreaDimen(DartboardSectionArea.SINGLE_BULL, DOUBLE_BULL_OUTER_RADIUS_MM, SINGLE_BULL_OUTER_RADIUS_MM),
+            new DartboardSectionAreaDimen(DartboardSectionArea.INNER_SINGLE, SINGLE_BULL_OUTER_RADIUS_MM, TRIPLE_INNER_RADIUS_MM),
+            new DartboardSectionAreaDimen(DartboardSectionArea.TRIPLE, TRIPLE_INNER_RADIUS_MM, TRIPLE_OUTER_RADIUS_MM),
+            new DartboardSectionAreaDimen(DartboardSectionArea.OUTER_SINGLE, TRIPLE_OUTER_RADIUS_MM, DOUBLE_INNER_RADIUS_MM),
+            new DartboardSectionAreaDimen(DartboardSectionArea.DOUBLE, DOUBLE_INNER_RADIUS_MM, DOUBLE_OUTER_RADIUS_MM),
+            new DartboardSectionAreaDimen(DartboardSectionArea.MISS, DOUBLE_OUTER_RADIUS_MM, Integer.MAX_VALUE)
+    );
 }

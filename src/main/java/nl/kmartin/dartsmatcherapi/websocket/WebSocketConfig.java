@@ -58,6 +58,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         this.mdcTaskDecorator = mdcTaskDecorator;
     }
 
+    /**
+     * Configures the STOMP application, user, broadcast and queue destination prefixes.
+     *
+     * @param config the message broker registry
+     */
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         config.setApplicationDestinationPrefixes(APP_PREFIX);
@@ -65,6 +70,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         config.enableSimpleBroker(BROADCAST_PREFIX, QUEUE_PREFIX);
     }
 
+    /**
+     * Registers the WebSocket STOMP endpoint and handshake interceptor.
+     *
+     * @param registry the STOMP endpoint registry
+     */
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint(WEBSOCKET_ENDPOINT)
@@ -72,6 +82,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .addInterceptors(handshakeInterceptor);
     }
 
+    /**
+     * Configures the inbound WebSocket channel with MDC propagation and correlation logging.
+     *
+     * @param registration the inbound channel registration
+     */
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         ThreadPoolTaskExecutor mdcTaskExecutor = taskExecutorBuilder
@@ -83,10 +98,15 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registration.taskExecutor(mdcTaskExecutor);
     }
 
+    /**
+     * Configures the outbound WebSocket channel with MDC propagation.
+     *
+     * @param registration the outbound channel registration
+     */
     @Override
     public void configureClientOutboundChannel(ChannelRegistration registration) {
         ThreadPoolTaskExecutor mdcTaskExecutor = taskExecutorBuilder
-                .taskDecorator(new MdcTaskDecorator())
+                .taskDecorator(mdcTaskDecorator)
                 .threadNamePrefix("clientOutboundChannel-")
                 .build();
 

@@ -8,6 +8,4 @@ import java.util.List;
 
 public interface IX01SetService {
     X01SetEntry createNewSet(int setNumber, List<X01MatchPlayer> players);
-
-    ObjectId calcThrowsFirstInSet(int setNumber, List<X01MatchPlayer> players);
 }

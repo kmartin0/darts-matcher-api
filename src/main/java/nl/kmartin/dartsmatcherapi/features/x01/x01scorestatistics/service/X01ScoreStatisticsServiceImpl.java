@@ -4,27 +4,37 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScor
 import nl.kmartin.dartsmatcherapi.features.x01.x01scorestatistics.model.X01ScoreStatistics;
 import org.springframework.stereotype.Service;
 
+/**
+ * Updates score statistics for X01 players based on their round scores.
+ */
 @Service
 public class X01ScoreStatisticsServiceImpl implements IX01ScoreStatisticsService {
+
     /**
-     * Updates the score statistics with the score from the current round.
+     * Updates the score statistic corresponding to the player's round score.
      *
-     * @param playerScoreStats  {@link X01ScoreStatistics} the object to store the updated score statistics
-     * @param playerScore {@link X01LegRoundScore} the score information from the current round
+     * @param scoreStatistics the score statistics to update
+     * @param playerScore the player's score for the current round
      */
     @Override
-    public void updateScoreStatistics(X01ScoreStatistics playerScoreStats, X01LegRoundScore playerScore) {
-        if (playerScoreStats == null || playerScore == null) return;
+    public void updateScoreStatistics(X01ScoreStatistics scoreStatistics, X01LegRoundScore playerScore) {
+        if (scoreStatistics == null || playerScore == null) return;
 
-        // Retrieve the score from the player's turn in the current leg round
         int score = playerScore.getScore();
 
-        // Update the score statistics based on the score thresholds
-        if (score == 180) playerScoreStats.incrementTonEighty();
-        else if (score >= 140) playerScoreStats.incrementTonFortyPlus();
-        else if (score >= 100) playerScoreStats.incrementTonPlus();
-        else if (score >= 80) playerScoreStats.incrementEightyPlus();
-        else if (score >= 60) playerScoreStats.incrementSixtyPlus();
-        else if (score >= 40) playerScoreStats.incrementFortyPlus();
+        // Increment the statistic for the score range containing the round score.
+        if (score == X01ScoreStatistics.TON_EIGHTY) {
+            scoreStatistics.incrementTonEighty();
+        } else if (score >= X01ScoreStatistics.MINIMUM_TON_FORTY_PLUS) {
+            scoreStatistics.incrementTonFortyPlus();
+        } else if (score >= X01ScoreStatistics.MINIMUM_TON_PLUS) {
+            scoreStatistics.incrementTonPlus();
+        } else if (score >= X01ScoreStatistics.MINIMUM_EIGHTY_PLUS) {
+            scoreStatistics.incrementEightyPlus();
+        } else if (score >= X01ScoreStatistics.MINIMUM_SIXTY_PLUS) {
+            scoreStatistics.incrementSixtyPlus();
+        } else if (score >= X01ScoreStatistics.MINIMUM_FORTY_PLUS) {
+            scoreStatistics.incrementFortyPlus();
+        }
     }
 }

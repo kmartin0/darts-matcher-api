@@ -1,13 +1,13 @@
 package nl.kmartin.dartsmatcherapi.features.dartboard.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class DartThrow {
-    private Dart target;
-    private Dart result;
+/**
+ * Represents a dart throw containing both the intended target and actual result.
+ *
+ * @param target the dartboard target
+ * @param result the position where the dart landed
+ */
+public record DartThrow(
+        Dart target,
+        Dart result
+) {
 }

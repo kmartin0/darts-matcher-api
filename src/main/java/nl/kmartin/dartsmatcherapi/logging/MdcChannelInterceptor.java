@@ -11,27 +11,41 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 /**
- * A Spring Messaging {@link ChannelInterceptor}
+ * Propagates the WebSocket session correlation ID to the MDC.
  *
- * Before a message is processed, it retrieves the correlationId from the
- * WebSocket session attributes and places it into the MDC. It clears the MDC
- * after processing is complete.
+ * The correlation ID is added before a message is sent through the channel
+ * and cleared when channel processing is complete.
  */
 @Component
 public class MdcChannelInterceptor implements ChannelInterceptor {
+
+    /**
+     * Adds the WebSocket session correlation ID to the MDC when available.
+     *
+     * @param message the WebSocket message
+     * @param channel the message channel
+     * @return the message to continue processing
+     */
     @Override
     public Message<?> preSend(@NonNull Message<?> message, @NonNull MessageChannel channel) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
         Map<String, Object> sessionAttributes = accessor.getSessionAttributes();
 
         if (sessionAttributes != null && sessionAttributes.containsKey(MdcKeys.CORRELATION_ID)) {
-            MDC.put(MdcKeys.CORRELATION_ID, (String) sessionAttributes.get(MdcKeys.CORRELATION_ID));
+            MDC.put(
+                    MdcKeys.CORRELATION_ID,
+                    (String) sessionAttributes.get(MdcKeys.CORRELATION_ID)
+            );
         }
+
         return message;
     }
 
+    /**
+     * Clears the MDC after channel processing completes.
+     */
     @Override
-    public void afterSendCompletion(@NonNull Message<?> message, @NonNull MessageChannel channel, boolean sent, Exception ex) {
+    public void afterSendCompletion(@NonNull Message<?> message, @NonNull MessageChannel channel, boolean sent, Exception exception) {
         MDC.clear();
     }
 }

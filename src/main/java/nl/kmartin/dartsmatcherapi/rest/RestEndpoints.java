@@ -1,15 +1,17 @@
 package nl.kmartin.dartsmatcherapi.rest;
 
-public class RestEndpoints {
-
+/**
+ * Defines the REST endpoint paths exposed by the application.
+ */
+public final class RestEndpoints {
     private RestEndpoints() {
     }
 
-    // Checkout Endpoints
+    // Checkout endpoints
     public static final String GET_CHECKOUTS = "/checkouts";
     public static final String GET_CHECKOUT = "/checkouts/{remaining}";
 
-    // X01Match Endpoints
+    // X01 match endpoints
     public static final String X01_CREATE_MATCH = "/x01/matches";
     public static final String X01_GET_MATCH = "/x01/matches/{matchId}";
     public static final String X01_GET_MATCHES = "/x01/matches";

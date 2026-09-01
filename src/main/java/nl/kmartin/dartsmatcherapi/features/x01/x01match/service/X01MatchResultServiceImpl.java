@@ -1,209 +1,236 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01match.service;
 
-import nl.kmartin.dartsmatcherapi.features.basematch.model.MatchPlayer;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.MatchStatus;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.ResultType;
 import nl.kmartin.dartsmatcherapi.features.x01.common.X01MatchUtils;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01BestOf;
-import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01ClearByTwoRule;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
-import nl.kmartin.dartsmatcherapi.features.x01.x01set.service.IX01SetProgressService;
-import nl.kmartin.dartsmatcherapi.features.x01.x01set.service.IX01SetResultService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01Set;
 import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01SetEntry;
+import nl.kmartin.dartsmatcherapi.features.x01.x01set.service.IX01SetResultService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01standings.service.IX01StandingsService;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+/**
+ * Rebuilds X01 match results from the processed set history.
+ *
+ * Reprocesses set results, removes stale history and updates player results, match state and standings.
+ */
 @Service
 public class X01MatchResultServiceImpl implements IX01MatchResultService {
 
     private final IX01SetResultService setResultService;
-    private final IX01SetProgressService setProgressService;
     private final IX01StandingsService standingsService;
 
-    public X01MatchResultServiceImpl(IX01SetResultService setResultService, IX01SetProgressService setProgressService, IX01StandingsService standingsService) {
+    public X01MatchResultServiceImpl(
+            IX01SetResultService setResultService,
+            IX01StandingsService standingsService
+    ) {
         this.setResultService = setResultService;
-        this.setProgressService = setProgressService;
         this.standingsService = standingsService;
     }
 
     /**
-     * First updates the set results. Then for each match player their results for a match.
+     * Rebuilds the result-related state of a match from its set history.
      *
-     * @param match {@link X01Match} the match to be updated
+     * Reprocesses set results, removes stale sets, determines the match winners and updates player results
+     * and the overall match state.
+     *
+     * @param match the match whose result state should be rebuilt
      */
     @Override
     public void updateMatchResult(X01Match match) {
         if (match == null) return;
 
-        // First update all set results.
-        updateSetResults(match);
+        // Rebuild set results and find the current unfinished set.
+        Integer currentSetNumber = updateSetResults(match);
 
-        // Get the player(s) that have won the match
-        List<ObjectId> matchWinners = getMatchWinners(match);
+        // History after the current set could not have been played and is stale.
+        if (currentSetNumber != null) {
+            removeSetsAfter(match, currentSetNumber);
+        }
 
-        // If multiple players have won the set, that means they have drawn.
-        ResultType winOrDrawType = matchWinners.size() > 1 ? ResultType.DRAW : ResultType.WIN;
+        // Find the first set at which the remaining history concludes the match.
+        WinnerSearch winnerSearch = findMatchWinners(match);
 
-        // Set the individual results for each player
-        match.getPlayers().forEach(player -> player.setResultType(
-                matchWinners.isEmpty() ? null : (matchWinners.contains(player.getPlayerId()) ? winOrDrawType : ResultType.LOSS)
-        ));
+        // History after the first match-concluding set is stale.
+        if (winnerSearch.setNumber() != null) {
+            removeSetsAfter(match, winnerSearch.setNumber());
+        }
 
-        // Cleanup trailing sets that may linger beyond the final set.
-        removeSetsAfterWinner(match, matchWinners);
-
-        // Update the match state.
-        updateMatchState(match, matchWinners);
-
-        // update the standings.
-        standingsService.updateMatchStandings(match);
+        // Convert the determined winners into player results.
+        updatePlayerResults(match, winnerSearch.winners());
     }
 
     /**
-     * Updates the result for each set from a match
+     * Rebuilds set results chronologically and finds the current unfinished set.
      *
-     * @param match {@link X01Match} the match that contains the sets
+     * @param match the match whose set results should be rebuilt
+     * @return the current set number, or null when all processed sets are concluded
      */
-    @Override
-    public void updateSetResults(X01Match match) {
-        if (X01MatchUtils.isSetsEmpty(match)) return;
+    private Integer updateSetResults(X01Match match) {
+        if (X01MatchUtils.isSetsEmpty(match)) return null;
 
         List<X01MatchPlayer> players = match.getPlayers();
         int x01 = match.getMatchSettings().getX01();
         X01BestOf bestOf = match.getMatchSettings().getBestOf();
 
-        // For each set update the leg results and after update the set result
-        match.getSets().entrySet().forEach(setEntry -> setResultService.updateSetResult(new X01SetEntry(setEntry), bestOf, players, x01));
+        // Reprocess sets chronologically until the current unfinished set is reached.
+        for (Map.Entry<Integer, X01Set> setEntry : match.getSets().entrySet()) {
+            X01SetEntry entry = new X01SetEntry(setEntry);
+            setResultService.updateSetResult(entry, bestOf, players, x01);
+
+            if (entry.set().getResult() == null) {
+                return entry.setNumber();
+            }
+        }
+
+        return null;
     }
 
     /**
-     * A list of object ids is created containing all players that have won the match. Multiple match winners
-     * means a draw has occurred.
+     * Finds the match winners and the first set at which the match becomes concluded.
      *
-     * @param match {@link X01Match} The match for which the winners are being determined.
-     * @return {@link List<ObjectId>} containing the IDs of players who won the match. multiple winners indicates a draw.
+     * @param match the match to inspect
+     * @return the winner search result
      */
-    @Override
-    public List<ObjectId> getMatchWinners(X01Match match) {
-        if (match == null) return Collections.emptyList();
+    private WinnerSearch findMatchWinners(X01Match match) {
+        if (X01MatchUtils.isSetsEmpty(match)) return new WinnerSearch(List.of(), null);
 
-        // Get the standings for the match.
-        TreeMap<Integer, List<ObjectId>> matchStandings = getMatchStandings(match);
+        Map<ObjectId, Long> winsPerPlayer = createEmptyWinCountMap(match.getPlayers());
+        X01BestOf bestOf = match.getMatchSettings().getBestOf();
+        int setsPlayed = 0;
 
-        // Get the parameters for determine winners method.
-        int setsPlayed = calcSetsPlayed(match);
-        int bestOfSets = match.getMatchSettings().getBestOf().getSets();
-        X01ClearByTwoRule clearByTwoSetsRule = match.getMatchSettings().getBestOf().getClearByTwoSetsRule();
+        // Build the standings chronologically until the rules determine that the match is concluded.
+        for (Map.Entry<Integer, X01Set> setEntry : match.getSets().entrySet()) {
+            X01Set set = setEntry.getValue();
+            if (set.getResult() == null) break;
 
-        // Create the winners list.
-        return standingsService.determineWinners(matchStandings, setsPlayed, bestOfSets, clearByTwoSetsRule);
+            updateWinCounts(winsPerPlayer, set);
+            setsPlayed++;
+
+            List<ObjectId> winners = determineMatchWinners(winsPerPlayer, setsPlayed, bestOf);
+
+            if (!winners.isEmpty()) {
+                return new WinnerSearch(winners, setEntry.getKey());
+            }
+        }
+
+        return new WinnerSearch(List.of(), null);
     }
 
     /**
-     * Determines the number of sets each player has won for a given match, stored in a tree map. where:
-     * - key is number of set wins
-     * - value is list of player ids who have the number of wins
+     * Updates player win counts from a concluded set result.
      *
-     * @param match {@link X01Match} the match for which standings need to be calculated
-     * @return TreeMap<Integer, List < ObjectId>> containing the number of sets each player has won
+     * @param winsPerPlayer the current set win counts
+     * @param set           the concluded set
      */
-    @Override
-    public TreeMap<Integer, List<ObjectId>> getMatchStandings(X01Match match) {
-        if (match == null) return new TreeMap<>();
+    private void updateWinCounts(Map<ObjectId, Long> winsPerPlayer, X01Set set) {
+        for (Map.Entry<ObjectId, ResultType> resultEntry : set.getResult().entrySet()) {
+            ResultType result = resultEntry.getValue();
 
-        // Step 1: Initialize a map containing the number of wins for each player. Initialized with an entry of 0 wins per player.
-        Map<ObjectId, Long> winsPerPlayer = match.getPlayers().stream()
-                .collect(Collectors.toMap(MatchPlayer::getPlayerId, player -> 0L));
-
-        // Step 2: Iterate through sets, for each won or draw set. Update win count map for the players that have won or drawn.
-        match.getSets().values().stream()
-                .filter(set -> set.getResult() != null && !set.getResult().isEmpty())
-                .flatMap(set -> set.getResult().entrySet().stream())
-                .filter(resultEntry -> resultEntry.getValue() == ResultType.WIN || resultEntry.getValue() == ResultType.DRAW)
-                .forEach(resultEntry ->
-                        winsPerPlayer.merge(resultEntry.getKey(), 1L, Long::sum)
-                );
-
-        // Step 3: Group players by number of wins in a tree map.
-        return standingsService.groupByWinCounts(winsPerPlayer);
-    }
-
-    /**
-     * Removes all sets from a match that occur after the last set won by a player
-     * present in the matchWinners list.
-     *
-     * This is useful for cleaning up any trailing sets after a match winner has
-     * already been decided, which may happen after score edits or corrections.
-     *
-     * @param match        {@link X01Match} the match for which the sets need to be potentially modified
-     * @param matchWinners {@link List<ObjectId>} the list of player IDs who have won (or drawn) the match
-     */
-    @Override
-    public void removeSetsAfterWinner(X01Match match, List<ObjectId> matchWinners) {
-        if (X01MatchUtils.isSetsEmpty(match) || CollectionUtils.isEmpty(matchWinners)) return;
-
-        // Iterate over the sets in reverse order.
-        Iterator<X01Set> reverseSetsIterator = match.getSets().descendingMap().values().iterator();
-        while (reverseSetsIterator.hasNext()) {
-            X01Set set = reverseSetsIterator.next();
-
-            // Determine if this set contains a 'set winner'.
-            Map<ObjectId, ResultType> setResultMap = set.getResult();
-            boolean setContainsWinner = setResultMap != null && matchWinners.stream().anyMatch(winner -> {
-                ResultType result = setResultMap.get(winner);
-                return result == ResultType.WIN || result == ResultType.DRAW;
-            });
-
-            if (setContainsWinner) break; // This is the deciding set, stop trimming.
-            else reverseSetsIterator.remove(); // This set is trailing the deciding set, so remove it.
+            // Both wins and drawn sets count as one set win.
+            if (result == ResultType.WIN || result == ResultType.DRAW) {
+                winsPerPlayer.merge(resultEntry.getKey(), 1L, Long::sum);
+            }
         }
     }
 
     /**
-     * Determines the number of sets that have been concluded in a match (doesn't include sets still in progress).
+     * Creates a win-count map containing every match player with zero set wins.
      *
-     * @param match {@link X01Match} the match to calculate the sets played in.
-     * @return int the number of sets that have been concluded in a match (doesn't include sets still in progress).
+     * @param players the match players
+     * @return the initialized win counts
      */
-    private int calcSetsPlayed(X01Match match) {
-        if (match == null) return 0;
-
-        // Count the number of concluded sets
-        long completedSets = match.getSets().values().stream()
-                .filter(set -> setProgressService.isSetConcluded(set, match.getPlayers()))
-                .count();
-
-        // Return the number of completed sets
-        return (int) completedSets;
+    private Map<ObjectId, Long> createEmptyWinCountMap(List<X01MatchPlayer> players) {
+        return players.stream()
+                .collect(Collectors.toMap(X01MatchPlayer::getPlayerId, player -> 0L));
     }
 
     /**
-     * Update the match status and the end date depending on if there are match winners or not.
-     * - Match is in play if there are no winners.
-     * - Match is concluded if there are winners.
+     * Determines whether the current set win counts have concluded the match.
      *
-     * @param match        {@link X01Match} the match to be updated
-     * @param matchWinners {@link List<ObjectId>} the list containing the match winners
+     * @param winsPerPlayer the current set win counts
+     * @param setsPlayed    the number of concluded sets
+     * @param bestOf        the match format
+     * @return the match winners, or an empty list when the match is not yet concluded
+     */
+    private List<ObjectId> determineMatchWinners(Map<ObjectId, Long> winsPerPlayer, int setsPlayed, X01BestOf bestOf) {
+        TreeMap<Integer, List<ObjectId>> standings = standingsService.groupByWinCounts(winsPerPlayer);
+
+        return standingsService.determineWinners(
+                standings,
+                setsPlayed,
+                bestOf.getSets(),
+                bestOf.getClearByTwoSetsRule()
+        );
+    }
+
+    /**
+     * Removes all sets after the given set number.
+     *
+     * @param match     the match containing the sets
+     * @param setNumber the final set number to retain
+     */
+    private void removeSetsAfter(X01Match match, int setNumber) {
+        match.getSets().tailMap(setNumber, false).clear();
+    }
+
+    /**
+     * Updates each player's result from the determined match winners.
+     *
+     * @param match        the match whose player results should be updated
+     * @param matchWinners the determined match winners
+     */
+    private void updatePlayerResults(X01Match match, List<ObjectId> matchWinners) {
+        if (matchWinners.isEmpty()) {
+            match.getPlayers().forEach(player -> player.setResultType(null));
+            return;
+        }
+
+        ResultType winnerResult = matchWinners.size() > 1 ? ResultType.DRAW : ResultType.WIN;
+
+        match.getPlayers().forEach(player -> player.setResultType(
+                matchWinners.contains(player.getPlayerId()) ? winnerResult : ResultType.LOSS
+        ));
+    }
+
+    /**
+     * Updates the match status and end date from the determined match result.
+     *
+     * @param match        the match to update
+     * @param matchWinners the determined match winners
      */
     private void updateMatchState(X01Match match, List<ObjectId> matchWinners) {
-        // No winners mean the match is in play and no end date should be set.
+        // An unfinished match remains in play and must not have an end date.
         if (matchWinners.isEmpty()) {
             match.setEndDate(null);
             match.setMatchStatus(MatchStatus.IN_PLAY);
-        } else {
-            // Only update the end date if the previous match status was in play.
-            if (match.getMatchStatus() == MatchStatus.IN_PLAY || match.getEndDate() == null) {
-                match.setEndDate(Instant.now());
-            }
-            match.setMatchStatus(MatchStatus.CONCLUDED);
+            return;
         }
+
+        // Preserve the original conclusion time when reprocessing an already concluded match.
+        if (match.getMatchStatus() == MatchStatus.IN_PLAY || match.getEndDate() == null) {
+            match.setEndDate(Instant.now());
+        }
+
+        match.setMatchStatus(MatchStatus.CONCLUDED);
+    }
+
+    /**
+     * Stores the winners found during a chronological search and the set that concluded the match.
+     *
+     * @param winners   the determined winners
+     * @param setNumber the concluding set number, or null when the match is unfinished
+     */
+    private record WinnerSearch(List<ObjectId> winners, Integer setNumber) {
     }
 }

@@ -8,34 +8,55 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
-import java.util.Arrays;
+import java.util.List;
 
+/**
+ * Configures cross-origin requests allowed by the application.
+ */
 @Configuration
 public class CorsConfig {
+    private static final List<String> ALLOWED_ORIGIN_PATTERNS = List.of(
+            "http://localhost:4200",
+            "https://jiangxy.github.io", // WebSocket debug tool: /websocket-debug-tool/
+            "http://192.168.1.*:4200",
+            "https://dartsmatcher.kmartin.nl"
+    );
+
+    /**
+     * Creates the CORS configuration used for all application endpoints.
+     *
+     * @return the configured CORS source
+     */
     @Bean
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
+        CorsConfiguration configuration = new CorsConfiguration();
 
-        config.setAllowCredentials(true);
-        config.setAllowedOriginPatterns(Arrays.asList(
-                "http://localhost:4200",
-                "https://jiangxy.github.io/websocket-debug-tool/",
-                "http://192.168.1.*:4200",
-                "https://dartsmatcher.kmartin.nl"
-        ));
-        config.addAllowedHeader("*");
-        config.addAllowedMethod("*");
+        configuration.setAllowCredentials(true);
+        configuration.setAllowedOriginPatterns(ALLOWED_ORIGIN_PATTERNS);
+        configuration.addAllowedHeader("*");
+        configuration.addAllowedMethod("*");
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
+        source.registerCorsConfiguration("/**", configuration);
 
         return source;
     }
 
+    /**
+     * Registers the CORS filter with the highest precedence.
+     *
+     * @param source the CORS configuration source
+     * @return the CORS filter registration
+     */
     @Bean
-    public FilterRegistrationBean<CorsFilter> corsFilterRegistrationBean(UrlBasedCorsConfigurationSource source) {
-        FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(new CorsFilter(source));
-        bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
-        return bean;
+    public FilterRegistrationBean<CorsFilter> corsFilterRegistrationBean(
+            UrlBasedCorsConfigurationSource source
+    ) {
+        FilterRegistrationBean<CorsFilter> registration =
+                new FilterRegistrationBean<>(new CorsFilter(source));
+
+        registration.setOrder(Ordered.HIGHEST_PRECEDENCE);
+
+        return registration;
     }
 }

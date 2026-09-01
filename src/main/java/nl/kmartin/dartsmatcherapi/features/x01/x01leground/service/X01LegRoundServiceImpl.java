@@ -1,41 +1,50 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01leground.service;
 
 import nl.kmartin.dartsmatcherapi.features.x01.common.X01MatchUtils;
+import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.service.IX01CheckoutService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Provides operations for determining and maintaining player turns within X01 leg rounds.
+ *
+ * Uses the insertion order of round scores to preserve the order in which players threw.
+ */
 @Service
 public class X01LegRoundServiceImpl implements IX01LegRoundService {
 
+    private final IX01CheckoutService checkoutService;
+
+    public X01LegRoundServiceImpl(IX01CheckoutService checkoutService) {
+        this.checkoutService = checkoutService;
+    }
+
     /**
-     * Find the player whose turn it is to throw in a round.
+     * Determines which player should throw next in the round.
      *
-     * @param legRound         {@link X01LegRound} the round to check.
-     * @param throwsFirstInLeg {@link ObjectId} the id of the player that started the leg.
-     * @param players          {@link List<X01MatchPlayer>} list of all match players.
-     * @return {@link ObjectId} the player whose turn it is.
+     * Players are evaluated in the throwing order established by the player that
+     * started the leg. The first player without a score in the round is returned.
+     *
+     * @param legRound         the round to evaluate
+     * @param throwsFirstInLeg the player that started the leg
+     * @param players          the match players
+     * @return the next player to throw, or null when no player remains
      */
     @Override
     public ObjectId getCurrentThrowerInRound(X01LegRound legRound, ObjectId throwsFirstInLeg, List<X01MatchPlayer> players) {
-        if (legRound == null || players == null) return null;
+        if (legRound == null || X01MatchUtils.isPlayersEmpty(players)) return null;
 
-        // Get the players who haven't scored yet in this round
-        List<X01MatchPlayer> playersToThrow = getPlayersToThrowInRound(legRound, players);
-
-        // When all players have thrown, there is no current throws for this round.
-        if (playersToThrow.isEmpty()) return null;
-
-        // Find the index of the player who stars the round.
+        // Order the players starting with the player that threw first in the leg.
         List<X01MatchPlayer> orderedPlayers = X01MatchUtils.getThrowingOrder(throwsFirstInLeg, players);
         if (orderedPlayers == null) return null;
 
-        // Find the first player in the order who hasn't scored yet.
+        // The first player without a score is the next player to throw.
         return orderedPlayers.stream()
                 .map(X01MatchPlayer::getPlayerId)
                 .filter(playerId -> !legRound.getScores().containsKey(playerId))
@@ -44,66 +53,75 @@ public class X01LegRoundServiceImpl implements IX01LegRoundService {
     }
 
     /**
-     * Find all players that have yet to score in a round.
+     * Removes the most recently added score from a round.
      *
-     * @param legRound {@link X01LegRound} the round to check
-     * @param players  {@link List<X01MatchPlayer>} list of all match players.
-     * @return {@link List<X01MatchPlayer>} list of players that have not scored in the round.
-     */
-    @Override
-    public List<X01MatchPlayer> getPlayersToThrowInRound(X01LegRound legRound, List<X01MatchPlayer> players) {
-        if (legRound == null || X01MatchUtils.isPlayersEmpty(players)) return Collections.emptyList();
-
-        // Find players that haven't scored and map to a list.
-        return players.stream()
-                .filter(player -> !legRound.getScores().containsKey(player.getPlayerId()))
-                .toList();
-    }
-
-    /**
-     * Removes the last round score from the given leg round.
-     *
-     * @param legRound {@link X01LegRound} from which to remove the last score
-     * @return boolean if a score was removed
+     * @param legRound the round from which to remove the score
+     * @return whether a score was removed
      */
     @Override
     public boolean removeLastScoreFromRound(X01LegRound legRound) {
-        // Nothing to remove
         if (X01MatchUtils.isScoresEmpty(legRound)) return false;
 
-        // Iterate through the scores map keys. When the last key is reached, remove it and return true.
-        Iterator<ObjectId> it = legRound.getScores().keySet().iterator();
-        while (it.hasNext()) {
-            ObjectId playerId = it.next();
-            if (!it.hasNext()) {
-                legRound.getScores().remove(playerId);
+        // Scores are stored in insertion order, so the final entry is the most recent turn.
+        Iterator<ObjectId> scoresIterator = legRound.getScores().keySet().iterator();
+
+        while (scoresIterator.hasNext()) {
+            scoresIterator.next();
+
+            if (!scoresIterator.hasNext()) {
+                scoresIterator.remove();
                 return true;
             }
         }
 
-        // Not score removed.
         return false;
     }
 
     /**
-     * Removes all the scores in a round that occur after the winner's score.
+     * Removes scores that were recorded after the player that won the leg.
      *
-     * @param round     {@link X01LegRound} the round to trim.
-     * @param legWinner {@link ObjectId} the player that won the leg.
+     * @param round     the round to trim
+     * @param legWinner the player that won the leg
      */
     @Override
     public void removeScoresAfterWinner(X01LegRound round, ObjectId legWinner) {
         if (round == null || legWinner == null) return;
 
-        // Iterate through the scores in insertion order. Remove all scores occur after the winner's score.
+        // Walk the scores in throwing order and remove everything after the winning turn.
         Iterator<ObjectId> scoresIterator = round.getScores().keySet().iterator();
         boolean winnerHasThrown = false;
+
         while (scoresIterator.hasNext()) {
             ObjectId playerId = scoresIterator.next();
 
-            if (winnerHasThrown) scoresIterator.remove();
-            else if (playerId.equals(legWinner)) winnerHasThrown = true;
+            if (winnerHasThrown) {
+                scoresIterator.remove();
+            } else if (playerId.equals(legWinner)) {
+                winnerHasThrown = true;
+            }
         }
     }
 
+    /**
+     * Determines whether a round score represents a legal X01 state.
+     *
+     * A bust is invalid. When the remaining score reaches zero, the score must also
+     * represent a valid checkout using the supplied number of checkout darts.
+     *
+     * @param roundScore the round score to validate
+     * @param checkoutDartsUsed the number of darts used for the checkout
+     * @return whether the round score is legal
+     */
+    @Override
+    public boolean isRoundScoreLegal(X01LegRoundScore roundScore, Integer checkoutDartsUsed) {
+        int remaining = roundScore.getRemaining();
+
+        if (checkoutService.isRemainingBust(remaining)) return false;
+
+        if (checkoutService.isRemainingZero(remaining)) {
+            return checkoutService.isScoreCheckout(roundScore.getScore(), checkoutDartsUsed);
+        }
+
+        return true;
+    }
 }

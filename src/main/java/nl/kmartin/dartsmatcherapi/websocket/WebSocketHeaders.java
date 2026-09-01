@@ -1,10 +1,9 @@
 package nl.kmartin.dartsmatcherapi.websocket;
 
 /**
- * Constants for WebSocket message headers.
+ * Defines the headers used by WebSocket messages.
  */
 public final class WebSocketHeaders {
-
     private WebSocketHeaders() {
     }
 

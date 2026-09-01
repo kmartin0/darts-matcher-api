@@ -1,11 +1,16 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01averagestatistics.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
-@AllArgsConstructor
+/**
+ * Stores average statistics for an X01 player.
+ *
+ * Tracks the total and first-nine points, darts and three-dart averages.
+ */
+@Getter
+@Setter
 @NoArgsConstructor
 public class X01AverageStatistics {
     private int pointsThrown;
@@ -15,6 +20,9 @@ public class X01AverageStatistics {
     private int dartsThrownFirstNine;
     private int averageFirstNine;
 
+    /**
+     * Resets all average statistics to their initial values.
+     */
     public void reset() {
         this.pointsThrown = 0;
         this.dartsThrown = 0;

@@ -10,48 +10,71 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class NoDuplicateMatchPlayerNameValidator implements ConstraintValidator<NoDuplicateMatchPlayerName, List<? extends MatchPlayer>> {
+/**
+ * Validates that all match players have unique player names.
+ *
+ * Null and empty player names are ignored because they are handled by separate field validators.
+ */
+public class NoDuplicateMatchPlayerNameValidator
+        implements ConstraintValidator<NoDuplicateMatchPlayerName, List<? extends MatchPlayer>> {
+
+    /**
+     * Checks whether all supplied match players have unique names.
+     *
+     * @param matchPlayers      the match players to validate
+     * @param constraintContext the validation context
+     * @return whether all non-empty player names are unique
+     */
     @Override
     public boolean isValid(List<? extends MatchPlayer> matchPlayers, ConstraintValidatorContext constraintContext) {
-        // null values are handled by other validators (@NotNull)
+        // Null values are handled by separate validation constraints.
         if (matchPlayers == null) {
             return true;
         }
 
-        return this.arePlayerNamesUnique(matchPlayers, constraintContext);
+        return arePlayerNamesUnique(matchPlayers, constraintContext);
     }
 
+    /**
+     * Checks the player names and creates a validation violation for the first duplicate found.
+     *
+     * @param matchPlayers      the match players to validate
+     * @param constraintContext the validation context
+     * @return whether all non-empty player names are unique
+     */
     private boolean arePlayerNamesUnique(List<? extends MatchPlayer> matchPlayers, ConstraintValidatorContext constraintContext) {
-        // Set to track unique player names.
         Set<String> playerNames = new HashSet<>();
 
-        // Add the player names to the set and use the result to determine if the player name already exists.
         for (MatchPlayer player : matchPlayers) {
             String playerName = player.getPlayerName();
 
-            // null or empty values are handled by other validators.
+            // Null and empty names are handled by separate validation constraints.
             if (playerName == null || playerName.isEmpty()) {
                 continue;
             }
 
-            // Check if the name is already in the set (duplicate)
+            // Set.add returns false when the name already exists in the set.
             if (!playerNames.add(playerName)) {
                 setDuplicateNameViolationMessage(playerName, constraintContext);
-
                 return false;
             }
         }
+
         return true;
     }
 
+    /**
+     * Replaces the default validation message with one containing the duplicate player name.
+     *
+     * @param duplicateName     the duplicated player name
+     * @param constraintContext the validation context
+     */
     private void setDuplicateNameViolationMessage(String duplicateName, ConstraintValidatorContext constraintContext) {
-        // Unwrap the HibernateConstraintValidatorContext to access Hibernate-specific methods
+        // Use the Hibernate context so the duplicate name can be supplied as a message parameter.
         HibernateConstraintValidatorContext hibernateContext = constraintContext.unwrap(HibernateConstraintValidatorContext.class);
 
-        // Disable the default violation message
         hibernateContext.disableDefaultConstraintViolation();
 
-        // Build and add the custom violation message with conflicting player names
         hibernateContext
                 .addMessageParameter(MessageKeys.Params.NAME, duplicateName)
                 .buildConstraintViolationWithTemplate("{" + MessageKeys.MESSAGE_PLAYER_NAME_DUPLICATE + "}")

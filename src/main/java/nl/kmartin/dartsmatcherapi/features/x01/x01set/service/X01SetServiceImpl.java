@@ -10,41 +10,48 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.TreeMap;
 
+/**
+ * Provides operations for creating X01 sets and determining their starting player.
+ */
 @Service
 public class X01SetServiceImpl implements IX01SetService {
 
     /**
-     * Creates a new set with the correct starting player.
+     * Creates a new numbered set with the correct starting player.
      *
-     * @param setNumber int the sets number
-     * @param players   {@link List<X01MatchPlayer>} the list of match players
-     * @return {@link X01SetEntry} the created set
+     * @param setNumber the set number
+     * @param players   the match players
+     * @return the created set entry
      */
     @Override
     public X01SetEntry createNewSet(int setNumber, List<X01MatchPlayer> players) {
         ObjectId throwsFirstInSet = calcThrowsFirstInSet(setNumber, players);
-        X01Set newSet = new X01Set(new TreeMap<>(), throwsFirstInSet, null);
-        return new X01SetEntry(setNumber, newSet);
+        X01Set set = new X01Set(new TreeMap<>(), throwsFirstInSet, null);
+
+        return new X01SetEntry(setNumber, set);
     }
 
     /**
-     * Determines who throws first in a set
+     * Determines which player throws first in a set.
      *
-     * @param setNumber int the number of the set
-     * @param players   {@link List<X01MatchPlayer>} the list of match players
-     * @return {@link ObjectId} the player who throws first in the set
+     * The starting player rotates through the match-player order for each successive set.
+     *
+     * @param setNumber the set number
+     * @param players   the match players
+     * @return the player that throws first in the set
+     * @throws IllegalArgumentException when the set number or player list is invalid
      */
-    @Override
-    public ObjectId calcThrowsFirstInSet(int setNumber, List<X01MatchPlayer> players) {
-        if (X01MatchUtils.isPlayersEmpty(players))
+    private ObjectId calcThrowsFirstInSet(int setNumber, List<X01MatchPlayer> players) {
+        if (setNumber < 1) {
+            throw new IllegalArgumentException("Set number must be greater than zero.");
+        }
+
+        if (X01MatchUtils.isPlayersEmpty(players)) {
             throw new IllegalArgumentException("Cannot calculate first thrower from a null or empty player list.");
+        }
 
-        // Calculate the index of the player that starts the set
-        int numOfPlayers = players.size();
-        int throwsFirstIndex = (setNumber - 1) % numOfPlayers;
-
-        // Get the first thrower for this set
+        // Rotate the starting position by one player for each successive set.
+        int throwsFirstIndex = (setNumber - 1) % players.size();
         return players.get(throwsFirstIndex).getPlayerId();
     }
-
 }

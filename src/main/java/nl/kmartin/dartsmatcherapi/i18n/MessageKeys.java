@@ -1,12 +1,15 @@
 package nl.kmartin.dartsmatcherapi.i18n;
 
-public class MessageKeys {
+/**
+ * Defines the keys and parameters used by the application's message resource bundles.
+ */
+public final class MessageKeys {
+    private static final String RESOURCE_TYPE_PREFIX = "resource.type";
+
     private MessageKeys() {
     }
 
-    /**
-     * Bean Validation Messages
-     */
+    // Bean validation messages
     public static final String VALIDATION_NOT_NULL = "javax.validation.constraints.NotNull.message";
     public static final String VALIDATION_NOT_BLANK = "javax.validation.constraints.NotBlank.message";
     public static final String VALIDATION_NULL = "javax.validation.constraints.Null.message";
@@ -16,19 +19,17 @@ public class MessageKeys {
     public static final String VALIDATION_MAX = "javax.validation.constraints.Max.message";
     public static final String VALIDATION_LENGTH = "org.hibernate.validator.constraints.Length.message";
 
-    /**
-     * User-facing Messages (message.*)
-     */
-    //Parameters: 0 - resource name
+    // User-facing messages
+    // Parameters: 0 - resource name
     public static final String MESSAGE_RESOURCE_ALREADY_EXISTS = "message.resource.already.exists";
     public static final String MESSAGE_NO_WHITESPACE_ALLOWED = "message.no.whitespace.allowed";
     // Named parameter: {name}
     public static final String MESSAGE_PLAYER_NAME_NOT_ALLOWED = "message.player.name.not.allowed";
     // Named parameter: {name}
     public static final String MESSAGE_PLAYER_NAME_DUPLICATE = "message.player.name.duplicate";
-    // Parameters: 0 (score)
+    // Parameters: 0 - score
     public static final String MESSAGE_IMPOSSIBLE_CHECKOUT = "message.impossible.checkout";
-    // Parameters: 0 (score), 1 (darts)
+    // Parameters: 0 - score, 1 - darts
     public static final String MESSAGE_IMPOSSIBLE_CHECKOUT_MIN_DARTS = "message.impossible.checkout.min.darts";
     public static final String MESSAGE_LEG_ALREADY_WON = "message.leg.already.won";
     public static final String MESSAGE_X01_DART_BOT_SETTINGS_HUMAN = "message.x01.dart.bot.settings.human";
@@ -41,29 +42,38 @@ public class MessageKeys {
     public static final String MESSAGE_TOO_MANY_BOTS = "message.too.many.bots";
     public static final String MESSAGE_BOT_REQUIRES_HUMAN = "message.bot.requires.human";
 
-    /**
-     * Developer-facing Exceptions (exception.*)
-     */
+    // Developer-facing exceptions
     public static final String EXCEPTION_INTERNAL = "exception.internal";
     public static final String EXCEPTION_INVALID_ARGUMENTS = "exception.invalid.arguments";
-    // Parameters: 0 (URI path)
+    // Parameters: 0 - URI path
     public static final String EXCEPTION_URI_NOT_FOUND = "exception.uri.not.found";
-    // Parameters: 0 (resource type), 1 (identifier)
+    // Parameters: 0 - resource type, 1 - identifier
     public static final String EXCEPTION_RESOURCE_NOT_FOUND = "exception.resource.not.found";
     public static final String EXCEPTION_BODY_NOT_READABLE = "exception.body.not.readable";
-    // Parameters: 0 (resource type)
+    // Parameters: 0 - resource type
     public static final String EXCEPTION_CONFLICT = "exception.conflict";
-    // Parameters: 0 (resource type), 1 (identifier)
+    // Parameters: 0 - resource type, 1 - identifier
     public static final String EXCEPTION_SERVICE_UNAVAILABLE = "exception.service.unavailable";
 
-    public static class Params {
+    /**
+     * Defines named parameters used by parameterized messages.
+     */
+    public static final class Params {
+        private Params() {
+        }
+
         public static final String NAME = "name";
         public static final String SCORE = "score";
         public static final String DARTS = "darts";
     }
 
+    /**
+     * Creates the message key used to resolve a resource type name.
+     *
+     * @param resource the resource type
+     * @return the message key for the resource type
+     */
     public static String forResourceType(Class<?> resource) {
-        String prefix = "resource.type";
-        return prefix + "." + resource.getSimpleName();
+        return RESOURCE_TYPE_PREFIX + "." + resource.getSimpleName();
     }
 }

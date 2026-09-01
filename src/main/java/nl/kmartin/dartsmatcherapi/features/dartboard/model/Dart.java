@@ -1,21 +1,19 @@
 package nl.kmartin.dartsmatcherapi.features.dartboard.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+/**
+ * Represents a dartboard position using a numbered section and scoring area.
+ *
+ * @param section the dartboard section
+ * @param area the scoring area
+ */
+public record Dart(DartboardSection section, DartboardSectionArea area) {
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class Dart {
-    private DartBoardSection section;
-    private DartboardSectionArea area;
-
+    /**
+     * Calculates the score represented by this dart position.
+     *
+     * @return the dart score
+     */
     public int getScore() {
         return section.getScore(area);
-    }
-
-    public Dart(Dart dart) {
-        this(dart.getSection(), dart.getArea());
     }
 }

@@ -5,6 +5,12 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.service.IX01CheckoutS
 import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.model.X01DartBotLegState;
 import org.springframework.stereotype.Service;
 
+/**
+ * Defines the checkout validation policy for the X01 dart bot.
+ *
+ * Determines whether a dart result is valid based on the remaining score,
+ * checkout rules, and the bot's target number of darts for completing the leg.
+ */
 @Service
 public class X01DartBotCheckoutPolicyImpl implements IX01DartBotCheckoutPolicy {
 
@@ -27,13 +33,13 @@ public class X01DartBotCheckoutPolicyImpl implements IX01DartBotCheckoutPolicy {
     @Override
     public boolean isDartResultValid(Dart result, X01DartBotLegState dartBotLegState) {
         // Calculate the remaining points after the dart throw.
-        int remaining = getRemainingAfterThrow(result, dartBotLegState.getRemainingPoints());
+        int remainingAfterThrow = getRemainingAfterThrow(result, dartBotLegState.getRemainingPoints());
 
         // Darts that are not part of a checkout attempt (zero or bust remaining) are always valid.
-        if (!checkoutService.isRemainingZeroOrBust(remaining)) return true;
+        if (!checkoutService.isRemainingZeroOrBust(remainingAfterThrow)) return true;
 
         // Otherwise, validate if the checkout is valid.
-        return isBotCheckoutValid(result, dartBotLegState);
+        return isBotCheckoutValid(result, dartBotLegState, remainingAfterThrow);
     }
 
     /**
@@ -53,12 +59,12 @@ public class X01DartBotCheckoutPolicyImpl implements IX01DartBotCheckoutPolicy {
      * This includes verifying that the remaining points after the throw are valid for a checkout
      * and that the target number of darts required to complete the leg has been reached.
      *
-     * @param result          {@link Dart} the dart result to be validated
-     * @param dartBotLegState {@link X01DartBotLegState} the current state of the leg.}
+     * @param result              {@link Dart} the dart result to be validated
+     * @param dartBotLegState     {@link X01DartBotLegState} the current state of the leg.
+     * @param remainingAfterThrow the remaining points after the dart throw
      * @return boolean true if the checkout is valid, false otherwise.
      */
-    private boolean isBotCheckoutValid(Dart result, X01DartBotLegState dartBotLegState) {
-        int remainingAfterThrow = getRemainingAfterThrow(result, dartBotLegState.getRemainingPoints());
+    private boolean isBotCheckoutValid(Dart result, X01DartBotLegState dartBotLegState, int remainingAfterThrow) {
         int dartsThrownAfterCheckout = dartBotLegState.getDartsUsedInLeg() + 1;
         int targetNumOfDarts = dartBotLegState.getTargetNumOfDarts();
 
@@ -71,7 +77,7 @@ public class X01DartBotCheckoutPolicyImpl implements IX01DartBotCheckoutPolicy {
      * Calculates the remaining points after a dart throw.
      *
      * @param result               the dart result to calculate the remaining points for.
-     * @param remainingBeforeThrow he remaining points before the throw.
+     * @param remainingBeforeThrow the remaining points before the throw.
      * @return int the remaining points after the dart throw.
      */
     private int getRemainingAfterThrow(Dart result, int remainingBeforeThrow) {

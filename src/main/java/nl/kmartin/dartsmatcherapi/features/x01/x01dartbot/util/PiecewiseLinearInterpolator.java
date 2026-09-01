@@ -4,18 +4,18 @@ import java.util.Map;
 import java.util.NavigableMap;
 
 /**
- * A class representing a piecewise linear graph, which allows for interpolation
- * between data points defined on a 2D graph.
+ * Performs piecewise linear interpolation between points on a two-dimensional graph.
+ *
+ * Values outside the defined x-range use the y-value of the nearest endpoint.
  */
-public class PiecewiseLinearInterpolator {
+public final class PiecewiseLinearInterpolator {
     private final NavigableMap<Double, Double> dataPoints;
 
     /**
-     * Constructs a PiecewiseLinearGraph with the specified data points.
+     * Creates an interpolator using the given data points.
      *
-     * @param dataPoints A NavigableMap where keys represent the X-values and
-     *                   values represent the corresponding Y-values.
-     * @throws IllegalArgumentException if the data points map is null or empty.
+     * @param dataPoints the data points where the key represents x and the value represents y
+     * @throws IllegalArgumentException if the data points are null or empty
      */
     public PiecewiseLinearInterpolator(NavigableMap<Double, Double> dataPoints) {
         if (dataPoints == null || dataPoints.isEmpty()) {
@@ -26,11 +26,10 @@ public class PiecewiseLinearInterpolator {
     }
 
     /**
-     * Interpolates the Y value for a given X value based on the piecewise linear
-     * interpolation between data points.
+     * Calculates the y-value for the given x-value.
      *
-     * @param valueX The X value for which the Y value is to be interpolated.
-     * @return The interpolated Y value for the specified X.
+     * @param x the x-value to interpolate
+     * @return the interpolated y-value
      */
     public double interpolateY(double valueX) {
         // If there's only one data point, return the Y value of that point
@@ -54,13 +53,12 @@ public class PiecewiseLinearInterpolator {
     }
 
     /**
-     * Interpolates a Y value between two data points based on their X and Y values.
-     * This is the core formula for linear interpolation.
+     * Calculates the y-value between two data points using linear interpolation.
      *
-     * @param lower The entry representing the lower data point (X1, Y1).
-     * @param upper The entry representing the upper data point (X2, Y2).
-     * @param x     The X value for which the Y value is to be calculated.
-     * @return The interpolated Y value for the given X.
+     * @param lower the lower data point
+     * @param upper the upper data point
+     * @param x     the x-value to interpolate
+     * @return the interpolated y-value
      */
     private double interpolateBetween(Map.Entry<Double, Double> lower, Map.Entry<Double, Double> upper, double x) {
         // Get the x1 and y1 values for the lower point

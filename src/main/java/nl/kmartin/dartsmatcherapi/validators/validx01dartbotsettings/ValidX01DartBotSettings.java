@@ -10,7 +10,10 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-@Target({TYPE})
+/**
+ * Validates that an X01 match player's dart bot settings match its player type.
+ */
+@Target(TYPE)
 @Retention(RUNTIME)
 @Constraint(validatedBy = ValidX01DartBotSettingsValidator.class)
 @Documented

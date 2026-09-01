@@ -1,30 +1,35 @@
 package nl.kmartin.dartsmatcherapi.error.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import nl.kmartin.dartsmatcherapi.error.util.ErrorUtil;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-@Data
-@AllArgsConstructor
+/**
+ * Represents the error response returned by the API.
+ *
+ * Contains the API error code, description, HTTP status code and optional
+ * target-specific errors that clients can use to associate errors with fields.
+ */
+@Getter
 public class ErrorResponse implements Serializable {
-    // The Status
-    private String error;
+    private final String error;
+    private final String description;
+    private final int code;
 
-    // A developer-facing human-readable error description in English.
-    private String description;
-
-    // The HTTP Status Code
-    private int code;
-
-    // (Optional) Additional user-friendly error information that the client code can use to handle
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Map<String, String> targetErrors;
+    private final Map<String, String> targetErrors;
 
+    /**
+     * Creates an error response containing target-specific errors.
+     *
+     * @param apiErrorCode the API error code
+     * @param description  the error description
+     * @param targetErrors the target-specific errors
+     */
     public ErrorResponse(ApiErrorCode apiErrorCode, String description, TargetError... targetErrors) {
         this.code = apiErrorCode.getHttpStatus().value();
         this.description = description;
@@ -32,6 +37,12 @@ public class ErrorResponse implements Serializable {
         this.targetErrors = ErrorUtil.targetErrorsToMap(targetErrors);
     }
 
+    /**
+     * Creates an error response without target-specific errors.
+     *
+     * @param apiErrorCode the API error code
+     * @param description  the error description
+     */
     public ErrorResponse(ApiErrorCode apiErrorCode, String description) {
         this.code = apiErrorCode.getHttpStatus().value();
         this.description = description;

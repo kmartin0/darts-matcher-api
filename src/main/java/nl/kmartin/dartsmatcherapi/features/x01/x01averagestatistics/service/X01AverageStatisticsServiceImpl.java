@@ -4,112 +4,133 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01averagestatistics.model.X01Ave
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
 import org.springframework.stereotype.Service;
 
+/**
+ * Calculates and updates average statistics for X01 players.
+ *
+ * Tracks overall throwing statistics and the separate first-nine statistics for the first three rounds of a leg.
+ */
 @Service
 public class X01AverageStatisticsServiceImpl implements IX01AverageStatisticsService {
+    private static final int DARTS_PER_ROUND = 3;
+    private static final int FIRST_NINE_ROUNDS = 3;
 
     /**
-     * Updates the player's average statistics based on the current round's score and dart usage.
+     * Updates the player's average statistics based on the current round.
      *
-     * @param playerAverageStats {@link X01AverageStatistics} the average statistics of the player to be updated.
-     * @param playerScore        {@link X01LegRoundScore} the score and dart usage details for the current round.
-     * @param roundNumber        {@link int} the current round number (used to differentiate first nine rounds).
+     * @param playerAverageStats the average statistics to update
+     * @param playerScore        the score for the current round
+     * @param roundNumber        the current round number
+     * @param checkoutDartsUsed  number of darts used when checking out, or null when no checkout occurred
      */
     @Override
-    public void updateAverageStats(X01AverageStatistics playerAverageStats, X01LegRoundScore playerScore, int roundNumber, Integer checkoutDartsUsed) {
+    public void updateAverageStats(
+            X01AverageStatistics playerAverageStats,
+            X01LegRoundScore playerScore,
+            int roundNumber,
+            Integer checkoutDartsUsed
+    ) {
         if (playerAverageStats == null || playerScore == null) return;
-        int dartsUsed = checkoutDartsUsed == null ? 3 : checkoutDartsUsed;
 
-        // Update the average statistics for with this score
+        int dartsUsed = checkoutDartsUsed != null
+                ? checkoutDartsUsed
+                : DARTS_PER_ROUND;
+
         updatePointsThrown(playerAverageStats, playerScore);
-        updateDartsThrown(playerAverageStats, playerScore, dartsUsed);
+        updateDartsThrown(playerAverageStats, dartsUsed);
         updateAverage(playerAverageStats);
 
-        // If it's one of the first three rounds, update the first nine statistics
-        if (roundNumber <= 3) {
+        if (roundNumber <= FIRST_NINE_ROUNDS) {
             updatePointsThrownFirstNine(playerAverageStats, playerScore);
-            updateDartsThrownFirstNine(playerAverageStats, playerScore, dartsUsed);
+            updateDartsThrownFirstNine(playerAverageStats, dartsUsed);
             updateAverageFirstNine(playerAverageStats);
         }
     }
 
     /**
-     * Updates the total points thrown by the player based on the current round's score.
+     * Updates the total points thrown.
      *
-     * @param playerAverageStats {@link X01AverageStatistics} the player's average statistics.
-     * @param playerScore        {@link X01LegRoundScore} the current round's score information.
+     * @param playerAverageStats the average statistics to update
+     * @param playerScore        the score for the current round
      */
     private void updatePointsThrown(X01AverageStatistics playerAverageStats, X01LegRoundScore playerScore) {
-        if (playerAverageStats == null || playerScore == null) return;
-
-        // Increment the total points thrown by the player's score in the current round
-        playerAverageStats.setPointsThrown(playerAverageStats.getPointsThrown() + playerScore.getScore());
+        playerAverageStats.setPointsThrown(
+                playerAverageStats.getPointsThrown() + playerScore.getScore()
+        );
     }
 
     /**
-     * Updates the total darts thrown by the player based on the current round's dart usage.
+     * Updates the total darts thrown.
      *
-     * @param playerAverageStats {@link X01AverageStatistics} the player's average statistics.
-     * @param playerScore        {@link X01LegRoundScore} the current round's dart usage information.
-     * @param dartsUsed          the number of darts used for this score.
+     * @param playerAverageStats the average statistics to update
+     * @param dartsUsed          the number of darts used
      */
-    private void updateDartsThrown(X01AverageStatistics playerAverageStats, X01LegRoundScore playerScore, int dartsUsed) {
-        if (playerAverageStats == null || playerScore == null) return;
-
-        // Increment the total darts thrown by the player's darts used in the current round
-        playerAverageStats.setDartsThrown(playerAverageStats.getDartsThrown() + dartsUsed);
+    private void updateDartsThrown(X01AverageStatistics playerAverageStats, int dartsUsed) {
+        playerAverageStats.setDartsThrown(
+                playerAverageStats.getDartsThrown() + dartsUsed
+        );
     }
 
     /**
-     * Calculates and updates the player's overall average based on the total points and darts thrown.
+     * Updates the player's three-dart average.
      *
-     * @param playerAverageStats {@link X01AverageStatistics} the player's average statistics.
+     * @param playerAverageStats the average statistics to update
      */
     private void updateAverage(X01AverageStatistics playerAverageStats) {
-        if (playerAverageStats == null) return;
-
-        // Calculate the one-dart average and update the player's overall average with their three-dart average
-        double oneDartAvg = (double) playerAverageStats.getPointsThrown() / playerAverageStats.getDartsThrown();
-        playerAverageStats.setAverage((int) Math.round(oneDartAvg * 3));
+        playerAverageStats.setAverage(
+                calculateThreeDartAverage(
+                        playerAverageStats.getPointsThrown(),
+                        playerAverageStats.getDartsThrown()
+                )
+        );
     }
 
     /**
-     * Updates the total points thrown by the player for the first nine darts.
+     * Updates the total points thrown during the first nine darts.
      *
-     * @param playerAverageStats {@link X01AverageStatistics} the player's average statistics.
-     * @param playerScore        {@link X01LegRoundScore} the current round's score information.
+     * @param playerAverageStats the average statistics to update
+     * @param playerScore        the score for the current round
      */
     private void updatePointsThrownFirstNine(X01AverageStatistics playerAverageStats, X01LegRoundScore playerScore) {
-        if (playerAverageStats == null || playerScore == null) return;
-
-        // Increment the total points thrown for the first nine darts
-        playerAverageStats.setPointsThrownFirstNine(playerAverageStats.getPointsThrownFirstNine() + playerScore.getScore());
+        playerAverageStats.setPointsThrownFirstNine(
+                playerAverageStats.getPointsThrownFirstNine() + playerScore.getScore()
+        );
     }
 
     /**
-     * Updates the total darts thrown by the player for the first nine darts.
+     * Updates the total darts thrown during the first nine darts.
      *
-     * @param playerAverageStats {@link X01AverageStatistics} the player's average statistics.
-     * @param playerScore        {@link X01LegRoundScore} the current round's dart usage information.
-     * @param dartsUsed          the number of darts used for this score.
+     * @param playerAverageStats the average statistics to update
+     * @param dartsUsed          the number of darts used
      */
-    private void updateDartsThrownFirstNine(X01AverageStatistics playerAverageStats, X01LegRoundScore playerScore, int dartsUsed) {
-        if (playerAverageStats == null || playerScore == null) return;
-
-        // Increment the total darts thrown for the first nine darts
-        playerAverageStats.setDartsThrownFirstNine(playerAverageStats.getDartsThrownFirstNine() + dartsUsed);
+    private void updateDartsThrownFirstNine(X01AverageStatistics playerAverageStats, int dartsUsed) {
+        playerAverageStats.setDartsThrownFirstNine(
+                playerAverageStats.getDartsThrownFirstNine() + dartsUsed
+        );
     }
 
     /**
-     * Calculates and updates the player's average for the first nine darts.
+     * Updates the player's three-dart average for the first nine darts.
      *
-     * @param playerAverageStats {@link X01AverageStatistics} the player's average statistics.
+     * @param playerAverageStats the average statistics to update
      */
     private void updateAverageFirstNine(X01AverageStatistics playerAverageStats) {
-        if (playerAverageStats == null) return;
-
-        // Calculate the three-dart average for the first nine darts and update the player's average for the first nine darts
-        double firstNineOneDartAvg = (double) playerAverageStats.getPointsThrownFirstNine() / playerAverageStats.getDartsThrownFirstNine();
-        playerAverageStats.setAverageFirstNine((int) Math.round(firstNineOneDartAvg * 3));
+        playerAverageStats.setAverageFirstNine(
+                calculateThreeDartAverage(
+                        playerAverageStats.getPointsThrownFirstNine(),
+                        playerAverageStats.getDartsThrownFirstNine()
+                )
+        );
     }
 
+    /**
+     * Calculates a three-dart average.
+     *
+     * @param pointsThrown total points thrown
+     * @param dartsThrown  total darts thrown
+     * @return the rounded three-dart average
+     */
+    private int calculateThreeDartAverage(int pointsThrown, int dartsThrown) {
+        double oneDartAverage = (double) pointsThrown / dartsThrown;
+        return (int) Math.round(oneDartAverage * DARTS_PER_ROUND);
+    }
 }

@@ -7,7 +7,9 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundEntry;
 import org.bson.types.ObjectId;
@@ -17,7 +19,14 @@ import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-@Data
+/**
+ * Represents a leg within an X01 match.
+ *
+ * Stores the player that throws first, the leg winner, checkout dart usage
+ * and the ordered rounds played within the leg.
+ */
+@Getter
+@Setter
 @NoArgsConstructor
 public class X01Leg {
     public static final int MINIMUM_CHECKOUT_DARTS_USED = 1;
@@ -50,22 +59,36 @@ public class X01Leg {
         this.rounds = rounds != null ? rounds : new TreeMap<>();
     }
 
-    // Serialize rounds as a list because JSON objects don't guarantee key order.
+    /**
+     * Returns the rounds as an ordered list for JSON serialization.
+     *
+     * @return the ordered round entries
+     */
     @JsonProperty("rounds")
-    public List<X01LegRoundEntry> setRoundEntries() {
-        return rounds.entrySet().stream()
+    public List<X01LegRoundEntry> getRoundEntries() {
+        return rounds.entrySet()
+                .stream()
                 .map(X01LegRoundEntry::new)
-                .collect(Collectors.toList());
+                .toList();
     }
 
-    // Deserialize rounds from a list to a NavigableMap to guarantee key order.
+    /**
+     * Restores the ordered rounds from their JSON representation.
+     *
+     * @param entries the round entries
+     */
     @JsonProperty("rounds")
-    public void setLegEntries(List<X01LegRoundEntry> entries) {
+    public void setRoundEntries(List<X01LegRoundEntry> entries) {
+        if (entries == null) {
+            this.rounds = new TreeMap<>();
+            return;
+        }
+
         this.rounds = entries.stream()
                 .collect(Collectors.toMap(
                         X01LegRoundEntry::roundNumber,
                         X01LegRoundEntry::round,
-                        (oldVal, newVal) -> newVal,
+                        (oldValue, newValue) -> newValue,
                         TreeMap::new
                 ));
     }

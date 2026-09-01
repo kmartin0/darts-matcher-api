@@ -3,118 +3,135 @@ package nl.kmartin.dartsmatcherapi.features.dartboard.service;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.*;
 import org.springframework.stereotype.Service;
 
+/**
+ * Provides geometric calculations for determining where a dart lands on the dartboard.
+ *
+ * The dartboard is represented using Cartesian coordinates with the bullseye at (0, 0).
+ * Coordinates are converted to polar coordinates, where:
+ * - r represents the distance from the center in millimeters.
+ * - theta represents the angle around the board in radians from 0 to 2π (0° to 360°).
+ *
+ * The radius (r) determines the scoring area and theta determines the numbered section.
+ */
 @Service
 public class DartboardServiceImpl implements IDartboardService {
 
-    private final Dartboard dartboard;
-
-    public DartboardServiceImpl(Dartboard dartboard) {
-        this.dartboard = dartboard;
-    }
-
     /**
-     * Virtually throws a dart at a target on the dartboard and returns a Dart with the result. Generates the result of
-     * the center of the target area + the deviation angle and radius.
+     * Calculates where a dart lands when throwing at a target with a given deviation.
      *
-     * @param target      Dart the target that will be aimed for.
-     * @param offsetR     double the radial deviation in mm.
-     * @param offsetTheta double the theta (angle) deviation in radian between -pi and pi.
-     * @return Dart The result of where the dart landed on the board.
+     * The target starts at the center of its scoring area.
+     * Setting both offsets to 0 results in a throw at the center of the requested target.
+     *
+     * @param target      the dartboard target
+     * @param offsetR     radial deviation in millimeters
+     * @param offsetTheta angular deviation in radians
+     * @return the resulting dart
      */
     @Override
     public Dart getScore(Dart target, double offsetR, double offsetTheta) {
         // Create a polar coordinate from the center of the section area.
-        PolarCoordinate polarTarget = getCenter(target.getSection(), target.getArea());
+        PolarCoordinate polarTarget = getCenter(target.section(), target.area());
 
         // Add the deviation radial and angle to the target's polar coordinate.
-        double r = polarTarget.getR() + offsetR;
-        double theta = PolarCoordinate.normalizeTheta(polarTarget.getTheta() + offsetTheta);
+        double r = polarTarget.r() + offsetR;
+        double theta = PolarCoordinate.normalizeTheta(polarTarget.theta() + offsetTheta);
 
         // Return the Dart containing the result of the polar coordinate with deviation.
         return getScorePolar(new PolarCoordinate(r, theta));
     }
 
     /**
-     * @param cartesianCoordinate CartesianCoordinate The cartesian coordinates of which a score needs to be calculated.
-     * @return int The score corresponding the cartesian coordinates.
+     * Determines where a Cartesian coordinate lies on the dartboard.
+     *
+     * @param cartesianCoordinate the Cartesian coordinate
+     * @return the resulting dart
      */
     private Dart getScoreCartesian(CartesianCoordinate cartesianCoordinate) {
-
         return getScorePolar(PolarCoordinate.fromCartesian(cartesianCoordinate));
     }
 
     /**
-     * @param polarCoordinate PolarCoordinate the polar coordinates of a score.
-     * @return int The score corresponding the polar coordinates.
+     * Determines where a polar coordinate lies on the dartboard.
+     *
+     * @param polarCoordinate the polar coordinate
+     * @return the resulting dart
      */
     private Dart getScorePolar(PolarCoordinate polarCoordinate) {
-        DartBoardSection section = getSection(polarCoordinate.getThetaNormalized());
-        DartboardSectionArea sectionArea = getSectionArea(polarCoordinate.getR());
+        DartboardSection section = getSection(polarCoordinate.getThetaNormalized());
+        DartboardSectionArea sectionArea = getSectionArea(polarCoordinate.r());
 
         // Return the score multiplied by the section area multiplier.
         return new Dart(section, sectionArea);
     }
 
     /**
-     * Gets the scoring section for a given angle (theta) in rad. Ties are broken clockwise (i.e. when theta is on the wire between 18 and 4 the score is 4).
+     * Determines the numbered dartboard section for an angle.
+     * Ties on section boundaries are resolved clockwise.
      *
-     * @param theta double The angle in rad of which the section needs to be determined.
-     * @return int The section of the board.
+     * @param theta the angle around the board in radians
+     * @return the dartboard section
      */
-    private DartBoardSection getSection(double theta) {
+    private DartboardSection getSection(double theta) {
 
-        for (int i = 0; i < dartboard.getSections().size(); i++) {
+        for (int i = 0; i < Dartboard.SECTIONS.size(); i++) {
             if (theta <= getSectionTheta(i)) {
-                return dartboard.getSections().get(i);
+                return Dartboard.SECTIONS.get(i);
             }
         }
 
-        return DartBoardSection.MISS;
+        return DartboardSection.MISS;
     }
 
     /**
-     * @param sectorIndex int the index of the sector counting clockwise starting at 0 = upper half of 6, 1 = 13, 2 = 4 etc.
-     * @return double The outer angle of a section in rad.
+     * Calculates the outer boundary angle of a dartboard section.
+     *
+     * @param sectorIndex the section index around the board
+     * @return the section boundary angle in radians
      */
     private double getSectionTheta(int sectorIndex) {
-        double offSet = Math.PI / 20;
+        if (sectorIndex == Dartboard.NUMBER_OF_SECTIONS) {
+            return Math.PI * 2;
+        }
 
-        return sectorIndex != 20 ? (sectorIndex * Math.PI) / 10 + offSet : (sectorIndex * Math.PI) / 10;
+        return (sectorIndex * Dartboard.SECTION_ANGLE_RADIANS) + Dartboard.HALF_SECTION_ANGLE_RADIANS;
     }
 
     /**
-     * @param r double Radial coordinate measured from the center of the board.
-     * @return The section area r lies in.
+     * Determines the scoring area for a radial distance from the center.
+     *
+     * @param r the distance from the center in millimeters
+     * @return the scoring area
      */
     private DartboardSectionArea getSectionArea(double r) {
 
-        for (DartboardSectionAreaDimen areaDimension : dartboard.getAreaDimensions()) {
-            if (r >= areaDimension.getInner() && r < areaDimension.getOuter())
-                return areaDimension.getSectionArea();
+        for (DartboardSectionAreaDimen areaDimension : Dartboard.AREA_DIMENSIONS) {
+            if (r >= areaDimension.inner() && r < areaDimension.outer())
+                return areaDimension.sectionArea();
         }
 
         return DartboardSectionArea.MISS;
     }
 
     /**
-     * @param section     int section to get the center angle (theta).
-     * @param sectionArea BoardSectionArea area within the section to get the radial center.
-     * @return PolarCoordinate of the center of the section and section area
+     * Calculates the center coordinate of a dartboard target.
+     *
+     * @param section     the dartboard section
+     * @param sectionArea the scoring area within the section
+     * @return the polar coordinate at the center of the target
      */
-    private PolarCoordinate getCenter(DartBoardSection section, DartboardSectionArea sectionArea) {
+    private PolarCoordinate getCenter(DartboardSection section, DartboardSectionArea sectionArea) {
         if (sectionArea.equals(DartboardSectionArea.DOUBLE_BULL)) return new PolarCoordinate(0, 0);
 
-        return dartboard.getAreaDimensions().stream()
-                .filter(dartBoardSectionAreaDimen -> dartBoardSectionAreaDimen.getSectionArea().equals(sectionArea))
+        return Dartboard.AREA_DIMENSIONS.stream()
+                .filter(dartBoardSectionAreaDimen -> dartBoardSectionAreaDimen.sectionArea().equals(sectionArea))
                 .findFirst()
                 .map(boardSectionAreaDimen -> {
                     // Calculate what the center angle of a section is.
-                    double sectionSize = Math.PI / 20;
-                    double sectionTheta = getSectionTheta(dartboard.getSections().indexOf(section));
-                    double sectionCenterTheta = sectionTheta - sectionSize;
+                    double sectionTheta = getSectionTheta(Dartboard.SECTIONS.indexOf(section));
+                    double sectionCenterTheta = sectionTheta - Dartboard.HALF_SECTION_ANGLE_RADIANS;
 
                     // Calculate what the radial of the section area is.
-                    double r = (boardSectionAreaDimen.getInner() + boardSectionAreaDimen.getOuter()) / 2.0;
+                    double r = (boardSectionAreaDimen.inner() + boardSectionAreaDimen.outer()) / 2.0;
 
                     return new PolarCoordinate(r, sectionCenterTheta);
                 })

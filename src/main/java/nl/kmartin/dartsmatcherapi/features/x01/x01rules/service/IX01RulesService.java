@@ -13,8 +13,4 @@ public interface IX01RulesService {
     boolean isSinglePlayerMatch(TreeMap<Integer, List<ObjectId>> standings, int leaderScore, Integer runnerUpScore);
 
     boolean isWinnerConfirmed(int diff, int bestOfRemaining, int played, int bestOf, X01ClearByTwoRule clearByTwoRule);
-
-    boolean winnerCannotBeCaught(int diff, int bestOfRemaining);
-
-    boolean isClearByTwoSatisfied(int diff, int played, int bestOf, X01ClearByTwoRule clearByTwoRule);
 }

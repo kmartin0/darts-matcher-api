@@ -11,12 +11,4 @@ import java.util.TreeMap;
 
 public interface IX01SetResultService {
     void updateSetResult(X01SetEntry setEntry, X01BestOf bestOf, List<X01MatchPlayer> players, int x01);
-
-    void updateLegResults(X01Set set, List<X01MatchPlayer> players, int x01);
-
-    List<ObjectId> getSetWinners(X01SetEntry setEntry, X01BestOf bestOf, List<X01MatchPlayer> players);
-
-    TreeMap<Integer, List<ObjectId>> getSetStandings(X01Set set, List<X01MatchPlayer> players);
-
-    void removeLegsAfterSetWinner(X01Set set, List<ObjectId> setWinners);
 }

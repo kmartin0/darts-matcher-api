@@ -13,6 +13,12 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
+/**
+ * Handles internal WebSocket events and sends their corresponding messages to clients.
+ *
+ * Supports broadcasting messages to subscribers and sending responses or errors
+ * to a specific WebSocket session.
+ */
 @Component
 public class WebSocketEventListener {
 

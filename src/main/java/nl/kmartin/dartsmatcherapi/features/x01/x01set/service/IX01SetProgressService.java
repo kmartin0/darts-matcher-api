@@ -16,11 +16,9 @@ public interface IX01SetProgressService {
 
     Optional<X01LegEntry> getCurrentLeg(X01Set set);
 
-    Optional<X01LegEntry> createNextLeg(X01SetEntry setEntry, List<X01MatchPlayer> players, X01BestOf bestOf, ObjectId throwsFirstInSet);
+    Optional<X01LegEntry> createNextLeg(X01SetEntry setEntry, List<X01MatchPlayer> players, X01BestOf bestOf);
 
-    Set<Integer> getLegNumbers(X01Set set);
-
-    boolean isSetConcluded(X01Set set, List<X01MatchPlayer> players);
+    boolean isSetConcluded(X01Set set);
 
     boolean removeLastScoreFromSet(X01Set set);
 }
