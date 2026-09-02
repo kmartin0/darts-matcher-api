@@ -12,8 +12,8 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class X01ClearByTwoRule {
 
     public static final int MAXIMUM_LIMIT = 20;

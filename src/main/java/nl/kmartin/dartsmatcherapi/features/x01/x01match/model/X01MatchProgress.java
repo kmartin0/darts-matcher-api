@@ -12,8 +12,8 @@ import org.bson.types.ObjectId;
  */
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class X01MatchProgress {
 
     @Positive

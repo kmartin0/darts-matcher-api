@@ -15,8 +15,8 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class X01BestOf {
 
     public static final int MAXIMUM_BEST_OF = 49;

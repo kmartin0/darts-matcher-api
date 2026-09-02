@@ -16,8 +16,8 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Turn;
  */
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class X01LegRoundScore {
     public static final int MAXIMUM_SCORE = 180;
     public static final int MAXIMUM_DOUBLES_MISSED = 3;

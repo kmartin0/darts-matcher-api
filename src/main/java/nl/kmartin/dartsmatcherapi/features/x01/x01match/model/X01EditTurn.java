@@ -2,7 +2,6 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01match.model;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,7 +12,6 @@ import org.bson.types.ObjectId;
  */
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 public class X01EditTurn extends X01Turn {
 

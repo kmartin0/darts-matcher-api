@@ -6,7 +6,15 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.service.IX01DartBotSer
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
-import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.*;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01BestOf;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01BestOfType;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01ClearByTwoRule;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01DartBotSettings;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchProgress;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchSettings;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Turn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.repository.IX01MatchRepository;
 import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01Set;
 import nl.kmartin.dartsmatcherapi.i18n.MessageResolver;
@@ -18,15 +26,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 @ExtendWith(MockitoExtension.class)
 public class X01DartBotTests {
-    private static final Logger logger = LoggerFactory.getLogger(X01DartBotTests.class);
     private static final int MAX_AVG_TO_TEST = 180;
     private static final int MIN_AVG_TO_TEST = 1;
     private static final int ITERATION_PER_TARGET = 100;

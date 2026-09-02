@@ -14,8 +14,8 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScor
  */
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class X01DartBotLegState {
     public static final int DARTS_PER_ROUND = 3;
 

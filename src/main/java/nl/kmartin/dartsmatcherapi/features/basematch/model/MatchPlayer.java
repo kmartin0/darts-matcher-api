@@ -16,8 +16,8 @@ import org.bson.types.ObjectId;
  */
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class MatchPlayer {
     public static final int MINIMUM_PLAYER_NAME_LENGTH = 3;
     public static final int MAXIMUM_PLAYER_NAME_LENGTH = 30;

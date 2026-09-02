@@ -13,8 +13,8 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class X01StandingsEntry {
     @PositiveOrZero
     private int setsWon;

@@ -12,8 +12,8 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class X01DartBotSettings {
 
     public static final int MINIMUM_BOT_AVG = 3;

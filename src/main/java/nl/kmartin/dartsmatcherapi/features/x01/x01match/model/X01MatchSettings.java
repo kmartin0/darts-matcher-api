@@ -14,8 +14,8 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class X01MatchSettings {
 
     public static final int MINIMUM_X01 = 101;

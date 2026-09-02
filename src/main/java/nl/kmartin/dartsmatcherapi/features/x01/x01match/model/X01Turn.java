@@ -16,8 +16,8 @@ import nl.kmartin.dartsmatcherapi.validators.validdartscore.ValidDartScore;
  */
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class X01Turn {
 
     public static final String FIELD_SCORE = "score";
