@@ -4,7 +4,6 @@ import nl.kmartin.dartsmatcherapi.features.dartboard.model.Dart;
 import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.model.X01Checkout;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public interface IX01CheckoutService {

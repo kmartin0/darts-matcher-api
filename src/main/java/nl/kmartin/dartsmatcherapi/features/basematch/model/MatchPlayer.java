@@ -1,6 +1,5 @@
 package nl.kmartin.dartsmatcherapi.features.basematch.model;
 
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

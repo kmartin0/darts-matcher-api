@@ -3,6 +3,7 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01match.service;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateMatchRequest;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01EditTurn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Turn;
@@ -11,7 +12,7 @@ import org.bson.types.ObjectId;
 import java.util.List;
 
 public interface IX01MatchService {
-    X01Match createMatch(@NotNull @Valid X01Match match);
+    X01Match createMatch(@NotNull @Valid X01CreateMatchRequest match);
 
     X01Match getMatch(@NotNull ObjectId matchId) throws ResourceNotFoundException;
 

@@ -1,88 +1,104 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01match.service;
 
-import jakarta.validation.Valid;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.MatchStatus;
-import nl.kmartin.dartsmatcherapi.features.basematch.model.MatchType;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateMatchRequest;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchProgress;
 import nl.kmartin.dartsmatcherapi.features.x01.x01statistics.model.X01Statistics;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 /**
- * Initializes X01 matches to their starting state.
+ * Creates new X01 matches and rebuilds existing matches into their starting state.
  */
 @Service
+@Validated
 public class X01MatchSetupServiceImpl implements IX01MatchSetupService {
 
-    /**
-     * Prepares an X01 match for play.
-     *
-     * @param match the match to initialize
-     */
     @Override
-    public void setupMatch(@Valid X01Match match) {
-        if (match == null) return;
+    public X01Match initializeNewMatch(X01CreateMatchRequest request) {
+        ArrayList<X01MatchPlayer> players = createMatchPlayers(request.players());
+        ObjectId throwsFirst = players.get(0).getPlayerId();
 
-        setupMatchPlayers(match);
-        setMatchTypeAndStatus(match);
-        setMatchDates(match);
-        setupMatchState(match);
+        return new X01Match(
+                null,
+                null,
+                0,
+                Instant.now(),
+                null,
+                MatchStatus.IN_PLAY,
+                players,
+                request.matchSettings(),
+                new TreeMap<>(),
+                new X01MatchProgress(1, 1, 1, throwsFirst),
+                new LinkedHashMap<>()
+        );
+    }
+
+    @Override
+    public X01Match resetMatch(X01Match match) {
+        ArrayList<X01MatchPlayer> players = resetMatchPlayers(match.getPlayers());
+        ObjectId throwsFirst = players.get(0).getPlayerId();
+
+        return new X01Match(
+                match.getId(),
+                match.getVersion(),
+                match.getBroadcastVersion(),
+                Instant.now(),
+                null,
+                MatchStatus.IN_PLAY,
+                players,
+                match.getMatchSettings(),
+                new TreeMap<>(),
+                new X01MatchProgress(1, 1, 1, throwsFirst),
+                new LinkedHashMap<>()
+        );
     }
 
     /**
-     * Initializes player identifiers, results and statistics.
+     * Maps requested players to newly initialized X01 match players.
      *
-     * @param match the match whose players should be initialized
+     * @param players the requested players
+     * @return the initialized match players
      */
-    private void setupMatchPlayers(X01Match match) {
-        match.getPlayers().forEach(player -> {
-            // Preserve an existing player id, otherwise assign a new one.
-            if (player.getPlayerId() == null) {
-                player.setPlayerId(new ObjectId());
-            }
-
-            player.setResultType(null);
-            player.setStatistics(new X01Statistics());
-        });
+    private ArrayList<X01MatchPlayer> createMatchPlayers(List<X01CreateMatchRequest.Player> players) {
+        return players.stream()
+                .map(player -> new X01MatchPlayer(
+                        new ObjectId(),
+                        player.playerName(),
+                        player.playerType(),
+                        null,
+                        player.x01DartBotSettings(),
+                        new X01Statistics()
+                ))
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     /**
-     * Initializes the match type and status.
+     * Recreates match players for a reset while preserving their identity and configuration.
      *
-     * @param match the match to initialize
+     * @param players the existing match players
+     * @return the reset match players
      */
-    private void setMatchTypeAndStatus(X01Match match) {
-        match.setMatchType(MatchType.X01);
-        match.setMatchStatus(MatchStatus.IN_PLAY);
-    }
-
-    /**
-     * Initializes the match dates.
-     *
-     * @param match the match to initialize
-     */
-    private void setMatchDates(X01Match match) {
-        match.setStartDate(Instant.now());
-        match.setEndDate(null);
-    }
-
-    /**
-     * Initializes the match history, standings and current progress.
-     *
-     * @param match the match to initialize
-     */
-    private void setupMatchState(X01Match match) {
-        // Clear any supplied or previously calculated match state.
-        match.setSets(new TreeMap<>());
-        match.setStandings(new LinkedHashMap<>());
-
-        // Start the match at the first round with the first player throwing.
-        ObjectId startsMatch = match.getPlayers().get(0).getPlayerId();
-        match.setMatchProgress(new X01MatchProgress(1, 1, 1, startsMatch));
+    private ArrayList<X01MatchPlayer> resetMatchPlayers(List<X01MatchPlayer> players) {
+        return players.stream()
+                .map(player -> new X01MatchPlayer(
+                        player.getPlayerId(),
+                        player.getPlayerName(),
+                        player.getPlayerType(),
+                        null,
+                        player.getX01DartBotSettings(),
+                        new X01Statistics()
+                ))
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 }

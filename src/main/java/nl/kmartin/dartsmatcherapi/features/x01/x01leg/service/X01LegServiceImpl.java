@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.IntStream;
 
@@ -172,14 +171,14 @@ public class X01LegServiceImpl implements IX01LegService {
      * @param turn         the turn to store
      * @param throwerId    the player that threw the turn
      * @param trackDoubles whether missed doubles should be tracked
-     * @return the stored round score, or null when the round cannot be resolved
+     * @return the stored round score
+     * @throws ResourceNotFoundException when the round does not exist
      */
     private X01LegRoundScore addRoundScore(X01Leg leg, int roundNumber, X01Turn turn, ObjectId throwerId, boolean trackDoubles) {
-        Optional<X01LegRoundEntry> legRoundEntry = legProgressService.getLegRoundOrThrow(leg, roundNumber, true);
-        if (legRoundEntry.isEmpty()) return null;
+        X01LegRoundEntry legRoundEntry = legProgressService.getLegRoundOrThrow(leg, roundNumber);
 
         X01LegRoundScore roundScore = new X01LegRoundScore(turn, trackDoubles);
-        legRoundEntry.get().round().getScores().put(throwerId, roundScore);
+        legRoundEntry.round().getScores().put(throwerId, roundScore);
 
         return roundScore;
     }

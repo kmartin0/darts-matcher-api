@@ -3,6 +3,7 @@ package nl.kmartin.dartsmatcherapi.features.basematch.model;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -48,9 +49,10 @@ public abstract class BaseMatch<P extends MatchPlayer> {
     @ValidPlayerComposition
     private ArrayList<P> players = new ArrayList<>();
 
+    @Setter(AccessLevel.PROTECTED)
     private MatchType matchType;
 
-    public BaseMatch(
+    protected BaseMatch(
             ObjectId id,
             Integer version,
             int broadcastVersion,

@@ -11,6 +11,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 /**
  * Provides utility methods for working with X01 match structures, players and averages.
@@ -80,10 +81,10 @@ public final class X01MatchUtils {
         if (throwsFirst == null || players == null) return players;
 
         // Find the index of the player that starts the round.
-        int throwsFirstIndex = players.indexOf(players.stream()
-                .filter(player -> player.getPlayerId().equals(throwsFirst))
+        int throwsFirstIndex = IntStream.range(0, players.size())
+                .filter(i -> players.get(i).getPlayerId().equals(throwsFirst))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Player not found")));
+                .orElseThrow(() -> new IllegalArgumentException("Player not found"));
 
         // Order the players in the throwing order of the round.
         List<X01MatchPlayer> orderedPlayers = new ArrayList<>();

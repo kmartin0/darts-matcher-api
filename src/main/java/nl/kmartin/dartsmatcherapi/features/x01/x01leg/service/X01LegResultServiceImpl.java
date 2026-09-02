@@ -1,10 +1,10 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01leg.service;
 
 import nl.kmartin.dartsmatcherapi.features.x01.common.X01MatchUtils;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.service.IX01LegRoundService;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 

@@ -1,11 +1,11 @@
 package nl.kmartin.dartsmatcherapi.websocket;
 
 import jakarta.validation.ConstraintViolationException;
-import nl.kmartin.dartsmatcherapi.error.util.ErrorUtil;
 import nl.kmartin.dartsmatcherapi.error.exception.InvalidArgumentsException;
 import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
 import nl.kmartin.dartsmatcherapi.error.response.ApiErrorCode;
 import nl.kmartin.dartsmatcherapi.error.response.TargetError;
+import nl.kmartin.dartsmatcherapi.error.util.ErrorUtil;
 import nl.kmartin.dartsmatcherapi.i18n.MessageKeys;
 import nl.kmartin.dartsmatcherapi.i18n.MessageResolver;
 import nl.kmartin.dartsmatcherapi.utils.StringUtils;

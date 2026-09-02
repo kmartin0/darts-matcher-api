@@ -11,6 +11,7 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01leg.service.IX01LegService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.service.IX01LegRoundService;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateMatchRequest;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.message.X01MatchMessageType;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01EditTurn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
@@ -85,16 +86,16 @@ public class X01MatchServiceImpl implements IX01MatchService {
     }
 
     /**
-     * Creates and initializes a new X01 match.
+     * Creates a new X01 match from the supplied creation request.
      *
-     * @param match the match to create
+     * @param request the match creation request
      * @return the created match
      */
     @Override
     @Transactional
-    public X01Match createMatch(@NotNull @Valid X01Match match) {
-        // Initialize server-managed state before the match is first processed.
-        matchSetupService.setupMatch(match);
+    public X01Match createMatch(@NotNull @Valid X01CreateMatchRequest request) {
+        // Initialize the complete match state from the creation request.
+        X01Match match = matchSetupService.initializeNewMatch(request);
 
         saveMatchAndProcessBotTurns(match, X01MatchMessageType.PROCESS_MATCH);
         return match;
@@ -244,11 +245,11 @@ public class X01MatchServiceImpl implements IX01MatchService {
     public X01Match resetMatch(ObjectId matchId) {
         X01Match match = getMatch(matchId);
 
-        // Reinitialize server-managed state while preserving the existing match identity.
-        matchSetupService.setupMatch(match);
+        // Create the reset match state while preserving its identity and configuration.
+        X01Match resetMatch = matchSetupService.resetMatch(match);
 
-        saveMatchAndProcessBotTurns(match, X01MatchMessageType.RESET_MATCH);
-        return match;
+        saveMatchAndProcessBotTurns(resetMatch, X01MatchMessageType.RESET_MATCH);
+        return resetMatch;
     }
 
     /**

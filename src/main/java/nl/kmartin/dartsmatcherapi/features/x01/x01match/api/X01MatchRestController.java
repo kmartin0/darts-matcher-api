@@ -1,6 +1,7 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01match.api;
 
 import jakarta.validation.Valid;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateMatchRequest;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01EditTurn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Turn;
@@ -33,8 +34,8 @@ public class X01MatchRestController {
      */
     @PostMapping(path = RestEndpoints.X01_CREATE_MATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public X01Match createMatch(@Valid @RequestBody X01Match match) {
-        return matchService.createMatch(match);
+    public X01Match createMatch(@Valid @RequestBody X01CreateMatchRequest createMatchRequest) {
+        return matchService.createMatch(createMatchRequest);
     }
 
     /**

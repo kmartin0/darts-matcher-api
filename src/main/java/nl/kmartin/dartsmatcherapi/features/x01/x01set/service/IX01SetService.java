@@ -2,7 +2,6 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01set.service;
 
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
 import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01SetEntry;
-import org.bson.types.ObjectId;
 
 import java.util.List;
 

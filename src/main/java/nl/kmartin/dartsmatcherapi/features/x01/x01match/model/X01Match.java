@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.BaseMatch;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.MatchStatus;
@@ -18,11 +17,7 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.NavigableMap;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -30,7 +25,6 @@ import java.util.stream.Collectors;
  */
 @Getter
 @Setter
-@NoArgsConstructor
 @Document(collection = "x01_matches")
 @TypeAlias("X01Match")
 public class X01Match extends BaseMatch<X01MatchPlayer> {
@@ -48,6 +42,10 @@ public class X01Match extends BaseMatch<X01MatchPlayer> {
     @Valid
     private LinkedHashMap<ObjectId, X01StandingsEntry> standings = new LinkedHashMap<>();
 
+    public X01Match() {
+        setMatchType(MatchType.X01);
+    }
+
     public X01Match(
             ObjectId id,
             Integer version,
@@ -56,13 +54,12 @@ public class X01Match extends BaseMatch<X01MatchPlayer> {
             Instant endDate,
             MatchStatus matchStatus,
             ArrayList<X01MatchPlayer> players,
-            MatchType matchType,
             X01MatchSettings matchSettings,
             NavigableMap<Integer, X01Set> sets,
             X01MatchProgress matchProgress,
             LinkedHashMap<ObjectId, X01StandingsEntry> standings
     ) {
-        super(id, version, broadcastVersion, startDate, endDate, matchStatus, players, matchType);
+        super(id, version, broadcastVersion, startDate, endDate, matchStatus, players, MatchType.X01);
         this.matchSettings = matchSettings;
         this.setSets(sets);
         this.matchProgress = matchProgress;

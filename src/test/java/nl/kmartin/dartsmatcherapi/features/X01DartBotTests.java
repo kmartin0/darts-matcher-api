@@ -27,7 +27,7 @@ import java.util.*;
 @ExtendWith(MockitoExtension.class)
 public class X01DartBotTests {
     private static final Logger logger = LoggerFactory.getLogger(X01DartBotTests.class);
-    private static final int MAX_AVG_TO_TEST = 5;
+    private static final int MAX_AVG_TO_TEST = 180;
     private static final int MIN_AVG_TO_TEST = 1;
     private static final int ITERATION_PER_TARGET = 100;
 

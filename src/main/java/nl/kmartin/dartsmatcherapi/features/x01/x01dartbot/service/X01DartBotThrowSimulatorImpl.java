@@ -1,11 +1,11 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.service;
 
-import nl.kmartin.dartsmatcherapi.features.dartboard.service.IDartboardService;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.Dart;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.DartThrow;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.DartboardSectionArea;
-import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.service.IX01CheckoutService;
+import nl.kmartin.dartsmatcherapi.features.dartboard.service.IDartboardService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.model.X01Checkout;
+import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.service.IX01CheckoutService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.model.X01DartBotLegState;
 import org.springframework.stereotype.Service;
 

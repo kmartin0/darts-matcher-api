@@ -1,20 +1,15 @@
 package nl.kmartin.dartsmatcherapi.features;
 
-import nl.kmartin.dartsmatcherapi.features.basematch.model.PlayerType;
 import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.service.IX01DartBotService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.service.IX01LegService;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01LegEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.service.IX01LegRoundService;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundEntry;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateMatchRequest;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.message.X01MatchMessageType;
-import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.*;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchProgress;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.repository.IX01MatchRepository;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.*;
 import nl.kmartin.dartsmatcherapi.features.x01.x01set.service.IX01SetProgressService;
-import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01Set;
-import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01SetEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01standings.service.IX01StandingsService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01statistics.service.IX01StatisticsService;
 import nl.kmartin.dartsmatcherapi.websocket.event.IWebSocketEventPublisher;
@@ -26,10 +21,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 public class X01MatchServiceTests {
@@ -90,19 +81,22 @@ public class X01MatchServiceTests {
     @Test
     void createMatchSetsUpProcessesAndSavesMatch() {
         // Given
+        X01CreateMatchRequest request = Mockito.mock(X01CreateMatchRequest.class);
+
         X01Match match = new X01Match();
         match.setId(new ObjectId());
         match.setMatchProgress(new X01MatchProgress(null, null, null, null));
 
+        Mockito.when(matchSetupService.initializeNewMatch(request)).thenReturn(match);
         Mockito.when(x01MatchRepository.save(match)).thenReturn(match);
 
         // When
-        X01Match result = x01MatchService.createMatch(match);
+        X01Match result = x01MatchService.createMatch(request);
 
         // Then
         Assertions.assertSame(match, result);
 
-        Mockito.verify(matchSetupService).setupMatch(match);
+        Mockito.verify(matchSetupService).initializeNewMatch(request);
         Mockito.verify(matchResultService).updateMatchResult(match);
         Mockito.verify(statisticsService).updatePlayerStatistics(match);
         Mockito.verify(matchProgressService).updateMatchProgress(match);
