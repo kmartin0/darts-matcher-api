@@ -2,7 +2,6 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01match.service;
 
 import nl.kmartin.dartsmatcherapi.features.basematch.model.MatchStatus;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.ResultType;
-import nl.kmartin.dartsmatcherapi.features.x01.common.X01MatchUtils;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01BestOf;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
@@ -12,6 +11,7 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01set.service.IX01SetResultServi
 import nl.kmartin.dartsmatcherapi.features.x01.x01standings.service.IX01StandingsService;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.time.Instant;
 import java.util.List;
@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
  * Reprocesses set results, removes stale history and updates player results, match state and standings.
  */
 @Service
+@Validated
 public class X01MatchResultServiceImpl implements IX01MatchResultService {
 
     private final IX01SetResultService setResultService;
@@ -48,8 +49,6 @@ public class X01MatchResultServiceImpl implements IX01MatchResultService {
      */
     @Override
     public void updateMatchResult(X01Match match) {
-        if (match == null) return;
-
         // Rebuild set results and find the current unfinished set.
         Integer currentSetNumber = updateSetResults(match);
 
@@ -68,6 +67,7 @@ public class X01MatchResultServiceImpl implements IX01MatchResultService {
 
         // Convert the determined winners into player results.
         updatePlayerResults(match, winnerSearch.winners());
+        updateMatchState(match, winnerSearch.winners());
     }
 
     /**
@@ -77,8 +77,6 @@ public class X01MatchResultServiceImpl implements IX01MatchResultService {
      * @return the current set number, or null when all processed sets are concluded
      */
     private Integer updateSetResults(X01Match match) {
-        if (X01MatchUtils.isSetsEmpty(match)) return null;
-
         List<X01MatchPlayer> players = match.getPlayers();
         int x01 = match.getMatchSettings().getX01();
         X01BestOf bestOf = match.getMatchSettings().getBestOf();
@@ -103,8 +101,6 @@ public class X01MatchResultServiceImpl implements IX01MatchResultService {
      * @return the winner search result
      */
     private WinnerSearch findMatchWinners(X01Match match) {
-        if (X01MatchUtils.isSetsEmpty(match)) return new WinnerSearch(List.of(), null);
-
         Map<ObjectId, Long> winsPerPlayer = createEmptyWinCountMap(match.getPlayers());
         X01BestOf bestOf = match.getMatchSettings().getBestOf();
         int setsPlayed = 0;

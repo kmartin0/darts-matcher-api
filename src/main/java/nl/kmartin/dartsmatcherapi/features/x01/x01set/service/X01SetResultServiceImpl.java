@@ -1,7 +1,6 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01set.service;
 
 import nl.kmartin.dartsmatcherapi.features.basematch.model.ResultType;
-import nl.kmartin.dartsmatcherapi.features.x01.common.X01MatchUtils;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.service.IX01LegResultService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01BestOf;
@@ -12,6 +11,7 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01SetEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01standings.service.IX01StandingsService;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 import java.util.Map;
@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
  * Reprocesses leg results, removes stale history and determines the player results for the set.
  */
 @Service
+@Validated
 public class X01SetResultServiceImpl implements IX01SetResultService {
 
     private final IX01LegResultService legResultService;
@@ -47,14 +48,7 @@ public class X01SetResultServiceImpl implements IX01SetResultService {
      */
     @Override
     public void updateSetResult(X01SetEntry setEntry, X01BestOf bestOf, List<X01MatchPlayer> players, int x01) {
-        if (setEntry == null || setEntry.set() == null) return;
-
         X01Set set = setEntry.set();
-
-        if (X01MatchUtils.isPlayersEmpty(players)) {
-            set.setResult(null);
-            return;
-        }
 
         // Rebuild leg results and find the current unfinished leg.
         Integer currentLegNumber = updateLegResults(set, x01);
@@ -84,8 +78,6 @@ public class X01SetResultServiceImpl implements IX01SetResultService {
      * @return the current leg number in play, or null when all processed legs are concluded
      */
     private Integer updateLegResults(X01Set set, int x01) {
-        if (X01MatchUtils.isLegsEmpty(set)) return null;
-
         // Reprocess legs chronologically until the current unfinished leg is reached.
         for (Map.Entry<Integer, X01Leg> legEntry : set.getLegs().entrySet()) {
             X01Leg leg = legEntry.getValue();
@@ -109,7 +101,6 @@ public class X01SetResultServiceImpl implements IX01SetResultService {
      */
     private WinnerSearch findSetWinners(X01SetEntry setEntry, X01BestOf bestOf, List<X01MatchPlayer> players) {
         X01Set set = setEntry.set();
-        if (X01MatchUtils.isLegsEmpty(set)) return new WinnerSearch(List.of(), null);
 
         Map<ObjectId, Long> winsPerPlayer = createEmptyWinCountMap(players);
         X01ClearByTwoRule clearByTwoRule = bestOf.getClearByTwoLegsRuleForSet(setEntry.setNumber());

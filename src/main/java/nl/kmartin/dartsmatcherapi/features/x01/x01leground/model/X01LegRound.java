@@ -1,6 +1,8 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01leground.model;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,20 +19,8 @@ import java.util.LinkedHashMap;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class X01LegRound {
-    @Valid
-    private LinkedHashMap<ObjectId, X01LegRoundScore> scores = new LinkedHashMap<>();
-
-    public X01LegRound(LinkedHashMap<ObjectId, X01LegRoundScore> scores) {
-        this.setScores(scores);
-    }
-
-    /**
-     * Sets the round scores, replacing a null value with an empty ordered map.
-     *
-     * @param scores the player scores in throwing order
-     */
-    public void setScores(@Valid LinkedHashMap<ObjectId, X01LegRoundScore> scores) {
-        this.scores = scores != null ? scores : new LinkedHashMap<>();
-    }
+    @NotNull
+    private LinkedHashMap<@NotNull ObjectId, @NotNull @Valid X01LegRoundScore> scores = new LinkedHashMap<>();
 }

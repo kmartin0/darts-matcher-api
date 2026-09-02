@@ -1,9 +1,12 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01match.model;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.BaseMatch;
@@ -33,14 +36,15 @@ public class X01Match extends BaseMatch<X01MatchPlayer> {
     @Valid
     private X01MatchSettings matchSettings;
 
-    @Valid
-    private NavigableMap<Integer, X01Set> sets = new TreeMap<>();
+    @NotNull
+    private NavigableMap<@NotNull @Positive Integer, @NotNull @Valid X01Set> sets = new TreeMap<>();
 
+    @NotNull
     @Valid
     private X01MatchProgress matchProgress;
 
-    @Valid
-    private LinkedHashMap<ObjectId, X01StandingsEntry> standings = new LinkedHashMap<>();
+    @NotNull
+    private LinkedHashMap<@NotNull ObjectId, @NotNull @Valid X01StandingsEntry> standings = new LinkedHashMap<>();
 
     public X01Match() {
         setMatchType(MatchType.X01);
@@ -61,9 +65,9 @@ public class X01Match extends BaseMatch<X01MatchPlayer> {
     ) {
         super(id, version, broadcastVersion, startDate, endDate, matchStatus, players, MatchType.X01);
         this.matchSettings = matchSettings;
-        this.setSets(sets);
+        this.sets = sets;
         this.matchProgress = matchProgress;
-        this.setStandings(standings);
+        this.standings = standings;
     }
 
     /**
@@ -77,29 +81,11 @@ public class X01Match extends BaseMatch<X01MatchPlayer> {
     }
 
     /**
-     * Replaces the ordered sets.
-     *
-     * @param sets the sets, or null to use an empty map
-     */
-    public void setSets(@Valid NavigableMap<Integer, X01Set> sets) {
-        this.sets = sets != null ? sets : new TreeMap<>();
-    }
-
-    /**
-     * Replaces the match standings.
-     *
-     * @param standings the standings, or null to use an empty map
-     */
-    public void setStandings(@Valid LinkedHashMap<ObjectId, X01StandingsEntry> standings) {
-        this.standings = standings != null ? standings : new LinkedHashMap<>();
-    }
-
-    /**
      * Serializes the ordered sets as a list to preserve their chronological order.
      *
      * @return the sets as ordered entries
      */
-    @JsonProperty("sets")
+    @JsonGetter("sets")
     public List<X01SetEntry> getSetEntries() {
         return sets.entrySet().stream()
                 .map(X01SetEntry::new)
@@ -111,13 +97,8 @@ public class X01Match extends BaseMatch<X01MatchPlayer> {
      *
      * @param entries the serialized set entries
      */
-    @JsonProperty("sets")
+    @JsonSetter(value = "sets", nulls = Nulls.AS_EMPTY)
     public void setSetEntries(List<X01SetEntry> entries) {
-        if (entries == null) {
-            sets = new TreeMap<>();
-            return;
-        }
-
         sets = entries.stream()
                 .collect(Collectors.toMap(
                         X01SetEntry::setNumber,

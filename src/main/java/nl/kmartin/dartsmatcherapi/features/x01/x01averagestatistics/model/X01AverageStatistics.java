@@ -1,5 +1,6 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01averagestatistics.model;
 
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,11 +14,22 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class X01AverageStatistics {
+    @PositiveOrZero
     private int pointsThrown;
+
+    @PositiveOrZero
     private int dartsThrown;
+
+    @PositiveOrZero
     private int average;
+
+    @PositiveOrZero
     private int pointsThrownFirstNine;
+
+    @PositiveOrZero
     private int dartsThrownFirstNine;
+
+    @PositiveOrZero
     private int averageFirstNine;
 
     /**

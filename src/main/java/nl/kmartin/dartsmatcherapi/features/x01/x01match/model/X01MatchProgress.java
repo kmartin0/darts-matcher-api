@@ -1,5 +1,6 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01match.model;
 
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,8 +16,14 @@ import org.bson.types.ObjectId;
 @NoArgsConstructor
 public class X01MatchProgress {
 
+    @Positive
     private Integer currentSet;
+
+    @Positive
     private Integer currentLeg;
+
+    @Positive
     private Integer currentRound;
+
     private ObjectId currentThrower;
 }

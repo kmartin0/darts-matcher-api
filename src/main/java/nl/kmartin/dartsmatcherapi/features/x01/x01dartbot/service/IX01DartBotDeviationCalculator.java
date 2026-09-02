@@ -1,7 +1,10 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.service;
 
-public interface IX01DartBotDeviationCalculator {
-    double createOffsetR(double targetOneDartAvg, double currentOneDartAvg);
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 
-    double createOffsetTheta(double targetOneDartAvg, double currentOneDartAvg);
+public interface IX01DartBotDeviationCalculator {
+    double createOffsetR(@Positive double targetOneDartAvg, @PositiveOrZero double currentOneDartAvg);
+
+    double createOffsetTheta(@Positive double targetOneDartAvg, @PositiveOrZero double currentOneDartAvg);
 }

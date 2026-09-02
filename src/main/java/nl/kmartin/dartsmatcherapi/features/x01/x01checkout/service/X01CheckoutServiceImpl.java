@@ -12,6 +12,7 @@ import nl.kmartin.dartsmatcherapi.i18n.MessageResolver;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.io.IOException;
 import java.util.List;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
  * and determining whether scores or remaining points are valid checkout states.
  */
 @Service
+@Validated
 public class X01CheckoutServiceImpl implements IX01CheckoutService {
     private static final Set<Integer> INVALID_CHECKOUTS = Set.of(169, 168, 166, 165, 163, 162, 159);
 
@@ -113,7 +115,7 @@ public class X01CheckoutServiceImpl implements IX01CheckoutService {
      */
     @Override
     public boolean isScoreCheckout(int score, int dartsUsed) {
-        if (!isScoreCheckout(score)) return false;
+        if (!isScoreCheckout(score) || !isValidDartsUsed(dartsUsed)) return false;
         Optional<X01Checkout> checkout = getCheckout(score);
 
         if (checkout.isEmpty()) return false;
@@ -178,6 +180,17 @@ public class X01CheckoutServiceImpl implements IX01CheckoutService {
         DartboardSectionArea lastDartArea = lastDart.area();
 
         return isRemainingZero(remaining) && lastDartArea.isDouble();
+    }
+
+    /**
+     * Determines whether the given number of darts is valid for a checkout attempt.
+     *
+     * @param dartsUsed the number of darts used
+     * @return whether the number of darts used is within the valid checkout range
+     */
+    private boolean isValidDartsUsed(int dartsUsed) {
+        return dartsUsed >= X01Checkout.MINIMUM_CHECKOUT_DARTS
+                && dartsUsed <= X01Checkout.MAXIMUM_CHECKOUT_DARTS;
     }
 
     /**

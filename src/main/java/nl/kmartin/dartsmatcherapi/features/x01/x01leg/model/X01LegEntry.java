@@ -1,6 +1,10 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01leg.model;
 
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
 import java.util.Map;
 
 /**
@@ -9,7 +13,10 @@ import java.util.Map;
  * @param legNumber the leg number
  * @param leg       the leg
  */
-public record X01LegEntry(int legNumber, X01Leg leg) {
+public record X01LegEntry(
+        @Positive int legNumber,
+        @NotNull @Valid X01Leg leg
+) {
 
     /**
      * Creates a leg entry from a map entry.

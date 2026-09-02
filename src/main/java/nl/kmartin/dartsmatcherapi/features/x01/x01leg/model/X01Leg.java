@@ -1,11 +1,14 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01leg.model;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -40,22 +43,18 @@ public class X01Leg {
     @Max(MAXIMUM_CHECKOUT_DARTS_USED)
     private Integer checkoutDartsUsed;
 
-    @Valid
-    private NavigableMap<Integer, X01LegRound> rounds = new TreeMap<>();
+    @NotNull
+    private NavigableMap<@NotNull @Positive Integer, @NotNull @Valid X01LegRound> rounds = new TreeMap<>();
 
     public X01Leg(ObjectId winner, ObjectId throwsFirst, NavigableMap<Integer, X01LegRound> rounds) {
         this.winner = winner;
         this.throwsFirst = throwsFirst;
-        this.setRounds(rounds);
+        this.rounds = rounds;
     }
 
     @JsonIgnore
-    public @Valid NavigableMap<Integer, X01LegRound> getRounds() {
+    public NavigableMap<Integer, X01LegRound> getRounds() {
         return rounds;
-    }
-
-    public void setRounds(@Valid NavigableMap<Integer, X01LegRound> rounds) {
-        this.rounds = rounds != null ? rounds : new TreeMap<>();
     }
 
     /**
@@ -63,7 +62,7 @@ public class X01Leg {
      *
      * @return the ordered round entries
      */
-    @JsonProperty("rounds")
+    @JsonGetter("rounds")
     public List<X01LegRoundEntry> getRoundEntries() {
         return rounds.entrySet()
                 .stream()
@@ -76,13 +75,8 @@ public class X01Leg {
      *
      * @param entries the round entries
      */
-    @JsonProperty("rounds")
+    @JsonSetter(value = "rounds", nulls = Nulls.AS_EMPTY)
     public void setRoundEntries(List<X01LegRoundEntry> entries) {
-        if (entries == null) {
-            this.rounds = new TreeMap<>();
-            return;
-        }
-
         this.rounds = entries.stream()
                 .collect(Collectors.toMap(
                         X01LegRoundEntry::roundNumber,

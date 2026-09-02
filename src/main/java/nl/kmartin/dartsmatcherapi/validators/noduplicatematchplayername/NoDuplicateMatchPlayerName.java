@@ -13,11 +13,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 /**
  * Validates that a collection of match players does not contain duplicate player names.
  */
-@Target({FIELD, METHOD, PARAMETER, ANNOTATION_TYPE})
+@Target({FIELD, METHOD, PARAMETER, ANNOTATION_TYPE, RECORD_COMPONENT})
 @Retention(RUNTIME)
 @Constraint(validatedBy = NoDuplicateMatchPlayerNameValidator.class)
 @Documented
 public @interface NoDuplicateMatchPlayerName {
+
     String message() default "";
 
     Class<?>[] groups() default {};

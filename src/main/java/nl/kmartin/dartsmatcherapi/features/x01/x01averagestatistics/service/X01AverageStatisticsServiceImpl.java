@@ -3,6 +3,7 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01averagestatistics.service;
 import nl.kmartin.dartsmatcherapi.features.x01.x01averagestatistics.model.X01AverageStatistics;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * Calculates and updates average statistics for X01 players.
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
  * Tracks overall throwing statistics and the separate first-nine statistics for the first three rounds of a leg.
  */
 @Service
+@Validated
 public class X01AverageStatisticsServiceImpl implements IX01AverageStatisticsService {
     private static final int DARTS_PER_ROUND = 3;
     private static final int FIRST_NINE_ROUNDS = 3;
@@ -29,8 +31,6 @@ public class X01AverageStatisticsServiceImpl implements IX01AverageStatisticsSer
             int roundNumber,
             Integer checkoutDartsUsed
     ) {
-        if (playerAverageStats == null || playerScore == null) return;
-
         int dartsUsed = checkoutDartsUsed != null
                 ? checkoutDartsUsed
                 : DARTS_PER_ROUND;

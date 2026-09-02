@@ -1,5 +1,7 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01checkout.service;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.Dart;
 import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.model.X01Checkout;
 
@@ -15,7 +17,7 @@ public interface IX01CheckoutService {
 
     boolean isScoreCheckout(int score, int dartsUsed);
 
-    boolean isValidCheckout(int remaining, Dart lastDart);
+    boolean isValidCheckout(int remaining, @NotNull @Valid Dart lastDart);
 
     boolean isRemainingZeroOrBust(int remaining);
 

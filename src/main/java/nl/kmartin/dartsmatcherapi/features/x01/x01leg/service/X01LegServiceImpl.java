@@ -2,7 +2,6 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01leg.service;
 
 import nl.kmartin.dartsmatcherapi.error.exception.InvalidArgumentsException;
 import nl.kmartin.dartsmatcherapi.error.response.TargetError;
-import nl.kmartin.dartsmatcherapi.features.x01.common.X01MatchUtils;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01LegEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundEntry;
@@ -14,6 +13,7 @@ import nl.kmartin.dartsmatcherapi.i18n.MessageKeys;
 import nl.kmartin.dartsmatcherapi.i18n.MessageResolver;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 import java.util.Objects;
@@ -26,6 +26,7 @@ import java.util.stream.IntStream;
  * Applies turns, maintains checkout state and delegates progression and result calculations.
  */
 @Service
+@Validated
 public class X01LegServiceImpl implements IX01LegService {
 
     private final MessageResolver messageResolver;
@@ -74,15 +75,13 @@ public class X01LegServiceImpl implements IX01LegService {
      */
     @Override
     public void applyTurn(int x01, X01Leg leg, int roundNumber, X01Turn turn, ObjectId throwerId, boolean trackDoubles) {
-        if (leg == null || turn == null) return;
-
+        // Determine if a turn may be applied to this leg.
         checkLegEditable(leg, throwerId);
 
         // Capture checkout state before replacing the existing score.
         boolean wasCheckoutRound = isPlayerCheckoutRound(leg, roundNumber, throwerId);
 
         X01LegRoundScore roundScore = addRoundScore(leg, roundNumber, turn, throwerId, trackDoubles);
-        if (roundScore == null) return;
 
         // Rebuild this player's remaining values before processing the new score.
         legResultService.updateRemainingForPlayer(leg, throwerId, x01);
@@ -102,8 +101,6 @@ public class X01LegServiceImpl implements IX01LegService {
      */
     @Override
     public boolean isPlayerCheckoutRound(X01Leg leg, int roundNumber, ObjectId playerId) {
-        if (leg == null || playerId == null) return false;
-
         return playerId.equals(leg.getWinner()) && leg.getRounds().higherKey(roundNumber) == null;
     }
 
@@ -116,18 +113,8 @@ public class X01LegServiceImpl implements IX01LegService {
      * @param throwsFirstInSet the player that throws first in the set
      * @param players          the match players
      * @return the player that throws first in the leg
-     * @throws IllegalArgumentException when the leg number or player list is invalid
-     * @throws IllegalStateException    when the set starter cannot be found among the match players
      */
     private ObjectId calcThrowsFirstInLeg(int legNumber, ObjectId throwsFirstInSet, List<X01MatchPlayer> players) {
-        if (legNumber < 1) {
-            throw new IllegalArgumentException("Leg number must be greater than zero.");
-        }
-
-        if (X01MatchUtils.isPlayersEmpty(players)) {
-            throw new IllegalArgumentException("Cannot calculate first thrower from a null or empty player list.");
-        }
-
         // Find the set starter's position in the match-player order.
         int numOfPlayers = players.size();
         int startingIndexForSet = IntStream.range(0, numOfPlayers)
@@ -150,8 +137,6 @@ public class X01LegServiceImpl implements IX01LegService {
      * @throws InvalidArgumentsException when another player's score is modified after the leg has been won
      */
     private void checkLegEditable(X01Leg leg, ObjectId playerId) {
-        if (leg == null) return;
-
         // A concluded leg can only be changed through the winning player's turn.
         if (legProgressService.isLegConcluded(leg) && !Objects.equals(leg.getWinner(), playerId)) {
             throw new InvalidArgumentsException(
@@ -172,7 +157,6 @@ public class X01LegServiceImpl implements IX01LegService {
      * @param throwerId    the player that threw the turn
      * @param trackDoubles whether missed doubles should be tracked
      * @return the stored round score
-     * @throws ResourceNotFoundException when the round does not exist
      */
     private X01LegRoundScore addRoundScore(X01Leg leg, int roundNumber, X01Turn turn, ObjectId throwerId, boolean trackDoubles) {
         X01LegRoundEntry legRoundEntry = legProgressService.getLegRoundOrThrow(leg, roundNumber);

@@ -1,7 +1,6 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01set.service;
 
 import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
-import nl.kmartin.dartsmatcherapi.features.x01.common.X01MatchUtils;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01LegEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.service.IX01LegProgressService;
@@ -13,6 +12,7 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01Set;
 import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01SetEntry;
 import nl.kmartin.dartsmatcherapi.utils.NumberUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.Iterator;
 import java.util.List;
@@ -23,6 +23,7 @@ import java.util.Set;
  * Provides operations for navigating and maintaining leg progression within an X01 set.
  */
 @Service
+@Validated
 public class X01SetProgressServiceImpl implements IX01SetProgressService {
 
     private final IX01LegService legService;
@@ -49,10 +50,6 @@ public class X01SetProgressServiceImpl implements IX01SetProgressService {
      */
     @Override
     public X01LegEntry getLegOrThrow(X01Set set, int legNumber) {
-        if (X01MatchUtils.isLegsEmpty(set) || legNumber < 1) {
-            throw new ResourceNotFoundException(X01Leg.class, legNumber);
-        }
-
         return Optional.ofNullable(set.getLegs().get(legNumber))
                 .map(leg -> new X01LegEntry(legNumber, leg))
                 .orElseThrow(() -> new ResourceNotFoundException(X01Leg.class, legNumber));
@@ -66,8 +63,6 @@ public class X01SetProgressServiceImpl implements IX01SetProgressService {
      */
     @Override
     public Optional<X01LegEntry> getCurrentLeg(X01Set set) {
-        if (X01MatchUtils.isLegsEmpty(set)) return Optional.empty();
-
         // Legs are ordered by number, so the first leg without a winner is the current leg.
         return set.getLegs().entrySet()
                 .stream()
@@ -86,8 +81,6 @@ public class X01SetProgressServiceImpl implements IX01SetProgressService {
      */
     @Override
     public Optional<X01LegEntry> createNextLeg(X01SetEntry setEntry, List<X01MatchPlayer> players, X01BestOf bestOf) {
-        if (setEntry == null || setEntry.set() == null) return Optional.empty();
-
         X01Set set = setEntry.set();
 
         // Determine which leg numbers are already present.
@@ -118,7 +111,7 @@ public class X01SetProgressServiceImpl implements IX01SetProgressService {
      */
     @Override
     public boolean isSetConcluded(X01Set set) {
-        return set != null && set.getResult() != null;
+        return set.getResult() != null;
     }
 
     /**
@@ -131,7 +124,7 @@ public class X01SetProgressServiceImpl implements IX01SetProgressService {
      */
     @Override
     public boolean removeLastScoreFromSet(X01Set set) {
-        if (X01MatchUtils.isLegsEmpty(set)) return false;
+        if (set.getLegs().isEmpty()) return false;
 
         // Traverse legs from newest to oldest until a score can be removed.
         Iterator<Integer> reverseLegsIterator = set.getLegs().descendingKeySet().iterator();
@@ -160,8 +153,6 @@ public class X01SetProgressServiceImpl implements IX01SetProgressService {
      * @return the leg numbers
      */
     private Set<Integer> getLegNumbers(X01Set set) {
-        if (X01MatchUtils.isLegsEmpty(set)) return Set.of();
-
         return Set.copyOf(set.getLegs().keySet());
     }
 }

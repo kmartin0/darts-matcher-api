@@ -4,6 +4,7 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01checkoutstatistics.model.X01Ch
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
 import nl.kmartin.dartsmatcherapi.utils.NumberUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * Calculates and updates checkout statistics for X01 players.
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
  * and the number of ton-plus checkouts.
  */
 @Service
+@Validated
 public class X01CheckoutStatisticsServiceImpl implements IX01CheckoutStatisticsService {
     /**
      * Updates the player's checkout statistics for the current round.
@@ -28,8 +30,6 @@ public class X01CheckoutStatisticsServiceImpl implements IX01CheckoutStatisticsS
             boolean isCheckout,
             boolean trackDoubles
     ) {
-        if (playerCheckoutStats == null || playerScore == null) return;
-
         if (isCheckout) {
             playerCheckoutStats.incrementCheckoutsHit();
             updateHighestCheckout(playerCheckoutStats, playerScore);

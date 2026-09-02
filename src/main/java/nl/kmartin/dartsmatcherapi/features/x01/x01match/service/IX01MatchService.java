@@ -12,13 +12,13 @@ import org.bson.types.ObjectId;
 import java.util.List;
 
 public interface IX01MatchService {
-    X01Match createMatch(@NotNull @Valid X01CreateMatchRequest match);
+    X01Match createMatch(@NotNull @Valid X01CreateMatchRequest request);
 
     X01Match getMatch(@NotNull ObjectId matchId) throws ResourceNotFoundException;
 
-    List<X01Match> getMatches(List<ObjectId> matchIds);
+    List<X01Match> getMatches(@NotNull List<@NotNull ObjectId> matchIds);
 
-    void checkMatchExists(ObjectId matchId);
+    void checkMatchExists(@NotNull ObjectId matchId);
 
     X01Match addTurn(@NotNull ObjectId matchId, @NotNull @Valid X01Turn turn);
 
@@ -26,9 +26,9 @@ public interface IX01MatchService {
 
     X01Match deleteLastTurn(@NotNull ObjectId matchId);
 
-    void deleteMatch(ObjectId matchId);
+    void deleteMatch(@NotNull ObjectId matchId);
 
-    X01Match resetMatch(ObjectId matchId);
+    X01Match resetMatch(@NotNull ObjectId matchId);
 
-    X01Match reprocessMatch(ObjectId matchId);
+    X01Match reprocessMatch(@NotNull ObjectId matchId);
 }

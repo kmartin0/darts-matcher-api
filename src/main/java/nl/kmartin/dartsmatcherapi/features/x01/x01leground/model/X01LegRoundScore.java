@@ -1,7 +1,7 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01leground.model;
 
 import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,19 +19,18 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Turn;
 @AllArgsConstructor
 @NoArgsConstructor
 public class X01LegRoundScore {
-    public static final int MINIMUM_SCORE = 0;
     public static final int MAXIMUM_SCORE = 180;
-    public static final int MINIMUM_REMAINING = 0;
+    public static final int MAXIMUM_DOUBLES_MISSED = 3;
 
-    @Min(X01Turn.MINIMUM_DOUBLES_MISSED)
-    @Max(X01Turn.MAXIMUM_DOUBLES_MISSED)
+    @PositiveOrZero
+    @Max(MAXIMUM_DOUBLES_MISSED)
     private Integer doublesMissed;
 
-    @Min(MINIMUM_SCORE)
+    @PositiveOrZero
     @Max(MAXIMUM_SCORE)
     private int score;
 
-    @Min(MINIMUM_REMAINING)
+    @PositiveOrZero
     private int remaining;
 
     /**

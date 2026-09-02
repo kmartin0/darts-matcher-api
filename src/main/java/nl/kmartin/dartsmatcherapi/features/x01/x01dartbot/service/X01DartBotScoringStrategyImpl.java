@@ -4,6 +4,7 @@ import nl.kmartin.dartsmatcherapi.features.dartboard.model.Dart;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.DartboardSection;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.DartboardSectionArea;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import java.util.Map;
  * always selected when the target one-dart average reaches the configured threshold.
  */
 @Service
+@Validated
 public class X01DartBotScoringStrategyImpl implements IX01DartBotScoringStrategy {
     private static final double GUARANTEED_T20_MINIMUM_ONE_DART_AVERAGE = 50.0;
 

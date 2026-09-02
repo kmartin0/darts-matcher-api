@@ -7,6 +7,7 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScor
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.Iterator;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.List;
  * Uses the insertion order of round scores to preserve the order in which players threw.
  */
 @Service
+@Validated
 public class X01LegRoundServiceImpl implements IX01LegRoundService {
 
     private final IX01CheckoutService checkoutService;
@@ -38,11 +40,8 @@ public class X01LegRoundServiceImpl implements IX01LegRoundService {
      */
     @Override
     public ObjectId getCurrentThrowerInRound(X01LegRound legRound, ObjectId throwsFirstInLeg, List<X01MatchPlayer> players) {
-        if (legRound == null || X01MatchUtils.isPlayersEmpty(players)) return null;
-
         // Order the players starting with the player that threw first in the leg.
         List<X01MatchPlayer> orderedPlayers = X01MatchUtils.getThrowingOrder(throwsFirstInLeg, players);
-        if (orderedPlayers == null) return null;
 
         // The first player without a score is the next player to throw.
         return orderedPlayers.stream()
@@ -60,7 +59,7 @@ public class X01LegRoundServiceImpl implements IX01LegRoundService {
      */
     @Override
     public boolean removeLastScoreFromRound(X01LegRound legRound) {
-        if (X01MatchUtils.isScoresEmpty(legRound)) return false;
+        if (legRound.getScores().isEmpty()) return false;
 
         // Scores are stored in insertion order, so the final entry is the most recent turn.
         Iterator<ObjectId> scoresIterator = legRound.getScores().keySet().iterator();
@@ -85,8 +84,6 @@ public class X01LegRoundServiceImpl implements IX01LegRoundService {
      */
     @Override
     public void removeScoresAfterWinner(X01LegRound round, ObjectId legWinner) {
-        if (round == null || legWinner == null) return;
-
         // Walk the scores in throwing order and remove everything after the winning turn.
         Iterator<ObjectId> scoresIterator = round.getScores().keySet().iterator();
         boolean winnerHasThrown = false;
@@ -108,7 +105,7 @@ public class X01LegRoundServiceImpl implements IX01LegRoundService {
      * A bust is invalid. When the remaining score reaches zero, the score must also
      * represent a valid checkout using the supplied number of checkout darts.
      *
-     * @param roundScore the round score to validate
+     * @param roundScore        the round score to validate
      * @param checkoutDartsUsed the number of darts used for the checkout
      * @return whether the round score is legal
      */
@@ -119,7 +116,7 @@ public class X01LegRoundServiceImpl implements IX01LegRoundService {
         if (checkoutService.isRemainingBust(remaining)) return false;
 
         if (checkoutService.isRemainingZero(remaining)) {
-            return checkoutService.isScoreCheckout(roundScore.getScore(), checkoutDartsUsed);
+            return checkoutDartsUsed != null && checkoutService.isScoreCheckout(roundScore.getScore(), checkoutDartsUsed);
         }
 
         return true;

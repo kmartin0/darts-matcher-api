@@ -13,6 +13,7 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01standings.model.X01StandingsEn
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
  * Match standings contain cumulative set wins and leg wins for the current or final set.
  */
 @Service
+@Validated
 public class X01StandingsServiceImpl implements IX01StandingsService {
 
     private final IX01MatchProgressService matchProgressService;
@@ -43,8 +45,6 @@ public class X01StandingsServiceImpl implements IX01StandingsService {
      */
     @Override
     public void updateMatchStandings(X01Match match) {
-        if (match == null) return;
-
         // Use the current set for leg standings, or the final set when the match is concluded.
         Integer currentOrFinalSetNumber = matchProgressService.getCurrentSet(match)
                 .map(X01SetEntry::setNumber)
@@ -82,13 +82,13 @@ public class X01StandingsServiceImpl implements IX01StandingsService {
     @Override
     public List<ObjectId> determineWinners(TreeMap<Integer, List<ObjectId>> standings, int played, int bestOf, X01ClearByTwoRule clearByTwoRule) {
         // Step 1: Empty standings means there can be no winner.
-        if (CollectionUtils.isEmpty(standings)) return List.of();
+        if (standings.isEmpty()) return List.of();
 
         // Step 2: Get the leader and runner-up scores and calculate the current lead.
         int leaderScore = standings.lastKey();
         Integer runnerUpScore = standings.lowerKey(leaderScore);
         int diff = leaderScore - (runnerUpScore != null ? runnerUpScore : leaderScore);
-        int bestOfRemaining = bestOf - played;
+        int bestOfRemaining = Math.max(0, bestOf - played);
 
         // Step 3: A single-player match is only concluded once all configured legs or sets have been played.
         if (rulesService.isSinglePlayerMatch(standings, leaderScore, runnerUpScore)) {
@@ -112,8 +112,6 @@ public class X01StandingsServiceImpl implements IX01StandingsService {
      */
     @Override
     public TreeMap<Integer, List<ObjectId>> groupByWinCounts(Map<ObjectId, Long> winsPerPlayer) {
-        if (winsPerPlayer == null || winsPerPlayer.isEmpty()) return new TreeMap<>();
-
         return winsPerPlayer.entrySet()
                 .stream()
                 .collect(Collectors.groupingBy(

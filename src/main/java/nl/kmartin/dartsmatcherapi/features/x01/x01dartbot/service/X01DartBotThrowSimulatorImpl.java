@@ -8,6 +8,7 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.model.X01Checkout;
 import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.service.IX01CheckoutService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.model.X01DartBotLegState;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +21,7 @@ import java.util.Optional;
  * bot's checkout policy.
  */
 @Service
+@Validated
 public class X01DartBotThrowSimulatorImpl implements IX01DartBotThrowSimulator {
     private final IDartboardService dartboardService;
     private final IX01CheckoutService checkoutService;

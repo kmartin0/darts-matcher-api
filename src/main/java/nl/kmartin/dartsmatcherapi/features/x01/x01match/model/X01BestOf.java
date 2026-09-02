@@ -3,8 +3,8 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01match.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,30 +19,29 @@ import lombok.Setter;
 @NoArgsConstructor
 public class X01BestOf {
 
-    public static final int MINIMUM_BEST_OF = 1;
     public static final int MAXIMUM_BEST_OF = 49;
 
-    @Min(MINIMUM_BEST_OF)
+    @Positive
     @Max(MAXIMUM_BEST_OF)
     private int sets;
 
-    @Min(MINIMUM_BEST_OF)
+    @Positive
     @Max(MAXIMUM_BEST_OF)
     private int legs;
 
     @NotNull
     private X01BestOfType bestOfType;
 
-    @Valid
     @NotNull
+    @Valid
     private X01ClearByTwoRule clearByTwoSetsRule;
 
-    @Valid
     @NotNull
+    @Valid
     private X01ClearByTwoRule clearByTwoLegsRule;
 
-    @Valid
     @NotNull
+    @Valid
     private X01ClearByTwoRule clearByTwoLegsInFinalSetRule;
 
     /**

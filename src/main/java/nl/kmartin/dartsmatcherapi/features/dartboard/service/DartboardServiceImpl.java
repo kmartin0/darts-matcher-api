@@ -2,6 +2,7 @@ package nl.kmartin.dartsmatcherapi.features.dartboard.service;
 
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.*;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * Provides geometric calculations for determining where a dart lands on the dartboard.
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
  * The radius (r) determines the scoring area and theta determines the numbered section.
  */
 @Service
+@Validated
 public class DartboardServiceImpl implements IDartboardService {
 
     /**
@@ -120,18 +122,18 @@ public class DartboardServiceImpl implements IDartboardService {
      * @return the polar coordinate at the center of the target
      */
     private PolarCoordinate getCenter(DartboardSection section, DartboardSectionArea sectionArea) {
-        if (sectionArea.equals(DartboardSectionArea.DOUBLE_BULL)) return new PolarCoordinate(0, 0);
+        if (sectionArea == DartboardSectionArea.DOUBLE_BULL) return new PolarCoordinate(0, 0);
 
         return Dartboard.AREA_DIMENSIONS.stream()
-                .filter(dartBoardSectionAreaDimen -> dartBoardSectionAreaDimen.sectionArea().equals(sectionArea))
+                .filter(dimen -> dimen.sectionArea() == sectionArea)
                 .findFirst()
-                .map(boardSectionAreaDimen -> {
+                .map(dimen -> {
                     // Calculate what the center angle of a section is.
                     double sectionTheta = getSectionTheta(Dartboard.SECTIONS.indexOf(section));
                     double sectionCenterTheta = sectionTheta - Dartboard.HALF_SECTION_ANGLE_RADIANS;
 
                     // Calculate what the radial of the section area is.
-                    double r = (boardSectionAreaDimen.inner() + boardSectionAreaDimen.outer()) / 2.0;
+                    double r = (dimen.inner() + dimen.outer()) / 2.0;
 
                     return new PolarCoordinate(r, sectionCenterTheta);
                 })

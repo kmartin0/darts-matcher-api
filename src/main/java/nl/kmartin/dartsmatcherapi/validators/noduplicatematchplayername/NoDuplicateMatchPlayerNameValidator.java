@@ -3,6 +3,7 @@ package nl.kmartin.dartsmatcherapi.validators.noduplicatematchplayername;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.MatchPlayer;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateMatchRequest;
 import nl.kmartin.dartsmatcherapi.i18n.MessageKeys;
 import org.hibernate.validator.constraintvalidation.HibernateConstraintValidatorContext;
 
@@ -11,51 +12,50 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Validates that all match players have unique player names.
+ * Validates that all supported match-player representations have unique player names.
  *
- * Null and empty player names are ignored because they are handled by separate field validators.
+ * Null players and null or empty player names are ignored because separate constraints validate them.
  */
 public class NoDuplicateMatchPlayerNameValidator
-        implements ConstraintValidator<NoDuplicateMatchPlayerName, List<? extends MatchPlayer>> {
+        implements ConstraintValidator<NoDuplicateMatchPlayerName, List<?>> {
 
     /**
-     * Checks whether all supplied match players have unique names.
+     * Checks whether all supplied players have unique names.
      *
-     * @param matchPlayers      the match players to validate
-     * @param constraintContext the validation context
+     * Null lists are accepted because nullability is handled by separate constraints.
+     *
+     * @param players the players to validate
+     * @param context the validation context
      * @return whether all non-empty player names are unique
      */
     @Override
-    public boolean isValid(List<? extends MatchPlayer> matchPlayers, ConstraintValidatorContext constraintContext) {
-        // Null values are handled by separate validation constraints.
-        if (matchPlayers == null) {
-            return true;
-        }
+    public boolean isValid(List<?> players, ConstraintValidatorContext context) {
+        if (players == null) return true;
 
-        return arePlayerNamesUnique(matchPlayers, constraintContext);
+        return arePlayerNamesUnique(players, context);
     }
 
     /**
      * Checks the player names and creates a validation violation for the first duplicate found.
      *
-     * @param matchPlayers      the match players to validate
-     * @param constraintContext the validation context
+     * @param players the players to validate
+     * @param context the validation context
      * @return whether all non-empty player names are unique
      */
-    private boolean arePlayerNamesUnique(List<? extends MatchPlayer> matchPlayers, ConstraintValidatorContext constraintContext) {
+    private boolean arePlayerNamesUnique(List<?> players, ConstraintValidatorContext context) {
         Set<String> playerNames = new HashSet<>();
 
-        for (MatchPlayer player : matchPlayers) {
-            String playerName = player.getPlayerName();
+        for (Object player : players) {
+            if (player == null) continue;
+
+            String playerName = extractPlayerName(player);
 
             // Null and empty names are handled by separate validation constraints.
-            if (playerName == null || playerName.isEmpty()) {
-                continue;
-            }
+            if (playerName == null || playerName.isEmpty()) continue;
 
             // Set.add returns false when the name already exists in the set.
             if (!playerNames.add(playerName)) {
-                setDuplicateNameViolationMessage(playerName, constraintContext);
+                setDuplicateNameViolationMessage(playerName, context);
                 return false;
             }
         }
@@ -64,17 +64,30 @@ public class NoDuplicateMatchPlayerNameValidator
     }
 
     /**
+     * Extracts the player name from a supported player representation.
+     *
+     * @param player the player representation
+     * @return the player's name
+     * @throws IllegalArgumentException when the player representation is unsupported
+     */
+    private String extractPlayerName(Object player) {
+        if (player instanceof MatchPlayer matchPlayer) return matchPlayer.getPlayerName();
+        if (player instanceof X01CreateMatchRequest.Player requestPlayer) return requestPlayer.playerName();
+
+        throw new IllegalArgumentException("Unsupported player type: " + player.getClass());
+    }
+
+    /**
      * Replaces the default validation message with one containing the duplicate player name.
      *
-     * @param duplicateName     the duplicated player name
-     * @param constraintContext the validation context
+     * @param duplicateName the duplicated player name
+     * @param context       the validation context
      */
-    private void setDuplicateNameViolationMessage(String duplicateName, ConstraintValidatorContext constraintContext) {
-        // Use the Hibernate context so the duplicate name can be supplied as a message parameter.
-        HibernateConstraintValidatorContext hibernateContext = constraintContext.unwrap(HibernateConstraintValidatorContext.class);
+    private void setDuplicateNameViolationMessage(String duplicateName, ConstraintValidatorContext context) {
+        HibernateConstraintValidatorContext hibernateContext =
+                context.unwrap(HibernateConstraintValidatorContext.class);
 
         hibernateContext.disableDefaultConstraintViolation();
-
         hibernateContext
                 .addMessageParameter(MessageKeys.Params.NAME, duplicateName)
                 .buildConstraintViolationWithTemplate("{" + MessageKeys.MESSAGE_PLAYER_NAME_DUPLICATE + "}")

@@ -1,6 +1,7 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01checkoutstatistics.model;
 
 import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,15 +19,21 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.model.X01Checkout;
 public class X01CheckoutStatistics {
     public static final int MINIMUM_TON_PLUS_CHECKOUT = 100;
 
+    @PositiveOrZero
     @Max(X01Checkout.MAXIMUM_CHECKOUT)
     private int checkoutHighest;
 
+    @PositiveOrZero
     private int checkoutTonPlus;
 
+    @PositiveOrZero
+    @Max(100)
     private Integer checkoutPercentage;
 
+    @PositiveOrZero
     private Integer checkoutsMissed;
 
+    @PositiveOrZero
     private int checkoutsHit;
 
     /**

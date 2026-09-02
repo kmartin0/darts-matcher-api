@@ -39,7 +39,7 @@ public class X01MatchSetupServiceImpl implements IX01MatchSetupService {
                 players,
                 request.matchSettings(),
                 new TreeMap<>(),
-                new X01MatchProgress(1, 1, 1, throwsFirst),
+                new X01MatchProgress(),
                 new LinkedHashMap<>()
         );
     }
@@ -59,7 +59,7 @@ public class X01MatchSetupServiceImpl implements IX01MatchSetupService {
                 players,
                 match.getMatchSettings(),
                 new TreeMap<>(),
-                new X01MatchProgress(1, 1, 1, throwsFirst),
+                new X01MatchProgress(),
                 new LinkedHashMap<>()
         );
     }

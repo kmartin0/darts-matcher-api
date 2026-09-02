@@ -1,5 +1,6 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01scorestatistics.model;
 
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,11 +21,22 @@ public class X01ScoreStatistics {
     public static final int MINIMUM_TON_FORTY_PLUS = 140;
     public static final int TON_EIGHTY = 180;
 
+    @PositiveOrZero
     private int fortyPlus;
+
+    @PositiveOrZero
     private int sixtyPlus;
+
+    @PositiveOrZero
     private int eightyPlus;
+
+    @PositiveOrZero
     private int tonPlus;
+
+    @PositiveOrZero
     private int tonFortyPlus;
+
+    @PositiveOrZero
     private int tonEighty;
 
     /**

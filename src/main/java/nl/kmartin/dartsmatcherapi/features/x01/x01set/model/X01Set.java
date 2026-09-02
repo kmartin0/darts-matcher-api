@@ -1,8 +1,12 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01set.model;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,31 +30,23 @@ import java.util.stream.Collectors;
 @Setter
 @NoArgsConstructor
 public class X01Set {
-    @Valid
-    private NavigableMap<Integer, X01Leg> legs = new TreeMap<>();
+    @NotNull
+    private NavigableMap<@NotNull @Positive Integer, @NotNull @Valid X01Leg> legs = new TreeMap<>();
 
+    @NotNull
     private ObjectId throwsFirst;
 
-    private Map<ObjectId, ResultType> result;
+    private Map<@NotNull ObjectId, @NotNull ResultType> result;
 
     public X01Set(NavigableMap<Integer, X01Leg> legs, ObjectId throwsFirst, Map<ObjectId, ResultType> result) {
-        this.setLegs(legs);
+        this.legs = legs;
         this.throwsFirst = throwsFirst;
         this.result = result;
     }
 
     @JsonIgnore
-    public @Valid NavigableMap<Integer, X01Leg> getLegs() {
+    public NavigableMap<Integer, X01Leg> getLegs() {
         return legs;
-    }
-
-    /**
-     * Sets the legs, replacing a null value with an empty ordered map.
-     *
-     * @param legs the numbered legs
-     */
-    public void setLegs(@Valid NavigableMap<Integer, X01Leg> legs) {
-        this.legs = legs != null ? legs : new TreeMap<>();
     }
 
     /**
@@ -58,7 +54,7 @@ public class X01Set {
      *
      * @return the numbered leg entries
      */
-    @JsonProperty("legs")
+    @JsonGetter("legs")
     public List<X01LegEntry> getLegEntries() {
         return legs.entrySet()
                 .stream()
@@ -71,13 +67,8 @@ public class X01Set {
      *
      * @param entries the numbered leg entries
      */
-    @JsonProperty("legs")
+    @JsonSetter(value = "legs", nulls = Nulls.AS_EMPTY)
     public void setLegEntries(List<X01LegEntry> entries) {
-        if (entries == null) {
-            this.legs = new TreeMap<>();
-            return;
-        }
-
         this.legs = entries.stream()
                 .collect(Collectors.toMap(
                         X01LegEntry::legNumber,

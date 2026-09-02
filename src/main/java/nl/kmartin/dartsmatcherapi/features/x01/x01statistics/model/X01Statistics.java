@@ -1,6 +1,7 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01statistics.model;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import nl.kmartin.dartsmatcherapi.features.x01.x01averagestatistics.model.X01AverageStatistics;
@@ -17,15 +18,19 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01scorestatistics.model.X01Score
 @Getter
 @Setter
 public class X01Statistics {
+    @NotNull
     @Valid
     private X01ResultStatistics resultStatistics;
 
+    @NotNull
     @Valid
     private X01AverageStatistics averageStats;
 
+    @NotNull
     @Valid
     private X01CheckoutStatistics checkoutStats;
 
+    @NotNull
     @Valid
     private X01ScoreStatistics scoreStatistics;
 
@@ -42,16 +47,9 @@ public class X01Statistics {
      * Missing statistics objects are recreated before continuing.
      */
     public void reset() {
-        if (resultStatistics == null) resultStatistics = new X01ResultStatistics();
-        else resultStatistics.reset();
-
-        if (averageStats == null) averageStats = new X01AverageStatistics();
-        else averageStats.reset();
-
-        if (checkoutStats == null) checkoutStats = new X01CheckoutStatistics();
-        else checkoutStats.reset();
-
-        if (scoreStatistics == null) scoreStatistics = new X01ScoreStatistics();
-        else scoreStatistics.reset();
+        resultStatistics.reset();
+        averageStats.reset();
+        checkoutStats.reset();
+        scoreStatistics.reset();
     }
 }

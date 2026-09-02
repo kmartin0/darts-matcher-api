@@ -1,7 +1,6 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01leg.service;
 
 import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
-import nl.kmartin.dartsmatcherapi.features.x01.common.X01MatchUtils;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundEntry;
@@ -9,13 +8,18 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01leground.service.IX01LegRoundS
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
 import nl.kmartin.dartsmatcherapi.utils.NumberUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Provides operations for navigating and maintaining round progression within an X01 leg.
  */
 @Service
+@Validated
 public class X01LegProgressServiceImpl implements IX01LegProgressService {
 
     private final IX01LegRoundService legRoundService;
@@ -34,7 +38,7 @@ public class X01LegProgressServiceImpl implements IX01LegProgressService {
      */
     @Override
     public X01LegRoundEntry getLegRoundOrThrow(X01Leg leg, int roundNumber) {
-        if (X01MatchUtils.isRoundsEmpty(leg) || roundNumber < 1) {
+        if (roundNumber < 1) {
             throw new ResourceNotFoundException(X01LegRound.class, roundNumber);
         }
 
@@ -52,9 +56,6 @@ public class X01LegProgressServiceImpl implements IX01LegProgressService {
      */
     @Override
     public Optional<X01LegRoundEntry> getCurrentLegRound(X01Leg leg, List<X01MatchPlayer> players) {
-        if (X01MatchUtils.isRoundsEmpty(leg) || X01MatchUtils.isPlayersEmpty(players))
-            return Optional.empty();
-
         // Filter rounds with missing player scores and get the lowest round number.
         return leg.getRounds().entrySet()
                 .stream()
@@ -72,8 +73,6 @@ public class X01LegProgressServiceImpl implements IX01LegProgressService {
      */
     @Override
     public Optional<X01LegRoundEntry> createNextLegRound(X01Leg leg) {
-        if (leg == null) return Optional.empty();
-
         // Get existing round numbers.
         Set<Integer> existingRoundNumbers = getLegRoundNumbers(leg);
 
@@ -96,7 +95,7 @@ public class X01LegProgressServiceImpl implements IX01LegProgressService {
      */
     @Override
     public boolean isLegConcluded(X01Leg leg) {
-        return leg != null && leg.getWinner() != null;
+        return leg.getWinner() != null;
     }
 
     /**
@@ -109,7 +108,7 @@ public class X01LegProgressServiceImpl implements IX01LegProgressService {
      */
     @Override
     public boolean removeLastScoreFromLeg(X01Leg leg) {
-        if (X01MatchUtils.isRoundsEmpty(leg)) return false;
+        if (leg.getRounds().isEmpty()) return false;
 
         Iterator<Integer> reverseRoundsIterator = leg.getRounds().descendingKeySet().iterator();
 
@@ -136,8 +135,6 @@ public class X01LegProgressServiceImpl implements IX01LegProgressService {
      * @return the round numbers
      */
     private Set<Integer> getLegRoundNumbers(X01Leg leg) {
-        if (X01MatchUtils.isRoundsEmpty(leg)) return Collections.emptySet();
-
         // Map all round numbers to a set of integers.
         return Set.copyOf(leg.getRounds().keySet());
     }

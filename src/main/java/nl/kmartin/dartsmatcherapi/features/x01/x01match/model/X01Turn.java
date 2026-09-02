@@ -2,10 +2,13 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01match.model;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
 import nl.kmartin.dartsmatcherapi.validators.validdartscore.ValidDartScore;
 
 /**
@@ -19,19 +22,14 @@ public class X01Turn {
 
     public static final String FIELD_SCORE = "score";
 
-    public static final int MINIMUM_CHECKOUT_DARTS_USED = 1;
-    public static final int MAXIMUM_CHECKOUT_DARTS_USED = 3;
-    public static final int MINIMUM_DOUBLES_MISSED = 0;
-    public static final int MAXIMUM_DOUBLES_MISSED = 3;
-
     @ValidDartScore
     private int score;
 
-    @Min(MINIMUM_CHECKOUT_DARTS_USED)
-    @Max(MAXIMUM_CHECKOUT_DARTS_USED)
+    @Min(X01Leg.MINIMUM_CHECKOUT_DARTS_USED)
+    @Max(X01Leg.MAXIMUM_CHECKOUT_DARTS_USED)
     private Integer checkoutDartsUsed;
 
-    @Min(MINIMUM_DOUBLES_MISSED)
-    @Max(MAXIMUM_DOUBLES_MISSED)
+    @PositiveOrZero
+    @Max(X01LegRoundScore.MAXIMUM_DOUBLES_MISSED)
     private Integer doublesMissed;
 }

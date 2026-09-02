@@ -2,6 +2,7 @@ package nl.kmartin.dartsmatcherapi.features.basematch.model;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -37,18 +38,24 @@ public abstract class BaseMatch<P extends MatchPlayer> {
     @Version
     private Integer version;
 
+    @PositiveOrZero
     private int broadcastVersion;
+
+    @NotNull
     private Instant startDate;
+
     private Instant endDate;
+
+    @NotNull
     private MatchStatus matchStatus;
 
-    @Valid
     @NotNull
     @Size(min = MINIMUM_PLAYERS, max = MAXIMUM_PLAYERS)
     @NoDuplicateMatchPlayerName
     @ValidPlayerComposition
-    private ArrayList<P> players = new ArrayList<>();
+    private ArrayList<@Valid P> players = new ArrayList<>();
 
+    @NotNull
     @Setter(AccessLevel.PROTECTED)
     private MatchType matchType;
 
@@ -68,21 +75,7 @@ public abstract class BaseMatch<P extends MatchPlayer> {
         this.startDate = startDate;
         this.endDate = endDate;
         this.matchStatus = matchStatus;
-        this.setPlayers(players);
+        this.players = players;
         this.matchType = matchType;
-    }
-
-    /**
-     * Sets the match players, replacing a null value with an empty list.
-     *
-     * @param players the match players
-     */
-    public void setPlayers(
-            @Valid
-            @NotNull
-            @Size(min = MINIMUM_PLAYERS, max = MAXIMUM_PLAYERS)
-            ArrayList<P> players
-    ) {
-        this.players = players != null ? players : new ArrayList<>();
     }
 }

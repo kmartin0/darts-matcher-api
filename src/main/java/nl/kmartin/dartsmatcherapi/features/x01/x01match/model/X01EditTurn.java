@@ -1,7 +1,7 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01match.model;
 
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,19 +17,15 @@ import org.bson.types.ObjectId;
 @NoArgsConstructor
 public class X01EditTurn extends X01Turn {
 
-    public static final int MINIMUM_SET_NUMBER = 1;
-    public static final int MINIMUM_LEG_NUMBER = 1;
-    public static final int MINIMUM_ROUND_NUMBER = 1;
-
     @NotNull
     private ObjectId playerId;
 
-    @Min(MINIMUM_SET_NUMBER)
+    @Positive
     private int set;
 
-    @Min(MINIMUM_LEG_NUMBER)
+    @Positive
     private int leg;
 
-    @Min(MINIMUM_ROUND_NUMBER)
+    @Positive
     private int round;
 }

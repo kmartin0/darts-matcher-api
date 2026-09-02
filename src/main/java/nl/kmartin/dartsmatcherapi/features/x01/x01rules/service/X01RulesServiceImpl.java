@@ -3,6 +3,7 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01rules.service;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01ClearByTwoRule;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 import java.util.TreeMap;
@@ -13,6 +14,7 @@ import java.util.TreeMap;
  * Handles standard best-of limits together with optional clear-by-two rules.
  */
 @Service
+@Validated
 public class X01RulesServiceImpl implements IX01RulesService {
 
     /**
@@ -39,8 +41,12 @@ public class X01RulesServiceImpl implements IX01RulesService {
      */
     @Override
     public boolean isSinglePlayerMatch(TreeMap<Integer, List<ObjectId>> standings, int leaderScore, Integer runnerUpScore) {
-        // A single-player match has one leader and no runner-up score.
-        return runnerUpScore == null && standings.get(leaderScore).size() == 1;
+        List<ObjectId> leaders = standings.get(leaderScore);
+
+        // A single-player match has one leader, no runner-up and a matching leader entry in the standings.
+        return runnerUpScore == null
+                && leaders != null
+                && leaders.size() == 1;
     }
 
     /**

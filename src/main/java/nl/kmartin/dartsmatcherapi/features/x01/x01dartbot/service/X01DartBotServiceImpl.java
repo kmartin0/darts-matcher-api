@@ -1,6 +1,5 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.service;
 
-import jakarta.validation.constraints.NotNull;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.PlayerType;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.Dart;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.DartThrow;
@@ -19,6 +18,7 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01SetEntry;
 import nl.kmartin.dartsmatcherapi.utils.NumberUtils;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +31,7 @@ import java.util.Optional;
  * and converts the result into an X01 turn.
  */
 @Service
+@Validated
 public class X01DartBotServiceImpl implements IX01DartBotService {
     private static final double TARGET_DART_COUNT_VARIANCE = 0.05;
     private static final int MINIMUM_TARGET_DARTS = 1;
@@ -58,7 +59,7 @@ public class X01DartBotServiceImpl implements IX01DartBotService {
      * @throws IllegalStateException when the current thrower is not a configured dart bot or the current leg cannot be resolved
      */
     @Override
-    public X01Turn createDartBotTurn(@NotNull X01Match match) {
+    public X01Turn createDartBotTurn(X01Match match) {
         X01MatchPlayer dartBotPlayer = getCurrentDartBotPlayer(match);
 
         // Resolve the current set and leg, creating them when required by the match progress.

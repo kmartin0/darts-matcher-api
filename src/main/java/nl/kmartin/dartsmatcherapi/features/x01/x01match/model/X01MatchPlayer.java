@@ -1,6 +1,7 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01match.model;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,6 +24,7 @@ public class X01MatchPlayer extends MatchPlayer {
     @Valid
     private X01DartBotSettings x01DartBotSettings;
 
+    @NotNull
     @Valid
     private X01Statistics statistics;
 

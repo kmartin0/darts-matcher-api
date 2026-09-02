@@ -1,7 +1,5 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01match.service;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.PlayerType;
 import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.service.IX01DartBotService;
@@ -28,6 +26,7 @@ import nl.kmartin.dartsmatcherapi.websocket.event.IWebSocketEventPublisher;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 import java.util.Map;
@@ -43,6 +42,7 @@ import java.util.stream.Collectors;
  * and publishes match updates.
  */
 @Service
+@Validated
 public class X01MatchServiceImpl implements IX01MatchService {
 
     private static final int MAX_BOT_TURNS = 2;
@@ -93,7 +93,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
      */
     @Override
     @Transactional
-    public X01Match createMatch(@NotNull @Valid X01CreateMatchRequest request) {
+    public X01Match createMatch(X01CreateMatchRequest request) {
         // Initialize the complete match state from the creation request.
         X01Match match = matchSetupService.initializeNewMatch(request);
 
@@ -110,7 +110,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
      */
     @Override
     @Transactional(readOnly = true)
-    public X01Match getMatch(@NotNull ObjectId matchId) throws ResourceNotFoundException {
+    public X01Match getMatch(ObjectId matchId) throws ResourceNotFoundException {
         return matchRepository.findById(matchId)
                 .orElseThrow(() -> new ResourceNotFoundException(X01Match.class, matchId));
     }
@@ -125,7 +125,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
      */
     @Override
     @Transactional(readOnly = true)
-    public List<X01Match> getMatches(@NotNull List<ObjectId> matchIds) {
+    public List<X01Match> getMatches(List<ObjectId> matchIds) {
         Map<ObjectId, X01Match> matchMap = matchRepository.findAllById(matchIds).stream()
                 .collect(Collectors.toMap(X01Match::getId, Function.identity()));
 
@@ -158,7 +158,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
      */
     @Override
     @Transactional
-    public X01Match addTurn(@NotNull ObjectId matchId, @NotNull @Valid X01Turn turn) {
+    public X01Match addTurn(ObjectId matchId, X01Turn turn) {
         X01Match match = getMatch(matchId);
 
         // Apply the submitted turn to the currently active round and thrower.
@@ -177,7 +177,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
      */
     @Override
     @Transactional
-    public X01Match editTurn(@NotNull ObjectId matchId, @NotNull @Valid X01EditTurn editTurn) {
+    public X01Match editTurn(ObjectId matchId, X01EditTurn editTurn) {
         X01Match match = getMatch(matchId);
 
         // Resolve the leg containing the turn being edited.
@@ -210,7 +210,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
      */
     @Override
     @Transactional
-    public X01Match deleteLastTurn(@NotNull ObjectId matchId) {
+    public X01Match deleteLastTurn(ObjectId matchId) {
         X01Match match = getMatch(matchId);
 
         // Remove the latest score and any trailing empty match structure.
@@ -275,7 +275,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
      * @param match the match to update
      * @param turn  the turn to apply
      */
-    private void addTurnToCurrentPlayer(@NotNull X01Match match, @NotNull @Valid X01Turn turn) {
+    private void addTurnToCurrentPlayer(X01Match match, X01Turn turn) {
         // Resolve or create the active set, leg and round.
         X01SetEntry currentSetEntry = matchProgressService.getCurrentSetOrCreate(match)
                 .orElseThrow(() -> new ResourceNotFoundException(X01Set.class, null));
@@ -382,9 +382,10 @@ public class X01MatchServiceImpl implements IX01MatchService {
      * @return true when the current thrower is a Dart Bot
      */
     private boolean isCurrentThrowerDartBot(X01Match match) {
-        if (match == null || match.getMatchProgress().getCurrentThrower() == null) return false;
+        ObjectId currentThrower = match.getMatchProgress().getCurrentThrower();
+        if (currentThrower == null) return false;
 
-        return getPlayerById(match, match.getMatchProgress().getCurrentThrower())
+        return getPlayerById(match, currentThrower)
                 .map(player -> player.getPlayerType() == PlayerType.DART_BOT)
                 .orElse(false);
     }
@@ -397,8 +398,6 @@ public class X01MatchServiceImpl implements IX01MatchService {
      * @return the matching player, or empty when the player is not found
      */
     private Optional<X01MatchPlayer> getPlayerById(X01Match match, ObjectId playerId) {
-        if (playerId == null) return Optional.empty();
-
         return match.getPlayers().stream()
                 .filter(player -> Objects.equals(player.getPlayerId(), playerId))
                 .findFirst();

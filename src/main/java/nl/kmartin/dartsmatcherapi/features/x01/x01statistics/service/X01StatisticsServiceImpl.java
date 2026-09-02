@@ -17,6 +17,7 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01Set;
 import nl.kmartin.dartsmatcherapi.features.x01.x01statistics.model.X01Statistics;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
  * and individual player scores through the specialized statistics services.
  */
 @Service
+@Validated
 public class X01StatisticsServiceImpl implements IX01StatisticsService {
     private final IX01ResultStatisticsService resultStatisticsService;
     private final IX01ScoreStatisticsService scoreStatisticsService;
@@ -61,8 +63,6 @@ public class X01StatisticsServiceImpl implements IX01StatisticsService {
      */
     @Override
     public void updatePlayerStatistics(X01Match match) {
-        if (match == null) return;
-
         // Reset all player statistics before rebuilding them from the match history.
         resetPlayerStatistics(match.getPlayers());
 
@@ -83,8 +83,6 @@ public class X01StatisticsServiceImpl implements IX01StatisticsService {
      * @param playersMap   the players mapped by player ID
      */
     private void processSets(NavigableMap<Integer, X01Set> sets, boolean trackDoubles, Map<ObjectId, X01MatchPlayer> playersMap) {
-        if (sets == null) return;
-
         sets.values().forEach(set -> {
             resultStatisticsService.updateSetsWonStatistics(set, playersMap);
             processLegs(set.getLegs(), trackDoubles, playersMap);
@@ -103,8 +101,6 @@ public class X01StatisticsServiceImpl implements IX01StatisticsService {
             boolean trackDoubles,
             Map<ObjectId, X01MatchPlayer> playersMap
     ) {
-        if (legs == null) return;
-
         legs.values().forEach(leg -> {
             resultStatisticsService.updateLegsWonStatistics(leg, playersMap);
             processLegRounds(leg.getRounds(), leg, trackDoubles, playersMap);
@@ -125,8 +121,6 @@ public class X01StatisticsServiceImpl implements IX01StatisticsService {
             boolean trackDoubles,
             Map<ObjectId, X01MatchPlayer> playersMap
     ) {
-        if (rounds == null) return;
-
         rounds.entrySet()
                 .stream()
                 .map(X01LegRoundEntry::new)
@@ -157,8 +151,6 @@ public class X01StatisticsServiceImpl implements IX01StatisticsService {
             boolean trackDoubles,
             Map<ObjectId, X01MatchPlayer> playersMap
     ) {
-        if (roundScores == null) return;
-
         // Process statistics for each player that recorded a score in the round.
         roundScores.forEach((playerId, roundScore) -> {
             X01MatchPlayer player = playersMap.get(playerId);

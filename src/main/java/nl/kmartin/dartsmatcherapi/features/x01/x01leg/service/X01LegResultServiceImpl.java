@@ -1,12 +1,12 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01leg.service;
 
-import nl.kmartin.dartsmatcherapi.features.x01.common.X01MatchUtils;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.service.IX01LegRoundService;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +18,7 @@ import java.util.Objects;
  * Recalculates remaining scores, determines the first winning turn, removes stale history and calculates darts used.
  */
 @Service
+@Validated
 public class X01LegResultServiceImpl implements IX01LegResultService {
 
     private final IX01LegRoundService legRoundService;
@@ -37,8 +38,6 @@ public class X01LegResultServiceImpl implements IX01LegResultService {
      */
     @Override
     public void updateLegResult(X01Leg leg, int x01) {
-        if (leg == null) return;
-
         // Recalculate all remaining scores before determining the result.
         updateAllRemaining(leg, x01);
 
@@ -89,8 +88,6 @@ public class X01LegResultServiceImpl implements IX01LegResultService {
      */
     @Override
     public void updateRemainingForPlayer(X01Leg leg, ObjectId playerId, int x01) {
-        if (leg == null) return;
-
         int remaining = x01;
 
         // Rebuild the player's remaining score chronologically from the start of the leg.
@@ -115,12 +112,10 @@ public class X01LegResultServiceImpl implements IX01LegResultService {
      */
     @Override
     public int calculateDartsUsed(X01Leg leg, ObjectId playerId) {
-        if (X01MatchUtils.isRoundsEmpty(leg) || playerId == null) return 0;
-
         // Only the winner can have a partial final turn; default missing checkout dart usage to three.
         boolean playerWonLeg = Objects.equals(leg.getWinner(), playerId);
         Integer checkoutRoundNumber = playerWonLeg ? leg.getRounds().lastKey() : null;
-        int checkoutDartsUsed = leg.getCheckoutDartsUsed() != null ? leg.getCheckoutDartsUsed() : 3;
+        int checkoutDartsUsed = leg.getCheckoutDartsUsed() != null ? leg.getCheckoutDartsUsed() : X01Leg.MAXIMUM_CHECKOUT_DARTS_USED;
 
         // Count three darts for each recorded turn, except the winner's checkout turn.
         return leg.getRounds().entrySet()
@@ -145,8 +140,6 @@ public class X01LegResultServiceImpl implements IX01LegResultService {
      * @return the winner and winning round, or an empty winner search when the leg is unfinished
      */
     private WinnerSearch findLegWinner(X01Leg leg) {
-        if (X01MatchUtils.isRoundsEmpty(leg)) return new WinnerSearch(null, null);
-
         // Traverse rounds and scores in playing order; the first player reaching zero wins the leg.
         for (Map.Entry<Integer, X01LegRound> roundEntry : leg.getRounds().entrySet()) {
             for (Map.Entry<ObjectId, X01LegRoundScore> scoreEntry : roundEntry.getValue().getScores().entrySet()) {
@@ -181,8 +174,6 @@ public class X01LegResultServiceImpl implements IX01LegResultService {
      * @param x01 the starting score for the leg
      */
     private void updateAllRemaining(X01Leg leg, int x01) {
-        if (leg == null) return;
-
         // Track each player's latest remaining score while rebuilding the leg chronologically.
         Map<ObjectId, Integer> remainingMap = new HashMap<>();
 

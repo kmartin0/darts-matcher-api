@@ -4,6 +4,7 @@ import nl.kmartin.dartsmatcherapi.features.dartboard.model.PolarCoordinate;
 import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.util.PiecewiseLinearInterpolator;
 import nl.kmartin.dartsmatcherapi.utils.NumberUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.Map;
 import java.util.NavigableMap;
@@ -20,6 +21,7 @@ import java.util.TreeMap;
  * (theta). Theta is converted to radians before being used by the dartboard calculations.
  */
 @Service
+@Validated
 public class X01DartBotDeviationCalculatorImpl implements IX01DartBotDeviationCalculator {
 
     // Controls how strongly the current average adjusts the baseline deviation.

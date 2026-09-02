@@ -1,7 +1,6 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01match.service;
 
 import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
-import nl.kmartin.dartsmatcherapi.features.x01.common.X01MatchUtils;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01LegEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.service.IX01LegProgressService;
@@ -18,6 +17,7 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01set.service.IX01SetService;
 import nl.kmartin.dartsmatcherapi.utils.NumberUtils;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -29,6 +29,7 @@ import java.util.Set;
  * Resolves or creates the current set, leg and round and rebuilds the current match progress.
  */
 @Service
+@Validated
 public class X01MatchProgressServiceImpl implements IX01MatchProgressService {
 
     private final IX01SetService setService;
@@ -54,17 +55,13 @@ public class X01MatchProgressServiceImpl implements IX01MatchProgressService {
     /**
      * Gets a set in a match by its set number.
      *
-     * @param match the match containing the sets
+     * @param match     the match containing the sets
      * @param setNumber the set number
      * @return the matching set entry
      * @throws ResourceNotFoundException when the set does not exist
      */
     @Override
     public X01SetEntry getSetOrThrow(X01Match match, int setNumber) {
-        if (X01MatchUtils.isSetsEmpty(match) || setNumber < 1) {
-            throw new ResourceNotFoundException(X01Set.class, setNumber);
-        }
-
         return Optional.ofNullable(match.getSets().get(setNumber))
                 .map(set -> new X01SetEntry(setNumber, set))
                 .orElseThrow(() -> new ResourceNotFoundException(X01Set.class, setNumber));
@@ -78,8 +75,6 @@ public class X01MatchProgressServiceImpl implements IX01MatchProgressService {
      */
     @Override
     public Optional<X01SetEntry> getCurrentSet(X01Match match) {
-        if (X01MatchUtils.isSetsEmpty(match)) return Optional.empty();
-
         // Sets are ordered by number, so the first unfinished set is the current set.
         return match.getSets().entrySet().stream()
                 .filter(entry -> entry.getValue().getResult() == null)
@@ -95,8 +90,6 @@ public class X01MatchProgressServiceImpl implements IX01MatchProgressService {
      */
     @Override
     public Optional<X01SetEntry> getCurrentSetOrCreate(X01Match match) {
-        if (match == null) return Optional.empty();
-
         Optional<X01SetEntry> currentSetEntry = getCurrentSet(match);
 
         // Create the next set only when no unfinished set exists and the match can still continue.
@@ -114,8 +107,6 @@ public class X01MatchProgressServiceImpl implements IX01MatchProgressService {
      */
     @Override
     public Optional<X01LegEntry> getCurrentLegOrCreate(X01Match match, X01SetEntry currentSetEntry) {
-        if (match == null || currentSetEntry == null || currentSetEntry.set() == null) return Optional.empty();
-
         X01Set currentSet = currentSetEntry.set();
         Optional<X01LegEntry> currentLegEntry = setProgressService.getCurrentLeg(currentSet);
 
@@ -135,10 +126,7 @@ public class X01MatchProgressServiceImpl implements IX01MatchProgressService {
      */
     @Override
     public Optional<X01LegRoundEntry> getCurrentLegRoundOrCreate(X01Match match, X01Leg currentLeg) {
-        if (match == null || currentLeg == null) return Optional.empty();
-
-        Optional<X01LegRoundEntry> currentRoundEntry =
-                legProgressService.getCurrentLegRound(currentLeg, match.getPlayers());
+        Optional<X01LegRoundEntry> currentRoundEntry = legProgressService.getCurrentLegRound(currentLeg, match.getPlayers());
 
         // Create the next round only when no unfinished round exists and the leg can still continue.
         return currentRoundEntry.isEmpty() && !legProgressService.isLegConcluded(currentLeg)
@@ -153,8 +141,6 @@ public class X01MatchProgressServiceImpl implements IX01MatchProgressService {
      */
     @Override
     public void removeLastScoreFromMatch(X01Match match) {
-        if (match == null) return;
-
         // Traverse sets in reverse so trailing empty rounds, legs and sets are cleaned up with the removed score.
         Iterator<Integer> reverseSetsIterator = match.getSets().descendingKeySet().iterator();
 
@@ -179,8 +165,6 @@ public class X01MatchProgressServiceImpl implements IX01MatchProgressService {
      */
     @Override
     public void updateMatchProgress(X01Match match) {
-        if (match == null) return;
-
         // Resolve or create the current set, leg and round.
         Optional<X01SetEntry> currentSetEntry = getCurrentSetOrCreate(match);
         Optional<X01LegEntry> currentLegEntry = currentSetEntry.flatMap(setEntry -> getCurrentLegOrCreate(match, setEntry));
@@ -211,8 +195,6 @@ public class X01MatchProgressServiceImpl implements IX01MatchProgressService {
      * @return the created set, or empty when no further set can be played
      */
     private Optional<X01SetEntry> createNextSet(X01Match match) {
-        if (match == null) return Optional.empty();
-
         Set<Integer> existingSetNumbers = getSetNumbers(match);
 
         // Determine the next available set number within the configured match limit.
@@ -235,8 +217,6 @@ public class X01MatchProgressServiceImpl implements IX01MatchProgressService {
      * @return the existing set numbers
      */
     private Set<Integer> getSetNumbers(X01Match match) {
-        if (X01MatchUtils.isSetsEmpty(match)) return Set.of();
-
         return Set.copyOf(match.getSets().keySet());
     }
 
@@ -247,8 +227,6 @@ public class X01MatchProgressServiceImpl implements IX01MatchProgressService {
      * @return true when the match is concluded
      */
     private boolean isMatchConcluded(X01Match match) {
-        if (match == null || X01MatchUtils.isPlayersEmpty(match.getPlayers())) return false;
-
         return match.getPlayers().stream()
                 .allMatch(player -> player.getResultType() != null);
     }

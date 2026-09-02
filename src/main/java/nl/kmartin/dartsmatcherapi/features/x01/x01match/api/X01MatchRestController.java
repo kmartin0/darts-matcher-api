@@ -29,7 +29,7 @@ public class X01MatchRestController {
     /**
      * Creates a new X01 match.
      *
-     * @param match the match to create
+     * @param createMatchRequest the match creation request
      * @return the created match
      */
     @PostMapping(path = RestEndpoints.X01_CREATE_MATCH, consumes = MediaType.APPLICATION_JSON_VALUE)

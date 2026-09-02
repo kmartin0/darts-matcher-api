@@ -7,17 +7,19 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.RECORD_COMPONENT;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Validates that a match contains a valid composition of human and dart bot players.
+ * Validates that a list of players follows the match player composition rules.
  */
-@Target({FIELD, METHOD, PARAMETER, ANNOTATION_TYPE})
+@Target({FIELD, RECORD_COMPONENT})
 @Retention(RUNTIME)
 @Constraint(validatedBy = ValidPlayerCompositionValidator.class)
 @Documented
 public @interface ValidPlayerComposition {
+
     String message() default "";
 
     Class<?>[] groups() default {};

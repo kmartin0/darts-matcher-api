@@ -1,14 +1,21 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01set.model;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
 import java.util.Map;
 
 /**
  * Represents a numbered X01 set.
  *
  * @param setNumber the set number
- * @param set the set
+ * @param set       the set
  */
-public record X01SetEntry(int setNumber, X01Set set) {
+public record X01SetEntry(
+        @Positive int setNumber,
+        @NotNull @Valid X01Set set
+) {
 
     /**
      * Creates a set entry from a map entry.
