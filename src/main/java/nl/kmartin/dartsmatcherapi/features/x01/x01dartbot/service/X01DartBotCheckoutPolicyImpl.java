@@ -2,7 +2,8 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.service;
 
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.Dart;
 import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.service.IX01CheckoutService;
-import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.model.X01DartBotLegState;
+import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.model.X01DartBotTurnSnapshot;
+import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.model.X01DartBotTurnState;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -23,15 +24,15 @@ public class X01DartBotCheckoutPolicyImpl implements IX01DartBotCheckoutPolicy {
     }
 
     @Override
-    public boolean isDartResultValid(Dart result, X01DartBotLegState dartBotLegState) {
+    public boolean isDartResultValid(Dart result, X01DartBotTurnSnapshot dartBotTurnSnapshot) {
         // Calculate the remaining score if the simulated dart were accepted.
-        int remainingAfterThrow = getRemainingAfterThrow(result, dartBotLegState.getRemainingPoints());
+        int remainingAfterThrow = getRemainingAfterThrow(result, dartBotTurnSnapshot.remainingPoints());
 
         // Accept throws that neither check out the leg nor result in a bust.
         if (!checkoutService.isRemainingZeroOrBust(remainingAfterThrow)) return true;
 
         // A zero or bust result must satisfy the bot-specific checkout rules.
-        return isBotCheckoutValid(result, dartBotLegState, remainingAfterThrow);
+        return isBotCheckoutValid(result, dartBotTurnSnapshot, remainingAfterThrow);
     }
 
     @Override
@@ -43,14 +44,14 @@ public class X01DartBotCheckoutPolicyImpl implements IX01DartBotCheckoutPolicy {
      * Determines whether a simulated checkout satisfies the X01 checkout rules and the bot's target dart count.
      *
      * @param result              the dart result
-     * @param dartBotLegState     the current dart bot leg state
+     * @param dartBotTurnSnapshot the current dart bot turn snapshot
      * @param remainingAfterThrow the remaining score after the throw
      * @return whether the checkout is valid
      */
-    private boolean isBotCheckoutValid(Dart result, X01DartBotLegState dartBotLegState, int remainingAfterThrow) {
+    private boolean isBotCheckoutValid(Dart result, X01DartBotTurnSnapshot dartBotTurnSnapshot, int remainingAfterThrow) {
         // Include the simulated checkout dart when evaluating the target dart count.
-        int dartsThrownAfterCheckout = dartBotLegState.getDartsUsedInLeg() + 1;
-        int targetNumOfDarts = dartBotLegState.getTargetNumOfDarts();
+        int dartsThrownAfterCheckout = dartBotTurnSnapshot.dartsUsedInLeg() + 1;
+        int targetNumOfDarts = dartBotTurnSnapshot.targetNumOfDarts();
 
         // The throw must complete a legal checkout without finishing before the bot's target dart count.
         return checkoutService.isValidCheckout(remainingAfterThrow, result)

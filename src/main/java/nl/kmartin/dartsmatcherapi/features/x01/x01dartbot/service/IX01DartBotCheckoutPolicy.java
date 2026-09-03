@@ -3,7 +3,8 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.service;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.Dart;
-import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.model.X01DartBotLegState;
+import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.model.X01DartBotTurnSnapshot;
+import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.model.X01DartBotTurnState;
 
 public interface IX01DartBotCheckoutPolicy {
 
@@ -19,9 +20,9 @@ public interface IX01DartBotCheckoutPolicy {
     /**
      * Determines whether a simulated dart result is valid for the current leg state.
      *
-     * @param result          the dart result
-     * @param dartBotLegState the current dart bot leg state
+     * @param result           the dart result
+     * @param dartBotTurnSnapshot the current dart bot turn snapshot
      * @return whether the dart result is valid
      */
-    boolean isDartResultValid(@NotNull @Valid Dart result, @NotNull X01DartBotLegState dartBotLegState);
+    boolean isDartResultValid(@NotNull @Valid Dart result, @NotNull X01DartBotTurnSnapshot dartBotTurnSnapshot);
 }
