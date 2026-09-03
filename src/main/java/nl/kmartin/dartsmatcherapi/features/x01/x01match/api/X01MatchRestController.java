@@ -10,6 +10,7 @@ import nl.kmartin.dartsmatcherapi.rest.RestEndpoints;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,7 +39,7 @@ public class X01MatchRestController {
      * @param createMatchRequest the match creation request
      * @return the created match
      */
-    @PostMapping(path = RestEndpoints.X01_CREATE_MATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = RestEndpoints.X01.MATCHES, consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public X01Match createMatch(@Valid @RequestBody X01CreateMatchRequest createMatchRequest) {
         return matchService.createMatch(createMatchRequest);
@@ -50,7 +51,7 @@ public class X01MatchRestController {
      * @param matchId the match id
      * @return the requested match
      */
-    @GetMapping(path = RestEndpoints.X01_GET_MATCH, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = RestEndpoints.X01.MATCH, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public X01Match getMatch(@PathVariable ObjectId matchId) {
         return matchService.getMatch(matchId);
@@ -62,7 +63,7 @@ public class X01MatchRestController {
      * @param ids the match ids
      * @return the matching matches
      */
-    @GetMapping(path = RestEndpoints.X01_GET_MATCHES, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = RestEndpoints.X01.MATCHES, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public List<X01Match> getMatches(@RequestParam("ids") List<ObjectId> ids) {
         return matchService.getMatches(ids);
@@ -73,7 +74,7 @@ public class X01MatchRestController {
      *
      * @param matchId the match id
      */
-    @GetMapping(path = RestEndpoints.X01_MATCH_EXISTS)
+    @GetMapping(path = RestEndpoints.X01.MATCH_EXISTS)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void matchExists(@PathVariable ObjectId matchId) {
         matchService.checkMatchExists(matchId);
@@ -86,7 +87,7 @@ public class X01MatchRestController {
      * @param turn    the turn to add
      * @return the updated match
      */
-    @PostMapping(path = RestEndpoints.X01_ADD_TURN, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = RestEndpoints.X01.MATCH_TURNS, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public X01Match addTurn(@PathVariable ObjectId matchId, @Valid @RequestBody X01Turn turn) {
         return matchService.addTurn(matchId, turn);
@@ -99,7 +100,7 @@ public class X01MatchRestController {
      * @param editTurn the turn edit
      * @return the updated match
      */
-    @PostMapping(path = RestEndpoints.X01_EDIT_TURN, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = RestEndpoints.X01.MATCH_TURNS_EDIT, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public X01Match editTurn(@PathVariable ObjectId matchId, @Valid @RequestBody X01EditTurn editTurn) {
         return matchService.editTurn(matchId, editTurn);
@@ -111,7 +112,7 @@ public class X01MatchRestController {
      * @param matchId the match id
      * @return the updated match
      */
-    @PostMapping(path = RestEndpoints.X01_DELETE_LAST_TURN, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = RestEndpoints.X01.MATCH_TURNS_DELETE_LAST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public X01Match deleteLastTurn(@PathVariable ObjectId matchId) {
         return matchService.deleteLastTurn(matchId);
@@ -122,7 +123,7 @@ public class X01MatchRestController {
      *
      * @param matchId the match id
      */
-    @PostMapping(path = RestEndpoints.X01_DELETE_MATCH)
+    @DeleteMapping(path = RestEndpoints.X01.MATCH)
     @ResponseStatus(HttpStatus.OK)
     public void deleteMatch(@PathVariable ObjectId matchId) {
         matchService.deleteMatch(matchId);
@@ -134,7 +135,7 @@ public class X01MatchRestController {
      * @param matchId the match id
      * @return the reset match
      */
-    @PostMapping(path = RestEndpoints.X01_RESET_MATCH, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = RestEndpoints.X01.MATCH_RESET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public X01Match resetMatch(@PathVariable ObjectId matchId) {
         return matchService.resetMatch(matchId);
@@ -146,7 +147,7 @@ public class X01MatchRestController {
      * @param matchId the match id
      * @return the reprocessed match
      */
-    @PostMapping(path = RestEndpoints.X01_REPROCESS_MATCH, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = RestEndpoints.X01.MATCH_REPROCESS, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public X01Match reprocessMatch(@PathVariable ObjectId matchId) {
         return matchService.reprocessMatch(matchId);

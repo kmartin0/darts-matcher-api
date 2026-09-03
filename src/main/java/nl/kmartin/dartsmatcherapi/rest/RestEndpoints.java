@@ -4,22 +4,32 @@ package nl.kmartin.dartsmatcherapi.rest;
  * Defines the REST endpoint paths exposed by the application.
  */
 public final class RestEndpoints {
+
     private RestEndpoints() {
     }
 
-    // Checkout endpoints
-    public static final String GET_CHECKOUTS = "/checkouts";
-    public static final String GET_CHECKOUT = "/checkouts/{remaining}";
+    /**
+     * Defines REST endpoints for the X01 feature.
+     */
+    public static final class X01 {
 
-    // X01 match endpoints
-    public static final String X01_CREATE_MATCH = "/x01/matches";
-    public static final String X01_GET_MATCH = "/x01/matches/{matchId}";
-    public static final String X01_GET_MATCHES = "/x01/matches";
-    public static final String X01_MATCH_EXISTS = "/x01/matches/{matchId}/exists";
-    public static final String X01_RESET_MATCH = "/x01/matches/{matchId}/reset";
-    public static final String X01_REPROCESS_MATCH = "/x01/matches/{matchId}/reprocess";
-    public static final String X01_DELETE_MATCH = "/x01/matches/{matchId}/delete";
-    public static final String X01_ADD_TURN = "/x01/matches/{matchId}/turn/add";
-    public static final String X01_EDIT_TURN = "/x01/matches/{matchId}/turn/edit";
-    public static final String X01_DELETE_LAST_TURN = "/x01/matches/{matchId}/turn/delete-last";
+        private X01() {
+        }
+
+        // Checkout endpoints
+        public static final String CHECKOUTS = "/checkouts/x01";
+        public static final String CHECKOUT = "/checkouts/x01/{remaining}";
+
+        // Match resource endpoints
+        public static final String MATCHES = "/matches/x01";
+        public static final String MATCH = "/matches/x01/{matchId}";
+
+        // Match operation endpoints
+        public static final String MATCH_EXISTS = "/matches/x01/{matchId}/exists";
+        public static final String MATCH_RESET = "/matches/x01/{matchId}/reset";
+        public static final String MATCH_REPROCESS = "/matches/x01/{matchId}/reprocess";
+        public static final String MATCH_TURNS = "/matches/x01/{matchId}/turns";
+        public static final String MATCH_TURNS_EDIT = "/matches/x01/{matchId}/turns/edit";
+        public static final String MATCH_TURNS_DELETE_LAST = "/matches/x01/{matchId}/turns/delete-last";
+    }
 }

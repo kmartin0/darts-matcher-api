@@ -18,6 +18,7 @@ import java.util.List;
  */
 @RestController
 public class X01CheckoutRestController {
+
     private final IX01CheckoutService checkoutService;
 
     public X01CheckoutRestController(IX01CheckoutService checkoutService) {
@@ -29,7 +30,7 @@ public class X01CheckoutRestController {
      *
      * @return the available checkout configurations
      */
-    @GetMapping(path = RestEndpoints.GET_CHECKOUTS, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = RestEndpoints.X01.CHECKOUTS, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public List<X01Checkout> getCheckouts() {
         return checkoutService.getCheckoutsAsList();
@@ -42,7 +43,7 @@ public class X01CheckoutRestController {
      * @return the checkout configuration
      * @throws ResourceNotFoundException when no checkout exists for the remaining score
      */
-    @GetMapping(path = RestEndpoints.GET_CHECKOUT, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = RestEndpoints.X01.CHECKOUT, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public X01Checkout getCheckout(@PathVariable int remaining) {
         return checkoutService
