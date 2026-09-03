@@ -1,4 +1,4 @@
-package nl.kmartin.dartsmatcherapi.validators.validx01dartbotsettings;
+package nl.kmartin.dartsmatcherapi.validator.validx01dartbotsettings;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;

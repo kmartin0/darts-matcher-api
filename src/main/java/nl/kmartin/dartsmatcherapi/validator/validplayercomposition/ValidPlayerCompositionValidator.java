@@ -1,4 +1,4 @@
-package nl.kmartin.dartsmatcherapi.validators.validplayercomposition;
+package nl.kmartin.dartsmatcherapi.validator.validplayercomposition;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
@@ -6,7 +6,7 @@ import nl.kmartin.dartsmatcherapi.features.basematch.model.MatchPlayer;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.PlayerType;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateMatchRequest;
 import nl.kmartin.dartsmatcherapi.i18n.MessageKeys;
-import org.hibernate.validator.constraintvalidation.HibernateConstraintValidatorContext;
+import nl.kmartin.dartsmatcherapi.validator.ConstraintViolationsHelper;
 
 import java.util.List;
 import java.util.Objects;
@@ -44,7 +44,7 @@ public class ValidPlayerCompositionValidator implements ConstraintValidator<Vali
 
         // A match can contain at most one dart bot.
         if (botCount > 1) {
-            setViolationMessage(context, MessageKeys.MESSAGE_TOO_MANY_BOTS);
+            ConstraintViolationsHelper.addViolation(context, MessageKeys.MESSAGE_TOO_MANY_BOTS);
             return false;
         }
 
@@ -53,7 +53,7 @@ public class ValidPlayerCompositionValidator implements ConstraintValidator<Vali
                 .anyMatch(playerType -> playerType == PlayerType.HUMAN);
 
         if (botCount == 1 && !hasHumanPlayer) {
-            setViolationMessage(context, MessageKeys.MESSAGE_BOT_REQUIRES_HUMAN);
+            ConstraintViolationsHelper.addViolation(context, MessageKeys.MESSAGE_BOT_REQUIRES_HUMAN);
             return false;
         }
 
@@ -72,21 +72,5 @@ public class ValidPlayerCompositionValidator implements ConstraintValidator<Vali
         if (player instanceof X01CreateMatchRequest.Player requestPlayer) return requestPlayer.playerType();
 
         throw new IllegalArgumentException("Unsupported player type: " + player.getClass());
-    }
-
-    /**
-     * Replaces the default validation message with the message for the violated composition rule.
-     *
-     * @param context    the validation context
-     * @param messageKey the message key for the violated rule
-     */
-    private void setViolationMessage(ConstraintValidatorContext context, String messageKey) {
-        HibernateConstraintValidatorContext hibernateContext =
-                context.unwrap(HibernateConstraintValidatorContext.class);
-
-        hibernateContext.disableDefaultConstraintViolation();
-        hibernateContext
-                .buildConstraintViolationWithTemplate("{" + messageKey + "}")
-                .addConstraintViolation();
     }
 }

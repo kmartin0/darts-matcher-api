@@ -1,14 +1,16 @@
-package nl.kmartin.dartsmatcherapi.validators.noduplicatematchplayername;
+package nl.kmartin.dartsmatcherapi.validator.noduplicatematchplayername;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.MatchPlayer;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateMatchRequest;
 import nl.kmartin.dartsmatcherapi.i18n.MessageKeys;
+import nl.kmartin.dartsmatcherapi.validator.ConstraintViolationsHelper;
 import org.hibernate.validator.constraintvalidation.HibernateConstraintValidatorContext;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -55,7 +57,11 @@ public class NoDuplicateMatchPlayerNameValidator
 
             // Set.add returns false when the name already exists in the set.
             if (!playerNames.add(playerName)) {
-                setDuplicateNameViolationMessage(playerName, context);
+                ConstraintViolationsHelper.addViolation(
+                        context,
+                        MessageKeys.MESSAGE_PLAYER_NAME_DUPLICATE,
+                        Map.of(MessageKeys.Params.NAME, playerName)
+                );
                 return false;
             }
         }

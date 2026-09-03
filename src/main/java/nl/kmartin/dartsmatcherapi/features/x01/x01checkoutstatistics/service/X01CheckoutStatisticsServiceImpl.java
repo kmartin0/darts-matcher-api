@@ -2,7 +2,7 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01checkoutstatistics.service;
 
 import nl.kmartin.dartsmatcherapi.features.x01.x01checkoutstatistics.model.X01CheckoutStatistics;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
-import nl.kmartin.dartsmatcherapi.utils.NumberUtils;
+import nl.kmartin.dartsmatcherapi.util.NumberUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 

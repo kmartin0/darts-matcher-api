@@ -1,8 +1,9 @@
-package nl.kmartin.dartsmatcherapi.validators.validx01dartbotsettings;
+package nl.kmartin.dartsmatcherapi.validator.validx01dartbotsettings;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateMatchRequest;
+import nl.kmartin.dartsmatcherapi.validator.ConstraintViolationsHelper;
 
 /**
  * Validates that dart bot settings match the player type in an X01 create-match request.
@@ -29,7 +30,11 @@ public class ValidX01CreateDartBotSettingsValidator implements ConstraintValidat
 
         if (messageKey == null) return true;
 
-        X01DartBotSettingsValidation.addConstraintViolation(messageKey, context);
+        ConstraintViolationsHelper.addViolation(
+                context,
+                messageKey,
+                X01DartBotSettingsValidation.FIELD_DART_BOT_SETTINGS
+        );
         return false;
     }
 }

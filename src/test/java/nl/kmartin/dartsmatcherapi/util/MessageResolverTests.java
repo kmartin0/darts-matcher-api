@@ -1,4 +1,4 @@
-package nl.kmartin.dartsmatcherapi.utils;
+package nl.kmartin.dartsmatcherapi.util;
 
 import nl.kmartin.dartsmatcherapi.config.LocaleConfig;
 import nl.kmartin.dartsmatcherapi.i18n.MessageResolver;

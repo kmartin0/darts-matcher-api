@@ -8,7 +8,7 @@ import nl.kmartin.dartsmatcherapi.error.response.TargetError;
 import nl.kmartin.dartsmatcherapi.error.util.ErrorUtil;
 import nl.kmartin.dartsmatcherapi.i18n.MessageKeys;
 import nl.kmartin.dartsmatcherapi.i18n.MessageResolver;
-import nl.kmartin.dartsmatcherapi.utils.StringUtils;
+import nl.kmartin.dartsmatcherapi.util.StringUtils;
 import nl.kmartin.dartsmatcherapi.websocket.event.IWebSocketEventPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

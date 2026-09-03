@@ -1,4 +1,4 @@
-package nl.kmartin.dartsmatcherapi.validators.noduplicatematchplayername;
+package nl.kmartin.dartsmatcherapi.validator.noduplicatematchplayername;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;

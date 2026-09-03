@@ -9,7 +9,7 @@ import nl.kmartin.dartsmatcherapi.features.basematch.model.MatchPlayer;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.PlayerType;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.ResultType;
 import nl.kmartin.dartsmatcherapi.features.x01.x01statistics.model.X01Statistics;
-import nl.kmartin.dartsmatcherapi.validators.validx01dartbotsettings.ValidX01DartBotSettings;
+import nl.kmartin.dartsmatcherapi.validator.validx01dartbotsettings.ValidX01DartBotSettings;
 import org.bson.types.ObjectId;
 
 /**

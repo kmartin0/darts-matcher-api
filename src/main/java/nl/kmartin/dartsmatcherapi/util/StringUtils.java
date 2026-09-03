@@ -1,4 +1,4 @@
-package nl.kmartin.dartsmatcherapi.utils;
+package nl.kmartin.dartsmatcherapi.util;
 
 /**
  * Provides utility methods for working with strings.

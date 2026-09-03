@@ -10,7 +10,7 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
 import nl.kmartin.dartsmatcherapi.features.x01.x01rules.service.IX01RulesService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01Set;
 import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01SetEntry;
-import nl.kmartin.dartsmatcherapi.utils.NumberUtils;
+import nl.kmartin.dartsmatcherapi.util.NumberUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 

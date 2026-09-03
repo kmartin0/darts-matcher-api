@@ -1,4 +1,4 @@
-package nl.kmartin.dartsmatcherapi.validators.validplayercomposition;
+package nl.kmartin.dartsmatcherapi.validator.validplayercomposition;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;

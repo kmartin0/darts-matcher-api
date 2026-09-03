@@ -1,4 +1,4 @@
-package nl.kmartin.dartsmatcherapi.serializers;
+package nl.kmartin.dartsmatcherapi.serializer;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;

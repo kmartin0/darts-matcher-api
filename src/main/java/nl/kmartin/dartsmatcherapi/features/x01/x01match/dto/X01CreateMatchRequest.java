@@ -9,9 +9,9 @@ import nl.kmartin.dartsmatcherapi.features.basematch.model.MatchPlayer;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.PlayerType;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01DartBotSettings;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchSettings;
-import nl.kmartin.dartsmatcherapi.validators.noduplicatematchplayername.NoDuplicateMatchPlayerName;
-import nl.kmartin.dartsmatcherapi.validators.validplayercomposition.ValidPlayerComposition;
-import nl.kmartin.dartsmatcherapi.validators.validx01dartbotsettings.ValidX01DartBotSettings;
+import nl.kmartin.dartsmatcherapi.validator.noduplicatematchplayername.NoDuplicateMatchPlayerName;
+import nl.kmartin.dartsmatcherapi.validator.validplayercomposition.ValidPlayerComposition;
+import nl.kmartin.dartsmatcherapi.validator.validx01dartbotsettings.ValidX01DartBotSettings;
 
 import java.util.List;
 

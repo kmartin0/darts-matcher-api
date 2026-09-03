@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
-import nl.kmartin.dartsmatcherapi.validators.validdartscore.ValidDartScore;
+import nl.kmartin.dartsmatcherapi.validator.validdartscore.ValidDartScore;
 
 /**
  * Represents a single turn played in an X01 match.

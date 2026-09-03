@@ -6,7 +6,7 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.service.IX01LegRoundService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
-import nl.kmartin.dartsmatcherapi.utils.NumberUtils;
+import nl.kmartin.dartsmatcherapi.util.NumberUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 

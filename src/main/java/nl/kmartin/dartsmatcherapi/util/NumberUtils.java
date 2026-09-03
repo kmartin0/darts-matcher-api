@@ -1,4 +1,4 @@
-package nl.kmartin.dartsmatcherapi.utils;
+package nl.kmartin.dartsmatcherapi.util;
 
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;

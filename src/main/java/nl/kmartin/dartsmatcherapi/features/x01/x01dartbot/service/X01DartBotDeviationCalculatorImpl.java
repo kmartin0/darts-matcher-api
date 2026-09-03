@@ -2,7 +2,7 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.service;
 
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.PolarCoordinate;
 import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.util.PiecewiseLinearInterpolator;
-import nl.kmartin.dartsmatcherapi.utils.NumberUtils;
+import nl.kmartin.dartsmatcherapi.util.NumberUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
