@@ -27,44 +27,37 @@ public class X01DartBotScoringStrategyImpl implements IX01DartBotScoringStrategy
             Map.entry(DartboardSection.SEVENTEEN, 0.02)
     );
 
-    /**
-     * Creates a biased random treble target intended for scoring.
-     *
-     * Chooses between Treble 20 (83%), Treble 19 (10%), Treble 18 (5%) and Treble 17 (2%).
-     * For sufficiently high target averages, Treble 20 is always selected.
-     *
-     * @param targetOneDartAvg the target one-dart average
-     * @return the treble target used for scoring
-     */
     @Override
     public Dart createScoringTarget(double targetOneDartAvg) {
-        // Return Treble 20 if the target average is a nine darter or better.
+        // Always target Treble 20 once the configured playing-strength threshold is reached.
         if (targetOneDartAvg >= GUARANTEED_T20_MINIMUM_ONE_DART_AVERAGE) {
             return new Dart(DartboardSection.TWENTY, DartboardSectionArea.TRIPLE);
         }
 
-        // Generate a biased random treble using the static map.
+        // Select a weighted treble target for lower playing strengths.
         DartboardSection selectedTreble = selectRandomTreble();
         return new Dart(selectedTreble, DartboardSectionArea.TRIPLE);
     }
 
     /**
-     * Selects a random treble using the configured weighted probabilities.
+     * Selects a treble using the configured weighted probabilities.
      *
      * @return the selected treble section
      */
     private DartboardSection selectRandomTreble() {
-        double rand = Math.random(); // Generate a random value between 0 and 1
+        double randomValue = Math.random();
         double cumulativeProbability = 0.0;
 
+        // Return the first treble whose cumulative probability contains the random value.
         for (Map.Entry<DartboardSection, Double> entry : TREBLE_PROBABILITIES) {
             cumulativeProbability += entry.getValue();
-            if (rand <= cumulativeProbability) {
-                return entry.getKey(); // Return the selected treble
+
+            if (randomValue <= cumulativeProbability) {
+                return entry.getKey();
             }
         }
 
-        // Fallback, should not be reached due to the control of probabilities
+        // Fall back to Treble 20 if floating-point rounding leaves the random value unmatched.
         return DartboardSection.TWENTY;
     }
 }

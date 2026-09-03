@@ -24,9 +24,9 @@ public class WebSocketHandshakeInterceptor implements HandshakeInterceptor {
     /**
      * Copies the correlation ID from the existing HTTP session to the WebSocket session attributes.
      *
-     * @param request the handshake request
-     * @param response the handshake response
-     * @param wsHandler the target WebSocket handler
+     * @param request    the handshake request
+     * @param response   the handshake response
+     * @param wsHandler  the target WebSocket handler
      * @param attributes the WebSocket session attributes
      * @return true to continue the handshake
      */

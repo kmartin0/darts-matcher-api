@@ -26,9 +26,10 @@ public class X01MatchSetupServiceImpl implements IX01MatchSetupService {
 
     @Override
     public X01Match initializeNewMatch(X01CreateMatchRequest request) {
+        // Create fresh match players from the requested player configuration.
         ArrayList<X01MatchPlayer> players = createMatchPlayers(request.players());
-        ObjectId throwsFirst = players.get(0).getPlayerId();
 
+        // Initialize the match without played sets or derived match state.
         return new X01Match(
                 null,
                 null,
@@ -46,9 +47,10 @@ public class X01MatchSetupServiceImpl implements IX01MatchSetupService {
 
     @Override
     public X01Match resetMatch(X01Match match) {
+        // Reset player state while preserving player identity and configuration.
         ArrayList<X01MatchPlayer> players = resetMatchPlayers(match.getPlayers());
-        ObjectId throwsFirst = players.get(0).getPlayerId();
 
+        // Recreate the starting match state while preserving persisted identity and configuration.
         return new X01Match(
                 match.getId(),
                 match.getVersion(),

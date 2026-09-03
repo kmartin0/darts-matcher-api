@@ -1,5 +1,6 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01match.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
@@ -22,4 +23,14 @@ public class X01DartBotSettings {
     @Min(MINIMUM_BOT_AVG)
     @Max(MAXIMUM_BOT_AVG)
     private int threeDartAverage;
+
+    /**
+     * Returns the configured three-dart average as a one-dart average.
+     *
+     * @return the equivalent one-dart average
+     */
+    @JsonIgnore
+    public double getOneDartAverage() {
+        return threeDartAverage / 3.0;
+    }
 }

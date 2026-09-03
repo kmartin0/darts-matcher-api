@@ -7,22 +7,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * Calculates and updates checkout statistics for X01 players.
- *
- * Tracks successful and missed checkouts, checkout percentage, highest checkout
- * and the number of ton-plus checkouts.
+ * Updates X01 checkout statistics from processed leg-round scores.
  */
 @Service
 @Validated
 public class X01CheckoutStatisticsServiceImpl implements IX01CheckoutStatisticsService {
-    /**
-     * Updates the player's checkout statistics for the current round.
-     *
-     * @param playerCheckoutStats the checkout statistics to update
-     * @param playerScore         the score for the current round
-     * @param isCheckout          whether the round resulted in a successful checkout
-     * @param trackDoubles        whether missed doubles and checkout percentage are tracked
-     */
+
     @Override
     public void updateCheckoutStatistics(
             X01CheckoutStatistics playerCheckoutStats,
@@ -30,12 +20,14 @@ public class X01CheckoutStatisticsServiceImpl implements IX01CheckoutStatisticsS
             boolean isCheckout,
             boolean trackDoubles
     ) {
+        // Record successful checkout statistics, including the highest and ton-plus counts.
         if (isCheckout) {
             playerCheckoutStats.incrementCheckoutsHit();
             updateHighestCheckout(playerCheckoutStats, playerScore);
             updateTonPlusCheckout(playerCheckoutStats, playerScore);
         }
 
+        // Track missed checkout attempts and recalculate the checkout percentage when enabled.
         if (trackDoubles) {
             updateCheckoutsMissed(playerCheckoutStats, playerScore);
             updateCheckoutPercentage(playerCheckoutStats);
@@ -43,15 +35,16 @@ public class X01CheckoutStatisticsServiceImpl implements IX01CheckoutStatisticsS
     }
 
     /**
-     * Updates the highest checkout when the current checkout is higher.
+     * Updates the highest checkout when no checkout has been recorded yet or the current checkout is higher.
      *
      * @param playerCheckoutStats the checkout statistics to update
      * @param playerScore         the score for the current round
      */
     private void updateHighestCheckout(X01CheckoutStatistics playerCheckoutStats, X01LegRoundScore playerScore) {
         int checkoutScore = playerScore.getScore();
+        Integer checkoutHighest = playerCheckoutStats.getCheckoutHighest();
 
-        if (checkoutScore > playerCheckoutStats.getCheckoutHighest()) {
+        if (checkoutHighest == null || checkoutScore > checkoutHighest) {
             playerCheckoutStats.setCheckoutHighest(checkoutScore);
         }
     }
@@ -83,9 +76,7 @@ public class X01CheckoutStatisticsServiceImpl implements IX01CheckoutStatisticsS
                 ? playerCheckoutStats.getCheckoutsMissed()
                 : 0;
 
-        playerCheckoutStats.setCheckoutsMissed(
-                checkoutsMissed + doublesMissed
-        );
+        playerCheckoutStats.setCheckoutsMissed(checkoutsMissed + doublesMissed);
     }
 
     /**
@@ -94,8 +85,7 @@ public class X01CheckoutStatisticsServiceImpl implements IX01CheckoutStatisticsS
      * @param playerCheckoutStats the checkout statistics to update
      */
     private void updateCheckoutPercentage(X01CheckoutStatistics playerCheckoutStats) {
-        int checkoutAttempts = playerCheckoutStats.getCheckoutsHit()
-                + playerCheckoutStats.getCheckoutsMissed();
+        int checkoutAttempts = playerCheckoutStats.getCheckoutsHit() + playerCheckoutStats.getCheckoutsMissed();
 
         int checkoutPercentage = NumberUtils.calcPercentage(
                 playerCheckoutStats.getCheckoutsHit(),

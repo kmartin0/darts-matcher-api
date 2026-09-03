@@ -22,65 +22,47 @@ public class X01DartBotCheckoutPolicyImpl implements IX01DartBotCheckoutPolicy {
         this.checkoutService = checkoutService;
     }
 
-    /**
-     * Checks whether the dart result is valid based on the remaining score after the throw.
-     *
-     * Darts that are not part of a checkout attempt (i.e., remaining score is neither zero nor bust) are always valid.
-     * If the remaining score is part of a checkout attempt, it further validates whether the result is a valid checkout.
-     *
-     * @param result          {@link Dart} the dart result to be validated
-     * @param dartBotLegState {@link X01DartBotLegState} the current state of the leg.
-     * @return boolean true if the result is valid, false otherwise.
-     */
     @Override
     public boolean isDartResultValid(Dart result, X01DartBotLegState dartBotLegState) {
-        // Calculate the remaining points after the dart throw.
+        // Calculate the remaining score if the simulated dart were accepted.
         int remainingAfterThrow = getRemainingAfterThrow(result, dartBotLegState.getRemainingPoints());
 
-        // Darts that are not part of a checkout attempt (zero or bust remaining) are always valid.
+        // Accept throws that neither check out the leg nor result in a bust.
         if (!checkoutService.isRemainingZeroOrBust(remainingAfterThrow)) return true;
 
-        // Otherwise, validate if the checkout is valid.
+        // A zero or bust result must satisfy the bot-specific checkout rules.
         return isBotCheckoutValid(result, dartBotLegState, remainingAfterThrow);
     }
 
-    /**
-     * Checks if the target number of darts has been reached.
-     *
-     * @param dartsThrown      int the number of darts that have been thrown so far.
-     * @param targetNumOfDarts int the target number of darts required to complete the leg.
-     * @return boolean true if the number of darts thrown is greater than or equal to the target, false otherwise.
-     */
     @Override
     public boolean isTargetNumOfDartsReached(int dartsThrown, int targetNumOfDarts) {
         return dartsThrown >= targetNumOfDarts;
     }
 
     /**
-     * Checks whether the bot's checkout throw is valid.
-     * This includes verifying that the remaining points after the throw are valid for a checkout
-     * and that the target number of darts required to complete the leg has been reached.
+     * Determines whether a simulated checkout satisfies the X01 checkout rules and the bot's target dart count.
      *
-     * @param result              {@link Dart} the dart result to be validated
-     * @param dartBotLegState     {@link X01DartBotLegState} the current state of the leg.
-     * @param remainingAfterThrow the remaining points after the dart throw
-     * @return boolean true if the checkout is valid, false otherwise.
+     * @param result              the dart result
+     * @param dartBotLegState     the current dart bot leg state
+     * @param remainingAfterThrow the remaining score after the throw
+     * @return whether the checkout is valid
      */
     private boolean isBotCheckoutValid(Dart result, X01DartBotLegState dartBotLegState, int remainingAfterThrow) {
+        // Include the simulated checkout dart when evaluating the target dart count.
         int dartsThrownAfterCheckout = dartBotLegState.getDartsUsedInLeg() + 1;
         int targetNumOfDarts = dartBotLegState.getTargetNumOfDarts();
 
-        // Check if the remaining points and number of darts thrown are valid for the checkout.
-        return checkoutService.isValidCheckout(remainingAfterThrow, result) &&
-                isTargetNumOfDartsReached(dartsThrownAfterCheckout, targetNumOfDarts);
+        // The throw must complete a legal checkout without finishing before the bot's target dart count.
+        return checkoutService.isValidCheckout(remainingAfterThrow, result)
+                && isTargetNumOfDartsReached(dartsThrownAfterCheckout, targetNumOfDarts);
     }
 
     /**
-     * Calculates the remaining points after a dart throw.
+     * Calculates the remaining score after a dart throw.
      *
-     * @param result               the dart result to calculate the remaining points for.
-     * @param remainingBeforeThrow the remaining points before the throw.
-     * @return int the remaining points after the dart throw.
+     * @param result               the dart result
+     * @param remainingBeforeThrow the remaining score before the throw
+     * @return the remaining score after the throw
      */
     private int getRemainingAfterThrow(Dart result, int remainingBeforeThrow) {
         return remainingBeforeThrow - result.getScore();

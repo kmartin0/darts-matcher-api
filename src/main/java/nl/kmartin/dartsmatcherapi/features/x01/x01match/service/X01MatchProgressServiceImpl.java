@@ -52,14 +52,6 @@ public class X01MatchProgressServiceImpl implements IX01MatchProgressService {
         this.rulesService = rulesService;
     }
 
-    /**
-     * Gets a set in a match by its set number.
-     *
-     * @param match     the match containing the sets
-     * @param setNumber the set number
-     * @return the matching set entry
-     * @throws ResourceNotFoundException when the set does not exist
-     */
     @Override
     public X01SetEntry getSetOrThrow(X01Match match, int setNumber) {
         return Optional.ofNullable(match.getSets().get(setNumber))
@@ -67,27 +59,16 @@ public class X01MatchProgressServiceImpl implements IX01MatchProgressService {
                 .orElseThrow(() -> new ResourceNotFoundException(X01Set.class, setNumber));
     }
 
-    /**
-     * Gets the first set that has not yet been concluded.
-     *
-     * @param match the match containing the sets
-     * @return the current set, or empty when no unfinished set exists
-     */
     @Override
     public Optional<X01SetEntry> getCurrentSet(X01Match match) {
         // Sets are ordered by number, so the first unfinished set is the current set.
-        return match.getSets().entrySet().stream()
+        return match.getSets().entrySet()
+                .stream()
                 .filter(entry -> entry.getValue().getResult() == null)
                 .findFirst()
                 .map(X01SetEntry::new);
     }
 
-    /**
-     * Gets the current set or creates the next set when the match can continue.
-     *
-     * @param match the match whose current set should be resolved
-     * @return the current or newly created set, or empty when the match is concluded
-     */
     @Override
     public Optional<X01SetEntry> getCurrentSetOrCreate(X01Match match) {
         Optional<X01SetEntry> currentSetEntry = getCurrentSet(match);
@@ -98,13 +79,6 @@ public class X01MatchProgressServiceImpl implements IX01MatchProgressService {
                 : currentSetEntry;
     }
 
-    /**
-     * Gets the current leg or creates the next leg when the set can continue.
-     *
-     * @param match           the match containing the set
-     * @param currentSetEntry the current set
-     * @return the current or newly created leg, or empty when the set is concluded
-     */
     @Override
     public Optional<X01LegEntry> getCurrentLegOrCreate(X01Match match, X01SetEntry currentSetEntry) {
         X01Set currentSet = currentSetEntry.set();
@@ -112,21 +86,18 @@ public class X01MatchProgressServiceImpl implements IX01MatchProgressService {
 
         // Create the next leg only when no unfinished leg exists and the set can still continue.
         X01BestOf bestOf = match.getMatchSettings().getBestOf();
+
         return currentLegEntry.isEmpty() && !setProgressService.isSetConcluded(currentSet)
                 ? setProgressService.createNextLeg(currentSetEntry, match.getPlayers(), bestOf)
                 : currentLegEntry;
     }
 
-    /**
-     * Gets the current round or creates the next round when the leg can continue.
-     *
-     * @param match      the match containing the leg
-     * @param currentLeg the current leg
-     * @return the current or newly created round, or empty when the leg is concluded
-     */
     @Override
     public Optional<X01LegRoundEntry> getCurrentLegRoundOrCreate(X01Match match, X01Leg currentLeg) {
-        Optional<X01LegRoundEntry> currentRoundEntry = legProgressService.getCurrentLegRound(currentLeg, match.getPlayers());
+        Optional<X01LegRoundEntry> currentRoundEntry = legProgressService.getCurrentLegRound(
+                currentLeg,
+                match.getPlayers()
+        );
 
         // Create the next round only when no unfinished round exists and the leg can still continue.
         return currentRoundEntry.isEmpty() && !legProgressService.isLegConcluded(currentLeg)
@@ -134,11 +105,6 @@ public class X01MatchProgressServiceImpl implements IX01MatchProgressService {
                 : currentRoundEntry;
     }
 
-    /**
-     * Removes the last score and any trailing empty match structure.
-     *
-     * @param match the match whose last score should be removed
-     */
     @Override
     public void removeLastScoreFromMatch(X01Match match) {
         // Traverse sets in reverse so trailing empty rounds, legs and sets are cleaned up with the removed score.
@@ -156,19 +122,16 @@ public class X01MatchProgressServiceImpl implements IX01MatchProgressService {
         }
     }
 
-    /**
-     * Rebuilds the current match progress.
-     *
-     * Missing set, leg and round structures are created when the match can continue.
-     *
-     * @param match the match whose progress should be rebuilt
-     */
     @Override
     public void updateMatchProgress(X01Match match) {
         // Resolve or create the current set, leg and round.
         Optional<X01SetEntry> currentSetEntry = getCurrentSetOrCreate(match);
-        Optional<X01LegEntry> currentLegEntry = currentSetEntry.flatMap(setEntry -> getCurrentLegOrCreate(match, setEntry));
-        Optional<X01LegRoundEntry> currentRoundEntry = currentLegEntry.flatMap(legEntry -> getCurrentLegRoundOrCreate(match, legEntry.leg()));
+        Optional<X01LegEntry> currentLegEntry = currentSetEntry.flatMap(
+                setEntry -> getCurrentLegOrCreate(match, setEntry)
+        );
+        Optional<X01LegRoundEntry> currentRoundEntry = currentLegEntry.flatMap(
+                legEntry -> getCurrentLegRoundOrCreate(match, legEntry.leg())
+        );
 
         // Determine whose turn it is from the current leg starter and scores already present in the round.
         Optional<ObjectId> currentThrower = currentLegEntry.flatMap(legEntry ->
@@ -201,6 +164,7 @@ public class X01MatchProgressServiceImpl implements IX01MatchProgressService {
         X01BestOf bestOf = match.getMatchSettings().getBestOf();
         int maxSets = rulesService.getMaxToPlay(bestOf.getSets(), bestOf.getClearByTwoSetsRule());
         int nextSetNumber = NumberUtils.findNextNumber(existingSetNumbers, maxSets);
+
         if (nextSetNumber == -1) return Optional.empty();
 
         // Create the set and add it to the ordered match history.
@@ -227,7 +191,8 @@ public class X01MatchProgressServiceImpl implements IX01MatchProgressService {
      * @return true when the match is concluded
      */
     private boolean isMatchConcluded(X01Match match) {
-        return match.getPlayers().stream()
+        return match.getPlayers()
+                .stream()
                 .allMatch(player -> player.getResultType() != null);
     }
 }

@@ -4,7 +4,6 @@ import nl.kmartin.dartsmatcherapi.features.basematch.model.PlayerType;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.Dart;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.DartThrow;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.DartboardSectionArea;
-import nl.kmartin.dartsmatcherapi.features.x01.common.X01MatchUtils;
 import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.model.X01DartBotLegState;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01LegEntry;
@@ -34,7 +33,6 @@ import java.util.Optional;
 @Validated
 public class X01DartBotServiceImpl implements IX01DartBotService {
     private static final double TARGET_DART_COUNT_VARIANCE = 0.05;
-    private static final int MINIMUM_TARGET_DARTS = 1;
 
     private final IX01MatchProgressService matchProgressService;
     private final IX01DartBotThrowSimulator dartBotThrowSimulator;
@@ -43,23 +41,16 @@ public class X01DartBotServiceImpl implements IX01DartBotService {
     public X01DartBotServiceImpl(
             IX01MatchProgressService matchProgressService,
             IX01DartBotThrowSimulator dartBotThrowSimulator,
-            IX01LegResultService legResultService) {
+            IX01LegResultService legResultService
+    ) {
         this.matchProgressService = matchProgressService;
         this.dartBotThrowSimulator = dartBotThrowSimulator;
         this.legResultService = legResultService;
     }
 
-    /**
-     * Creates the next turn for the current dart bot player.
-     *
-     * Resolves the current leg, builds the bot's leg state, simulates the round and returns the resulting turn.
-     *
-     * @param match the match in which the dart bot is throwing
-     * @return the generated dart bot turn
-     * @throws IllegalStateException when the current thrower is not a configured dart bot or the current leg cannot be resolved
-     */
     @Override
     public X01Turn createDartBotTurn(X01Match match) {
+        // Resolve and verify the current dart bot player.
         X01MatchPlayer dartBotPlayer = getCurrentDartBotPlayer(match);
 
         // Resolve the current set and leg, creating them when required by the match progress.
@@ -70,15 +61,16 @@ public class X01DartBotServiceImpl implements IX01DartBotService {
                         "Unable to resolve the current leg while creating a dart bot turn"
                 ));
 
-        // Build the bot's current leg state and simulate its round.
+        // Build the current leg state and simulate the bot's round.
         X01DartBotLegState dartBotLegState = createDartBotLegState(match, dartBotPlayer, currentLegEntry.leg());
-        X01LegRoundScore roundScore = createRoundScore(dartBotLegState, match.getMatchSettings().isTrackDoubles());
+        X01LegRoundScore roundScore = createRoundScore(dartBotLegState);
 
-        // Checkout darts are only supplied when the bot completed the leg during this round.
+        // Record checkout dart usage only when this round completed the leg.
         Integer checkoutDartsUsed = dartBotLegState.getRemainingPoints() == 0
                 ? dartBotLegState.getDartsUsedInRound()
                 : null;
 
+        // Convert the completed round state into the turn persisted on the match.
         return new X01Turn(roundScore.getScore(), checkoutDartsUsed, roundScore.getDoublesMissed());
     }
 
@@ -92,7 +84,7 @@ public class X01DartBotServiceImpl implements IX01DartBotService {
     private X01MatchPlayer getCurrentDartBotPlayer(X01Match match) {
         ObjectId currentThrower = match.getMatchProgress().getCurrentThrower();
 
-        // Find the player matching the current thrower and verify that dart bot settings are available.
+        // Find the current player and verify that it has dart bot configuration.
         return match.getPlayers()
                 .stream()
                 .filter(matchPlayer ->
@@ -107,30 +99,28 @@ public class X01DartBotServiceImpl implements IX01DartBotService {
     /**
      * Creates the dart bot state used while simulating the current leg.
      *
-     * The state contains the score and darts already used before the current round,
-     * the bot's target one-dart average and its target number of darts for completing the leg.
-     *
      * @param match         the current match
      * @param dartBotPlayer the dart bot player
      * @param currentLeg    the current leg
      * @return the state used to simulate the dart bot's turn
      */
-    private X01DartBotLegState createDartBotLegState(X01Match match, X01MatchPlayer dartBotPlayer, X01Leg currentLeg) {
+    private X01DartBotLegState createDartBotLegState(
+            X01Match match,
+            X01MatchPlayer dartBotPlayer,
+            X01Leg currentLeg
+    ) {
         // Get the starting score for the leg.
         int x01 = match.getMatchSettings().getX01();
+        boolean trackDoubles = match.getMatchSettings().isTrackDoubles();
 
-        // Calculate how many points the bot scored before the current round.
+        // Calculate the points and darts already accumulated before the current round.
         int legScored = x01 - legResultService.getRemainingForPlayer(currentLeg, dartBotPlayer.getPlayerId(), x01);
-
-        // Calculate how many darts the bot used before the current round.
         int dartsUsed = legResultService.calculateDartsUsed(currentLeg, dartBotPlayer.getPlayerId());
 
-        // Convert the configured three-dart average to the one-dart average used by the simulator.
-        double targetOneDartAvg = X01MatchUtils.threeDartAvgToOneDartAvg(
-                dartBotPlayer.getX01DartBotSettings().getThreeDartAverage()
-        );
+        // Use the configured playing strength to determine the bot's target leg length.
+        double targetOneDartAvg = dartBotPlayer.getX01DartBotSettings().getOneDartAverage();
 
-        // Start the new round with no darts thrown and no points scored yet.
+        // Start the current round with no darts thrown and no points scored.
         return new X01DartBotLegState(
                 x01,
                 legScored,
@@ -138,61 +128,51 @@ public class X01DartBotServiceImpl implements IX01DartBotService {
                 dartsUsed,
                 createTargetNumOfDarts(x01, targetOneDartAvg),
                 targetOneDartAvg,
-                new X01LegRoundScore(0, 0, x01 - legScored)
+                new X01LegRoundScore(null, 0, x01 - legScored),
+                trackDoubles
         );
     }
 
     /**
      * Creates the target number of darts in which the bot should complete the leg.
      *
-     * The expected number of darts is calculated from the starting score and target
-     * one-dart average, then varied within the configured range to produce less predictable leg lengths.
-     *
      * @param x01              the starting score
      * @param targetOneDartAvg the bot's target one-dart average
      * @return the target number of darts for completing the leg
      */
     private int createTargetNumOfDarts(int x01, double targetOneDartAvg) {
-        // Calculate how many darts would normally be required at the target average.
+        // Calculate the expected leg length at the bot's target average.
         int expectedNumOfDarts = (int) Math.round(x01 / targetOneDartAvg);
 
-        // Calculate the allowed variance around the expected number of darts.
+        // Apply variance so repeated legs do not always target the same dart count.
         double lowerBound = expectedNumOfDarts * (1 - TARGET_DART_COUNT_VARIANCE);
         double upperBound = expectedNumOfDarts * (1 + TARGET_DART_COUNT_VARIANCE);
-
-        // Pick a random target number of darts within the allowed range.
         double randomWithinRange = NumberUtils.randomBetween(lowerBound, upperBound);
 
-        // Round the result while guaranteeing a target of at least one dart.
-        return Math.max(MINIMUM_TARGET_DARTS, (int) Math.round(randomWithinRange));
+        // Keep the generated target at a minimum of one dart.
+        return Math.max(1, (int) Math.round(randomWithinRange));
     }
 
     /**
      * Simulates the dart bot's current round.
      *
-     * Throws are generated and applied until the bot completes the leg or uses
-     * all remaining darts in the round.
-     *
      * @param dartBotLegState the current dart bot leg state
-     * @param trackDoubles    whether missed doubles should be tracked
      * @return the completed round score
      */
-    private X01LegRoundScore createRoundScore(X01DartBotLegState dartBotLegState, boolean trackDoubles) {
+    private X01LegRoundScore createRoundScore(X01DartBotLegState dartBotLegState) {
         int remaining = dartBotLegState.getRemainingPoints();
 
-        // Simulate throws until the leg is finished or no darts remain in the round.
+        // Continue until the bot completes the leg or exhausts the darts available in the round.
         while (remaining != 0 && dartBotLegState.getDartsLeftInRound() > 0) {
             List<DartThrow> dartThrows = dartBotThrowSimulator.getNextDartThrows(dartBotLegState);
 
-            // Apply each simulated throw to the current round state.
+            // Apply each simulated dart to the round state.
             for (DartThrow dartThrow : dartThrows) {
-                updateRoundScore(dartBotLegState, dartThrow, trackDoubles);
-                dartBotLegState.setDartsUsedInRound(
-                        dartBotLegState.getDartsUsedInRound() + 1
-                );
+                updateRoundScore(dartBotLegState, dartThrow);
+                dartBotLegState.setDartsUsedInRound(dartBotLegState.getDartsUsedInRound() + 1);
             }
 
-            // Recalculate the remaining score after the simulated throws.
+            // Re-evaluate whether the simulated round has completed the leg.
             remaining = dartBotLegState.getRemainingPoints();
         }
 
@@ -202,21 +182,18 @@ public class X01DartBotServiceImpl implements IX01DartBotService {
     /**
      * Applies a simulated dart result to the current round score.
      *
-     * Updates the scored and remaining points and, when enabled, tracks a missed
-     * double if the dart did not hit the specific double it was targeting.
-     *
      * @param dartBotLegState the current dart bot leg state
      * @param dartThrow       the simulated dart throw
-     * @param trackDoubles    whether missed doubles should be tracked
      */
-    private void updateRoundScore(X01DartBotLegState dartBotLegState, DartThrow dartThrow, boolean trackDoubles) {
+    private void updateRoundScore(X01DartBotLegState dartBotLegState, DartThrow dartThrow) {
         X01LegRoundScore roundScore = dartBotLegState.getLegRoundScore();
 
+        // Add the dart result and recalculate the remaining score.
         roundScore.setScore(roundScore.getScore() + dartThrow.result().getScore());
         roundScore.setRemaining(dartBotLegState.getRemainingPoints());
 
-        // Count a missed double only when double tracking is enabled.
-        if (trackDoubles && isDoubleMiss(dartThrow)) {
+        // Count missed doubles only when double tracking is enabled.
+        if (dartBotLegState.isTrackDoubles() && isDoubleMiss(dartThrow)) {
             if (roundScore.getDoublesMissed() == null) {
                 roundScore.setDoublesMissed(0);
             }
@@ -229,7 +206,6 @@ public class X01DartBotServiceImpl implements IX01DartBotService {
      * Determines whether a dart aimed at a double missed its specific target.
      *
      * Double bull is treated as a double through {@link DartboardSectionArea#isDouble()}.
-     * A different section or scoring area therefore counts as a miss.
      *
      * @param dartThrow the dart throw to evaluate
      * @return whether the intended double was missed
@@ -238,7 +214,7 @@ public class X01DartBotServiceImpl implements IX01DartBotService {
         Dart target = dartThrow.target();
         Dart result = dartThrow.result();
 
-        // Only throws aimed at a double can count as a missed double.
+        // Throws not aimed at a double cannot count as missed doubles.
         if (!target.area().isDouble()) {
             return false;
         }

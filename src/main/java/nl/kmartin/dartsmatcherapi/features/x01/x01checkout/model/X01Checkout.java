@@ -4,9 +4,12 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.Dart;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Represents an X01 checkout and its suggested dart sequence.
@@ -20,8 +23,8 @@ public record X01Checkout(
         @Max(MAXIMUM_CHECKOUT)
         int checkout,
 
-        @Min(MINIMUM_CHECKOUT_DARTS)
-        @Max(MAXIMUM_CHECKOUT_DARTS)
+        @Positive
+        @Max(X01LegRoundScore.MAXIMUM_DARTS_PER_ROUND)
         int minDarts,
 
         @NotNull
@@ -30,6 +33,5 @@ public record X01Checkout(
     public static final int MINIMUM_CHECKOUT = 2;
     public static final int MAXIMUM_CHECKOUT = 170;
 
-    public static final int MINIMUM_CHECKOUT_DARTS = 1;
-    public static final int MAXIMUM_CHECKOUT_DARTS = 3;
+    public static final Set<Integer> IMPOSSIBLE_CHECKOUTS = Set.of(169, 168, 166, 165, 163, 162, 159);
 }

@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 /**
  * Rebuilds X01 match results from the processed set history.
  *
- * Reprocesses set results, removes stale history and updates player results, match state and standings.
+ * Reprocesses set results, removes stale history and updates player results and match state.
  */
 @Service
 @Validated
@@ -39,14 +39,6 @@ public class X01MatchResultServiceImpl implements IX01MatchResultService {
         this.standingsService = standingsService;
     }
 
-    /**
-     * Rebuilds the result-related state of a match from its set history.
-     *
-     * Reprocesses set results, removes stale sets, determines the match winners and updates player results
-     * and the overall match state.
-     *
-     * @param match the match whose result state should be rebuilt
-     */
     @Override
     public void updateMatchResult(X01Match match) {
         // Rebuild set results and find the current unfinished set.
@@ -65,7 +57,7 @@ public class X01MatchResultServiceImpl implements IX01MatchResultService {
             removeSetsAfter(match, winnerSearch.setNumber());
         }
 
-        // Convert the determined winners into player results.
+        // Apply the determined result to the players and overall match state.
         updatePlayerResults(match, winnerSearch.winners());
         updateMatchState(match, winnerSearch.winners());
     }
@@ -105,7 +97,7 @@ public class X01MatchResultServiceImpl implements IX01MatchResultService {
         X01BestOf bestOf = match.getMatchSettings().getBestOf();
         int setsPlayed = 0;
 
-        // Build the standings chronologically until the rules determine that the match is concluded.
+        // Build the win counts chronologically until the rules determine that the match is concluded.
         for (Map.Entry<Integer, X01Set> setEntry : match.getSets().entrySet()) {
             X01Set set = setEntry.getValue();
             if (set.getResult() == null) break;

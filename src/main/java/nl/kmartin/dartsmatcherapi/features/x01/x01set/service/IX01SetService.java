@@ -11,6 +11,13 @@ import java.util.List;
 
 public interface IX01SetService {
 
+    /**
+     * Creates a new numbered set with the correct starting player.
+     *
+     * @param setNumber the set number
+     * @param players   the match players
+     * @return the created set entry
+     */
     X01SetEntry createNewSet(
             @Positive int setNumber,
             @NotEmpty List<@NotNull @Valid X01MatchPlayer> players

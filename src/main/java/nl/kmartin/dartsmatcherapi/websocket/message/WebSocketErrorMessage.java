@@ -7,10 +7,10 @@ import java.util.Map;
 /**
  * Represents an error message returned over WebSocket.
  *
- * @param destination the destination associated with the error
- * @param error the API error code
- * @param description the error description
- * @param code the HTTP status code associated with the error
+ * @param destination  the destination associated with the error
+ * @param error        the API error code
+ * @param description  the error description
+ * @param code         the HTTP status code associated with the error
  * @param targetErrors the target-specific errors
  */
 public record WebSocketErrorMessage(

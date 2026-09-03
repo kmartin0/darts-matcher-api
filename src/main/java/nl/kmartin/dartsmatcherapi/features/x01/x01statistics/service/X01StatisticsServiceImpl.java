@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 @Service
 @Validated
 public class X01StatisticsServiceImpl implements IX01StatisticsService {
+
     private final IX01ResultStatisticsService resultStatisticsService;
     private final IX01ScoreStatisticsService scoreStatisticsService;
     private final IX01CheckoutStatisticsService checkoutStatisticsService;
@@ -54,24 +55,17 @@ public class X01StatisticsServiceImpl implements IX01StatisticsService {
         this.legService = legService;
     }
 
-    /**
-     * Recalculates the statistics for all players from the complete match history.
-     *
-     * Existing statistics are reset before all sets, legs, rounds and scores are processed again.
-     *
-     * @param match the match for which player statistics should be recalculated
-     */
     @Override
     public void updatePlayerStatistics(X01Match match) {
-        // Reset all player statistics before rebuilding them from the match history.
+        // Reset all accumulated statistics before rebuilding them from the match history.
         resetPlayerStatistics(match.getPlayers());
 
-        // Map players by ID so scores can quickly be associated with their player.
+        // Map players by ID so recorded scores can be associated with their player.
         Map<ObjectId, X01MatchPlayer> playersMap = match.getPlayers()
                 .stream()
                 .collect(Collectors.toMap(X01MatchPlayer::getPlayerId, Function.identity()));
 
-        // Rebuild statistics by processing the match from sets down to individual scores.
+        // Process the complete match hierarchy from sets down to individual player scores.
         processSets(match.getSets(), match.getMatchSettings().isTrackDoubles(), playersMap);
     }
 
@@ -82,7 +76,11 @@ public class X01StatisticsServiceImpl implements IX01StatisticsService {
      * @param trackDoubles whether missed doubles should be tracked
      * @param playersMap   the players mapped by player ID
      */
-    private void processSets(NavigableMap<Integer, X01Set> sets, boolean trackDoubles, Map<ObjectId, X01MatchPlayer> playersMap) {
+    private void processSets(
+            NavigableMap<Integer, X01Set> sets,
+            boolean trackDoubles,
+            Map<ObjectId, X01MatchPlayer> playersMap
+    ) {
         sets.values().forEach(set -> {
             resultStatisticsService.updateSetsWonStatistics(set, playersMap);
             processLegs(set.getLegs(), trackDoubles, playersMap);
@@ -151,7 +149,7 @@ public class X01StatisticsServiceImpl implements IX01StatisticsService {
             boolean trackDoubles,
             Map<ObjectId, X01MatchPlayer> playersMap
     ) {
-        // Process statistics for each player that recorded a score in the round.
+        // Process statistics only for scores that can be associated with a match player.
         roundScores.forEach((playerId, roundScore) -> {
             X01MatchPlayer player = playersMap.get(playerId);
 
@@ -179,6 +177,7 @@ public class X01StatisticsServiceImpl implements IX01StatisticsService {
     ) {
         X01Statistics playerStats = player.getStatistics();
 
+        // Determine whether this score represents the player's successful checkout round.
         boolean isScoreCheckout = legService.isPlayerCheckoutRound(
                 leg,
                 legRoundEntry.roundNumber(),
@@ -188,7 +187,7 @@ public class X01StatisticsServiceImpl implements IX01StatisticsService {
         // Update the score-range statistics.
         scoreStatisticsService.updateScoreStatistics(playerStats.getScoreStatistics(), playerScore);
 
-        // Update checkout statistics using the checkout and double-tracking state.
+        // Update successful and missed checkout statistics.
         X01CheckoutStatistics checkoutStats = playerStats.getCheckoutStats();
         checkoutStatisticsService.updateCheckoutStatistics(
                 checkoutStats,
@@ -197,7 +196,7 @@ public class X01StatisticsServiceImpl implements IX01StatisticsService {
                 trackDoubles
         );
 
-        // Update overall and first-nine averages.
+        // Update overall and first-nine averages using the actual dart count for a checkout round.
         X01AverageStatistics averageStats = playerStats.getAverageStats();
         Integer checkoutDartsUsed = isScoreCheckout ? leg.getCheckoutDartsUsed() : null;
 
@@ -212,18 +211,9 @@ public class X01StatisticsServiceImpl implements IX01StatisticsService {
     /**
      * Resets the statistics for all match players.
      *
-     * Players without an existing statistics object are initialized with a new one.
-     *
      * @param matchPlayers the players whose statistics should be reset
      */
     private void resetPlayerStatistics(List<X01MatchPlayer> matchPlayers) {
-        matchPlayers.forEach(matchPlayer -> {
-            if (matchPlayer.getStatistics() == null) {
-                matchPlayer.setStatistics(new X01Statistics());
-                return;
-            }
-
-            matchPlayer.getStatistics().reset();
-        });
+        matchPlayers.forEach(matchPlayer -> matchPlayer.getStatistics().reset());
     }
 }

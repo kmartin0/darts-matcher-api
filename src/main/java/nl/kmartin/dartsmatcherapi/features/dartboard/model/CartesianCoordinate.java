@@ -6,5 +6,8 @@ package nl.kmartin.dartsmatcherapi.features.dartboard.model;
  * @param x the horizontal distance from the center in millimeters
  * @param y the vertical distance from the center in millimeters
  */
-public record CartesianCoordinate(double x, double y) {
+public record CartesianCoordinate(
+        double x,
+        double y
+) {
 }

@@ -43,8 +43,6 @@ public class X01Statistics {
 
     /**
      * Resets all player statistics to their initial values.
-     *
-     * Missing statistics objects are recreated before continuing.
      */
     public void reset() {
         resultStatistics.reset();

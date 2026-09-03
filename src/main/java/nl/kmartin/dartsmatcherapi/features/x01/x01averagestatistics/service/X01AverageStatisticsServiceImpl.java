@@ -6,24 +6,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * Calculates and updates average statistics for X01 players.
- *
- * Tracks overall throwing statistics and the separate first-nine statistics for the first three rounds of a leg.
+ * Updates X01 average statistics from processed leg-round scores.
  */
 @Service
 @Validated
 public class X01AverageStatisticsServiceImpl implements IX01AverageStatisticsService {
-    private static final int DARTS_PER_ROUND = 3;
-    private static final int FIRST_NINE_ROUNDS = 3;
-
-    /**
-     * Updates the player's average statistics based on the current round.
-     *
-     * @param playerAverageStats the average statistics to update
-     * @param playerScore        the score for the current round
-     * @param roundNumber        the current round number
-     * @param checkoutDartsUsed  number of darts used when checking out, or null when no checkout occurred
-     */
     @Override
     public void updateAverageStats(
             X01AverageStatistics playerAverageStats,
@@ -31,15 +18,18 @@ public class X01AverageStatisticsServiceImpl implements IX01AverageStatisticsSer
             int roundNumber,
             Integer checkoutDartsUsed
     ) {
+        // Use the recorded checkout dart count for a partial final round; otherwise count a full round.
         int dartsUsed = checkoutDartsUsed != null
                 ? checkoutDartsUsed
-                : DARTS_PER_ROUND;
+                : X01LegRoundScore.MAXIMUM_DARTS_PER_ROUND;
 
+        // Accumulate the overall throwing totals and recalculate the three-dart average.
         updatePointsThrown(playerAverageStats, playerScore);
         updateDartsThrown(playerAverageStats, dartsUsed);
         updateAverage(playerAverageStats);
 
-        if (roundNumber <= FIRST_NINE_ROUNDS) {
+        // Accumulate the separate first-nine statistics for the opening rounds of the leg.
+        if (roundNumber <= X01AverageStatistics.ROUND_COUNT_FIRST_NINE) {
             updatePointsThrownFirstNine(playerAverageStats, playerScore);
             updateDartsThrownFirstNine(playerAverageStats, dartsUsed);
             updateAverageFirstNine(playerAverageStats);
@@ -131,6 +121,6 @@ public class X01AverageStatisticsServiceImpl implements IX01AverageStatisticsSer
      */
     private int calculateThreeDartAverage(int pointsThrown, int dartsThrown) {
         double oneDartAverage = (double) pointsThrown / dartsThrown;
-        return (int) Math.round(oneDartAverage * DARTS_PER_ROUND);
+        return (int) Math.round(oneDartAverage * X01LegRoundScore.MAXIMUM_DARTS_PER_ROUND);
     }
 }

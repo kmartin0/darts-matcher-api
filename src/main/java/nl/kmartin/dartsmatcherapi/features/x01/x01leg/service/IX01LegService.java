@@ -14,12 +14,30 @@ import java.util.List;
 
 public interface IX01LegService {
 
+    /**
+     * Creates a new numbered leg and determines which player throws first.
+     *
+     * @param legNumber        the leg number
+     * @param throwsFirstInSet the player that started the set
+     * @param players          the match players
+     * @return the created leg entry
+     */
     X01LegEntry createNewLeg(
             @Positive int legNumber,
             @NotNull ObjectId throwsFirstInSet,
             @NotEmpty List<@NotNull @Valid X01MatchPlayer> players
     );
 
+    /**
+     * Applies a player's turn to a leg round and recalculates the affected leg state.
+     *
+     * @param x01          the starting score for the leg
+     * @param leg          the leg to update
+     * @param roundNumber  the round number
+     * @param turn         the turn to apply
+     * @param throwerId    the player that threw the turn
+     * @param trackDoubles whether missed doubles should be tracked
+     */
     void applyTurn(
             @Positive int x01,
             @NotNull @Valid X01Leg leg,
@@ -29,6 +47,14 @@ public interface IX01LegService {
             boolean trackDoubles
     );
 
+    /**
+     * Determines whether a player's score belongs to the checkout round of a leg.
+     *
+     * @param leg         the leg to check
+     * @param roundNumber the round number
+     * @param playerId    the player ID
+     * @return whether the round is the player's checkout round
+     */
     boolean isPlayerCheckoutRound(
             @NotNull @Valid X01Leg leg,
             int roundNumber,

@@ -24,17 +24,6 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class DartboardServiceImpl implements IDartboardService {
 
-    /**
-     * Calculates where a dart lands when throwing at a target with a given deviation.
-     *
-     * The target starts at the center of its scoring area.
-     * Setting both offsets to 0 results in a throw at the center of the requested target.
-     *
-     * @param target      the dartboard target
-     * @param offsetR     radial deviation in millimeters
-     * @param offsetTheta angular deviation in radians
-     * @return the resulting dart
-     */
     @Override
     public Dart getScore(Dart target, double offsetR, double offsetTheta) {
         // Create a polar coordinate from the center of the section area.
@@ -80,7 +69,6 @@ public class DartboardServiceImpl implements IDartboardService {
      * @return the dartboard section
      */
     private DartboardSection getSection(double theta) {
-
         for (int i = 0; i < Dartboard.SECTIONS.size(); i++) {
             if (theta <= getSectionTheta(i)) {
                 return Dartboard.SECTIONS.get(i);
@@ -98,7 +86,7 @@ public class DartboardServiceImpl implements IDartboardService {
      */
     private double getSectionTheta(int sectorIndex) {
         if (sectorIndex == Dartboard.NUMBER_OF_SECTIONS) {
-            return Math.PI * 2;
+            return Dartboard.FULL_ROTATION_RADIANS;
         }
 
         return (sectorIndex * Dartboard.SECTION_ANGLE_RADIANS) + Dartboard.HALF_SECTION_ANGLE_RADIANS;
@@ -111,10 +99,10 @@ public class DartboardServiceImpl implements IDartboardService {
      * @return the scoring area
      */
     private DartboardSectionArea getSectionArea(double r) {
-
         for (DartboardSectionAreaDimen areaDimension : Dartboard.AREA_DIMENSIONS) {
-            if (r >= areaDimension.inner() && r < areaDimension.outer())
+            if (r >= areaDimension.inner() && r < areaDimension.outer()) {
                 return areaDimension.sectionArea();
+            }
         }
 
         return DartboardSectionArea.MISS;
@@ -128,7 +116,9 @@ public class DartboardServiceImpl implements IDartboardService {
      * @return the polar coordinate at the center of the target
      */
     private PolarCoordinate getCenter(DartboardSection section, DartboardSectionArea sectionArea) {
-        if (sectionArea == DartboardSectionArea.DOUBLE_BULL) return new PolarCoordinate(0, 0);
+        if (sectionArea == DartboardSectionArea.DOUBLE_BULL) {
+            return new PolarCoordinate(0, 0);
+        }
 
         return Dartboard.AREA_DIMENSIONS.stream()
                 .filter(dimen -> dimen.sectionArea() == sectionArea)

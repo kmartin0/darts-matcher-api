@@ -14,6 +14,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class X01AverageStatistics {
+    public static final int ROUND_COUNT_FIRST_NINE = 3;
+
     @PositiveOrZero
     private int pointsThrown;
 
@@ -21,7 +23,7 @@ public class X01AverageStatistics {
     private int dartsThrown;
 
     @PositiveOrZero
-    private int average;
+    private Integer average;
 
     @PositiveOrZero
     private int pointsThrownFirstNine;
@@ -30,7 +32,7 @@ public class X01AverageStatistics {
     private int dartsThrownFirstNine;
 
     @PositiveOrZero
-    private int averageFirstNine;
+    private Integer averageFirstNine;
 
     /**
      * Resets all average statistics to their initial values.
@@ -38,9 +40,9 @@ public class X01AverageStatistics {
     public void reset() {
         this.pointsThrown = 0;
         this.dartsThrown = 0;
-        this.average = 0;
+        this.average = null;
         this.pointsThrownFirstNine = 0;
         this.dartsThrownFirstNine = 0;
-        this.averageFirstNine = 0;
+        this.averageFirstNine = null;
     }
 }

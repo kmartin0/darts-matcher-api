@@ -46,33 +46,14 @@ public class X01LegServiceImpl implements IX01LegService {
         this.legRoundService = legRoundService;
     }
 
-    /**
-     * Creates a new numbered leg and determines which player throws first.
-     *
-     * @param legNumber        the leg number
-     * @param throwsFirstInSet the player that started the set
-     * @param players          the match players
-     * @return the created leg entry
-     */
     @Override
     public X01LegEntry createNewLeg(int legNumber, ObjectId throwsFirstInSet, List<X01MatchPlayer> players) {
+        // Rotate the set starter through the player order to determine who starts this leg.
         ObjectId throwsFirstInLeg = calcThrowsFirstInLeg(legNumber, throwsFirstInSet, players);
+
         return new X01LegEntry(legNumber, new X01Leg(null, throwsFirstInLeg, new TreeMap<>()));
     }
 
-    /**
-     * Applies a player's turn to a leg round.
-     *
-     * The turn is stored or replaces an existing turn, after which remaining points, score validity, checkout state
-     * and the leg result are recalculated.
-     *
-     * @param x01          the starting score for the leg
-     * @param leg          the leg to update
-     * @param roundNumber  the round number
-     * @param turn         the turn to apply
-     * @param throwerId    the player that threw the turn
-     * @param trackDoubles whether missed doubles should be tracked
-     */
     @Override
     public void applyTurn(int x01, X01Leg leg, int roundNumber, X01Turn turn, ObjectId throwerId, boolean trackDoubles) {
         // Determine if a turn may be applied to this leg.
@@ -91,14 +72,6 @@ public class X01LegServiceImpl implements IX01LegService {
         legResultService.updateLegResult(leg, x01);
     }
 
-    /**
-     * Determines whether a player's score belongs to the checkout round of a leg.
-     *
-     * @param leg         the leg to check
-     * @param roundNumber the round number
-     * @param playerId    the player ID
-     * @return whether the round is the player's checkout round
-     */
     @Override
     public boolean isPlayerCheckoutRound(X01Leg leg, int roundNumber, ObjectId playerId) {
         return playerId.equals(leg.getWinner()) && leg.getRounds().higherKey(roundNumber) == null;

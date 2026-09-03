@@ -27,8 +27,7 @@ public class X01DartBotDeviationCalculatorImpl implements IX01DartBotDeviationCa
     // Controls how strongly the current average adjusts the baseline deviation.
     private static final double CALIBRATION_FACTOR = 5.0;
 
-    // Piecewise deviation curve where the x-axis represents the target one-dart average
-    // and the y-axis represents the corresponding maximum throw deviation.
+    // Maps target one-dart averages to their corresponding maximum throw deviations.
     private static final NavigableMap<Double, Double> DEVIATION_CURVE = new TreeMap<>(Map.of(
             0.0, 80.0,
             10.0, 45.0,
@@ -41,47 +40,25 @@ public class X01DartBotDeviationCalculatorImpl implements IX01DartBotDeviationCa
             53.0, 0.0
     ));
 
-    // Interpolates the baseline deviation for target averages between the defined curve points.
-    private final PiecewiseLinearInterpolator deviationInterpolator =
-            new PiecewiseLinearInterpolator(DEVIATION_CURVE);
+    // Interpolates deviations for target averages between the configured curve points.
+    private final PiecewiseLinearInterpolator deviationInterpolator = new PiecewiseLinearInterpolator(DEVIATION_CURVE);
 
-    /**
-     * Creates a randomized radial offset for a dart throw.
-     *
-     * The maximum offset is calibrated using the bot's target and current one-dart averages.
-     *
-     * @param targetOneDartAvg  the target one-dart average
-     * @param currentOneDartAvg the current one-dart average
-     * @return the radial offset in millimeters
-     */
     @Override
     public double createOffsetR(double targetOneDartAvg, double currentOneDartAvg) {
-        // Calculate how many millimeters the dart is allowed to miss the target by.
+        // Calculate the maximum radial deviation allowed by the bot's current performance.
         double maxDeviationMm = calculateDeviation(targetOneDartAvg, currentOneDartAvg);
 
-        // Pick a random distance from the target within the allowed maximum.
+        // Pick a random radial offset within the allowed deviation.
         return NumberUtils.randomBetween(maxDeviationMm);
     }
 
-    /**
-     * Creates a randomized angular offset for a dart throw.
-     *
-     * The maximum offset is calibrated using the bot's target and current one-dart averages.
-     * The generated offset is converted from degrees to radians for the dartboard calculations.
-     *
-     * @param targetOneDartAvg  the target one-dart average
-     * @param currentOneDartAvg the current one-dart average
-     * @return the angular offset in radians
-     */
     @Override
     public double createOffsetTheta(double targetOneDartAvg, double currentOneDartAvg) {
-        // Calculate how many degrees the dart is allowed to miss the target by.
+        // Calculate the maximum angular deviation allowed by the bot's current performance.
         double maxDeviationDegrees = calculateDeviation(targetOneDartAvg, currentOneDartAvg);
 
-        // Pick a random angle between the maximum miss to the left and right of the target.
+        // Pick a random angular offset and convert it to the radians used by the dartboard.
         double offsetDegrees = NumberUtils.randomBetween(maxDeviationDegrees);
-
-        // Convert the angle from degrees to radians because the dartboard calculations use radians.
         return PolarCoordinate.degreeToRadian(offsetDegrees);
     }
 
@@ -96,21 +73,18 @@ public class X01DartBotDeviationCalculatorImpl implements IX01DartBotDeviationCa
      * @return the calibrated throw deviation
      */
     private double calculateDeviation(double targetOneDartAvg, double currentOneDartAvg) {
-        // Get the baseline deviation for the target average.
+        // Get the baseline deviation for the configured playing strength.
         double baseDeviation = getBaseDeviation(targetOneDartAvg);
 
-        // When no darts have been thrown yet, use the baseline deviation without calibration.
+        // No current average exists before the first dart, so use the baseline without calibration.
         if (currentOneDartAvg == 0) return baseDeviation;
 
-        // Calibrate the deviation based on how the bot is currently performing.
+        // Adjust the deviation according to how the bot is currently performing.
         return calibrateDeviation(targetOneDartAvg, currentOneDartAvg, baseDeviation);
     }
 
     /**
      * Gets the baseline deviation for a target one-dart average using piecewise linear interpolation.
-     *
-     * The curve x-axis represents the target one-dart average and the y-axis represents
-     * the corresponding throw deviation.
      *
      * @param targetOneDartAvg the target one-dart average
      * @return the baseline throw deviation
@@ -131,27 +105,21 @@ public class X01DartBotDeviationCalculatorImpl implements IX01DartBotDeviationCa
      * @return the calibrated deviation within the allowed range
      */
     private double calibrateDeviation(double targetOneDartAvg, double currentOneDartAvg, double deviationToCalibrate) {
-        // Calculate how far the current average is above or below the target average as a percentage.
-        double relativePerformanceDifference =
-                (currentOneDartAvg - targetOneDartAvg) / targetOneDartAvg;
+        // Calculate how far the current average is above or below the target average.
+        double relativePerformanceDifference = (currentOneDartAvg - targetOneDartAvg) / targetOneDartAvg;
 
-        // Increase the allowed deviation when overperforming and decrease it when underperforming.
-        double adjustedDeviation = deviationToCalibrate
-                * (1.0 + CALIBRATION_FACTOR * relativePerformanceDifference);
+        // Increase deviation when overperforming and decrease it when underperforming.
+        double adjustedDeviation = deviationToCalibrate * (1.0 + CALIBRATION_FACTOR * relativePerformanceDifference);
 
-        // Get the allowed deviation range surrounding the target average.
+        // Constrain the adjustment to the neighboring values in the configured curve.
         double maxDeviation = getMaximumDeviation(targetOneDartAvg);
         double minDeviation = getMinimumDeviation(targetOneDartAvg);
 
-        // Keep the adjusted deviation within the allowed minimum and maximum.
         return Math.max(minDeviation, Math.min(maxDeviation, adjustedDeviation));
     }
 
     /**
      * Gets the maximum allowed deviation for a target one-dart average.
-     *
-     * The value is taken from the neighboring curve point below the target average.
-     * If no lower neighboring point exists, the first curve value is returned.
      *
      * @param targetOneDartAvg the target one-dart average
      * @return the maximum allowed deviation
@@ -170,9 +138,6 @@ public class X01DartBotDeviationCalculatorImpl implements IX01DartBotDeviationCa
 
     /**
      * Gets the minimum allowed deviation for a target one-dart average.
-     *
-     * The value is taken from the neighboring curve point above the target average.
-     * If no higher neighboring point exists, the last curve value is returned.
      *
      * @param targetOneDartAvg the target one-dart average
      * @return the minimum allowed deviation

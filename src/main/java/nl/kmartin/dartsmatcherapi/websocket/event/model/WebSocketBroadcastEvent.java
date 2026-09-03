@@ -5,7 +5,7 @@ package nl.kmartin.dartsmatcherapi.websocket.event.model;
  *
  * @param destination the WebSocket destination
  * @param messageType the message type
- * @param payload the message payload
+ * @param payload     the message payload
  */
 public record WebSocketBroadcastEvent<M, P>(
         String destination,

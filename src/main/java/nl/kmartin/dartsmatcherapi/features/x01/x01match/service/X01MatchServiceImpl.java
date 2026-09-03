@@ -85,29 +85,18 @@ public class X01MatchServiceImpl implements IX01MatchService {
         this.standingsService = standingsService;
     }
 
-    /**
-     * Creates a new X01 match from the supplied creation request.
-     *
-     * @param request the match creation request
-     * @return the created match
-     */
     @Override
     @Transactional
     public X01Match createMatch(X01CreateMatchRequest request) {
         // Initialize the complete match state from the creation request.
         X01Match match = matchSetupService.initializeNewMatch(request);
 
+        // Persist the initialized match and process any immediately scheduled Dart Bot turns.
         saveMatchAndProcessBotTurns(match, X01MatchMessageType.PROCESS_MATCH);
+
         return match;
     }
 
-    /**
-     * Gets an X01 match by id.
-     *
-     * @param matchId the match id
-     * @return the requested match
-     * @throws ResourceNotFoundException when the match does not exist
-     */
     @Override
     @Transactional(readOnly = true)
     public X01Match getMatch(ObjectId matchId) throws ResourceNotFoundException {
@@ -115,32 +104,21 @@ public class X01MatchServiceImpl implements IX01MatchService {
                 .orElseThrow(() -> new ResourceNotFoundException(X01Match.class, matchId));
     }
 
-    /**
-     * Gets existing X01 matches for the supplied ids while preserving the requested order.
-     *
-     * Missing matches are omitted from the result.
-     *
-     * @param matchIds the match ids
-     * @return the existing matches in requested order
-     */
     @Override
     @Transactional(readOnly = true)
     public List<X01Match> getMatches(List<ObjectId> matchIds) {
-        Map<ObjectId, X01Match> matchMap = matchRepository.findAllById(matchIds).stream()
+        // Index the matches that currently exist so the requested order can be restored.
+        Map<ObjectId, X01Match> matchMap = matchRepository.findAllById(matchIds)
+                .stream()
                 .collect(Collectors.toMap(X01Match::getId, Function.identity()));
 
+        // Preserve the supplied ID order while omitting matches that no longer exist.
         return matchIds.stream()
                 .map(matchMap::get)
                 .filter(Objects::nonNull)
                 .toList();
     }
 
-    /**
-     * Verifies that an X01 match exists.
-     *
-     * @param matchId the match id
-     * @throws ResourceNotFoundException when the match does not exist
-     */
     @Override
     @Transactional(readOnly = true)
     public void checkMatchExists(ObjectId matchId) {
@@ -149,13 +127,6 @@ public class X01MatchServiceImpl implements IX01MatchService {
         }
     }
 
-    /**
-     * Adds a turn for the current thrower and processes the resulting match state.
-     *
-     * @param matchId the match id
-     * @param turn    the turn to add
-     * @return the updated match
-     */
     @Override
     @Transactional
     public X01Match addTurn(ObjectId matchId, X01Turn turn) {
@@ -164,17 +135,12 @@ public class X01MatchServiceImpl implements IX01MatchService {
         // Apply the submitted turn to the currently active round and thrower.
         addTurnToCurrentPlayer(match, turn);
 
+        // Rebuild and persist the match before processing any following Dart Bot turns.
         saveMatchAndProcessBotTurns(match, X01MatchMessageType.ADD_HUMAN_TURN);
+
         return match;
     }
 
-    /**
-     * Replaces an existing turn and reprocesses the resulting match state.
-     *
-     * @param matchId  the match id
-     * @param editTurn the edited turn and its match position
-     * @return the updated match
-     */
     @Override
     @Transactional
     public X01Match editTurn(ObjectId matchId, X01EditTurn editTurn) {
@@ -184,11 +150,10 @@ public class X01MatchServiceImpl implements IX01MatchService {
         X01SetEntry setEntry = matchProgressService.getSetOrThrow(match, editTurn.getSet());
         X01LegEntry legEntry = setProgressService.getLegOrThrow(setEntry.set(), editTurn.getLeg());
 
-        // Replace the turn and let the leg service rebuild state affected by the edit.
-
         int x01 = match.getMatchSettings().getX01();
         boolean trackDoubles = match.getMatchSettings().isTrackDoubles();
 
+        // Apply the edited turn and rebuild the leg state affected by the change.
         legService.applyTurn(
                 x01,
                 legEntry.leg(),
@@ -198,16 +163,12 @@ public class X01MatchServiceImpl implements IX01MatchService {
                 trackDoubles
         );
 
+        // Rebuild and persist the match before processing any following Dart Bot turns.
         saveMatchAndProcessBotTurns(match, X01MatchMessageType.EDIT_TURN);
+
         return match;
     }
 
-    /**
-     * Deletes the last recorded turn and reprocesses the match.
-     *
-     * @param matchId the match id
-     * @return the updated match
-     */
     @Override
     @Transactional
     public X01Match deleteLastTurn(ObjectId matchId) {
@@ -216,30 +177,22 @@ public class X01MatchServiceImpl implements IX01MatchService {
         // Remove the latest score and any trailing empty match structure.
         matchProgressService.removeLastScoreFromMatch(match);
 
+        // Rebuild and persist the match before processing any following Dart Bot turns.
         saveMatchAndProcessBotTurns(match, X01MatchMessageType.DELETE_LAST_TURN);
+
         return match;
     }
 
-    /**
-     * Deletes an X01 match and broadcasts its removal.
-     *
-     * @param matchId the match id
-     */
     @Override
     @Transactional
     public void deleteMatch(ObjectId matchId) {
         checkMatchExists(matchId);
 
+        // Delete the aggregate before publishing its removal to connected clients.
         matchRepository.deleteById(matchId);
         broadcastMatchEvent(matchId, X01MatchMessageType.DELETE_MATCH, matchId);
     }
 
-    /**
-     * Resets an X01 match to its initial state and reprocesses it.
-     *
-     * @param matchId the match id
-     * @return the reset match
-     */
     @Override
     @Transactional
     public X01Match resetMatch(ObjectId matchId) {
@@ -248,22 +201,18 @@ public class X01MatchServiceImpl implements IX01MatchService {
         // Create the reset match state while preserving its identity and configuration.
         X01Match resetMatch = matchSetupService.resetMatch(match);
 
+        // Persist the reset state and process any immediately scheduled Dart Bot turns.
         saveMatchAndProcessBotTurns(resetMatch, X01MatchMessageType.RESET_MATCH);
+
         return resetMatch;
     }
 
-    /**
-     * Reprocesses the derived state of an existing X01 match.
-     *
-     * @param matchId the match id
-     * @return the reprocessed match
-     */
     @Override
     @Transactional
     public X01Match reprocessMatch(ObjectId matchId) {
         X01Match match = getMatch(matchId);
 
-        // Rebuild calculated state from the recorded match history before persisting it again.
+        // Rebuild calculated state from the recorded history and persist the normalized aggregate.
         saveMatchAndProcessBotTurns(match, X01MatchMessageType.PROCESS_MATCH);
 
         return match;
@@ -283,9 +232,11 @@ public class X01MatchServiceImpl implements IX01MatchService {
         X01LegEntry currentLegEntry = matchProgressService.getCurrentLegOrCreate(match, currentSetEntry)
                 .orElseThrow(() -> new ResourceNotFoundException(X01Leg.class, null));
 
-        X01LegRoundEntry currentRoundEntry =
-                matchProgressService.getCurrentLegRoundOrCreate(match, currentLegEntry.leg())
-                        .orElseThrow(() -> new ResourceNotFoundException(X01LegRound.class, null));
+        X01LegRoundEntry currentRoundEntry = matchProgressService.getCurrentLegRoundOrCreate(
+                        match,
+                        currentLegEntry.leg()
+                )
+                .orElseThrow(() -> new ResourceNotFoundException(X01LegRound.class, null));
 
         // Determine the current thrower from the scores already recorded in the active round.
         ObjectId currentThrower = legRoundService.getCurrentThrowerInRound(
@@ -297,6 +248,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
         int x01 = match.getMatchSettings().getX01();
         boolean trackDoubles = match.getMatchSettings().isTrackDoubles();
 
+        // Apply the turn and rebuild the affected leg state.
         legService.applyTurn(
                 x01,
                 currentLegEntry.leg(),
@@ -327,6 +279,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
                 );
             }
 
+            // Generate and apply the Dart Bot turn before rebuilding and publishing the resulting state.
             X01Turn dartBotTurn = dartBotService.createDartBotTurn(match);
             addTurnToCurrentPlayer(match, dartBotTurn);
             saveMatch(match, X01MatchMessageType.ADD_BOT_TURN);
@@ -398,7 +351,8 @@ public class X01MatchServiceImpl implements IX01MatchService {
      * @return the matching player, or empty when the player is not found
      */
     private Optional<X01MatchPlayer> getPlayerById(X01Match match, ObjectId playerId) {
-        return match.getPlayers().stream()
+        return match.getPlayers()
+                .stream()
                 .filter(player -> Objects.equals(player.getPlayerId(), playerId))
                 .findFirst();
     }

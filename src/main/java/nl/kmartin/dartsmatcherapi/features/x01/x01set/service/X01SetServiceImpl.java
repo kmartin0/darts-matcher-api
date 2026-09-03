@@ -17,18 +17,12 @@ import java.util.TreeMap;
 @Validated
 public class X01SetServiceImpl implements IX01SetService {
 
-    /**
-     * Creates a new numbered set with the correct starting player.
-     *
-     * @param setNumber the set number
-     * @param players   the match players
-     * @return the created set entry
-     */
     @Override
     public X01SetEntry createNewSet(int setNumber, List<X01MatchPlayer> players) {
+        // Determine which player starts the set from the set number and match-player order.
         ObjectId throwsFirstInSet = calcThrowsFirstInSet(setNumber, players);
-        X01Set set = new X01Set(new TreeMap<>(), throwsFirstInSet, null);
 
+        X01Set set = new X01Set(new TreeMap<>(), throwsFirstInSet, null);
         return new X01SetEntry(setNumber, set);
     }
 
@@ -44,6 +38,7 @@ public class X01SetServiceImpl implements IX01SetService {
     private ObjectId calcThrowsFirstInSet(int setNumber, List<X01MatchPlayer> players) {
         // Rotate the starting position by one player for each successive set.
         int throwsFirstIndex = (setNumber - 1) % players.size();
+
         return players.get(throwsFirstIndex).getPlayerId();
     }
 }

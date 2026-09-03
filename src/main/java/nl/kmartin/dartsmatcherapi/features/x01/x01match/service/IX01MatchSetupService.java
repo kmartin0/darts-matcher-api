@@ -5,9 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateMatchRequest;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
 
-/**
- * Defines operations for creating and resetting X01 matches to their starting state.
- */
 public interface IX01MatchSetupService {
 
     /**

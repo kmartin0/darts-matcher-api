@@ -6,23 +6,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * Updates score statistics for X01 players based on their round scores.
+ * Updates X01 score statistics from processed leg-round scores.
  */
 @Service
 @Validated
 public class X01ScoreStatisticsServiceImpl implements IX01ScoreStatisticsService {
 
-    /**
-     * Updates the score statistic corresponding to the player's round score.
-     *
-     * @param scoreStatistics the score statistics to update
-     * @param playerScore     the player's score for the current round
-     */
     @Override
     public void updateScoreStatistics(X01ScoreStatistics scoreStatistics, X01LegRoundScore playerScore) {
         int score = playerScore.getScore();
 
-        // Increment the statistic for the score range containing the round score.
+        // Place the round score in its highest matching score range.
         if (score == X01ScoreStatistics.TON_EIGHTY) {
             scoreStatistics.incrementTonEighty();
         } else if (score >= X01ScoreStatistics.MINIMUM_TON_FORTY_PLUS) {

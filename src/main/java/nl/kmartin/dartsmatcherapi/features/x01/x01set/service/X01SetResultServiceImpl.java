@@ -38,16 +38,13 @@ public class X01SetResultServiceImpl implements IX01SetResultService {
         this.standingsService = standingsService;
     }
 
-    /**
-     * Rebuilds all result-related state for a set.
-     *
-     * @param setEntry the set to process
-     * @param bestOf   the match format
-     * @param players  the match players
-     * @param x01      the starting X01 score
-     */
     @Override
-    public void updateSetResult(X01SetEntry setEntry, X01BestOf bestOf, List<X01MatchPlayer> players, int x01) {
+    public void updateSetResult(
+            X01SetEntry setEntry,
+            X01BestOf bestOf,
+            List<X01MatchPlayer> players,
+            int x01
+    ) {
         X01Set set = setEntry.set();
 
         // Rebuild leg results and find the current unfinished leg.
@@ -66,7 +63,7 @@ public class X01SetResultServiceImpl implements IX01SetResultService {
             removeLegsAfter(set, winnerSearch.legNumber());
         }
 
-        // Convert the determined winners into player results.
+        // Apply the determined winners to the set result.
         updatePlayerResults(set, players, winnerSearch.winners());
     }
 
@@ -99,14 +96,18 @@ public class X01SetResultServiceImpl implements IX01SetResultService {
      * @param players  the match players
      * @return the winner search result
      */
-    private WinnerSearch findSetWinners(X01SetEntry setEntry, X01BestOf bestOf, List<X01MatchPlayer> players) {
+    private WinnerSearch findSetWinners(
+            X01SetEntry setEntry,
+            X01BestOf bestOf,
+            List<X01MatchPlayer> players
+    ) {
         X01Set set = setEntry.set();
 
         Map<ObjectId, Long> winsPerPlayer = createEmptyWinCountMap(players);
         X01ClearByTwoRule clearByTwoRule = bestOf.getClearByTwoLegsRuleForSet(setEntry.setNumber());
         int legsPlayed = 0;
 
-        // Build the standings chronologically until the rules determine that the set is concluded.
+        // Build the win counts chronologically until the rules determine that the set is concluded.
         for (Map.Entry<Integer, X01Leg> legEntry : set.getLegs().entrySet()) {
             X01Leg leg = legEntry.getValue();
             if (leg.getWinner() == null) break;
@@ -114,8 +115,12 @@ public class X01SetResultServiceImpl implements IX01SetResultService {
             winsPerPlayer.merge(leg.getWinner(), 1L, Long::sum);
             legsPlayed++;
 
-            List<ObjectId> winners =
-                    determineSetWinners(winsPerPlayer, legsPlayed, bestOf.getLegs(), clearByTwoRule);
+            List<ObjectId> winners = determineSetWinners(
+                    winsPerPlayer,
+                    legsPlayed,
+                    bestOf.getLegs(),
+                    clearByTwoRule
+            );
 
             if (!winners.isEmpty()) {
                 return new WinnerSearch(winners, legEntry.getKey());
@@ -145,10 +150,20 @@ public class X01SetResultServiceImpl implements IX01SetResultService {
      * @param clearByTwoRule the applicable clear-by-two rule
      * @return the set winners, or an empty list when the set is not yet concluded
      */
-    private List<ObjectId> determineSetWinners(Map<ObjectId, Long> winsPerPlayer, int legsPlayed, int bestOfLegs, X01ClearByTwoRule clearByTwoRule) {
+    private List<ObjectId> determineSetWinners(
+            Map<ObjectId, Long> winsPerPlayer,
+            int legsPlayed,
+            int bestOfLegs,
+            X01ClearByTwoRule clearByTwoRule
+    ) {
         TreeMap<Integer, List<ObjectId>> standings = standingsService.groupByWinCounts(winsPerPlayer);
 
-        return standingsService.determineWinners(standings, legsPlayed, bestOfLegs, clearByTwoRule);
+        return standingsService.determineWinners(
+                standings,
+                legsPlayed,
+                bestOfLegs,
+                clearByTwoRule
+        );
     }
 
     /**

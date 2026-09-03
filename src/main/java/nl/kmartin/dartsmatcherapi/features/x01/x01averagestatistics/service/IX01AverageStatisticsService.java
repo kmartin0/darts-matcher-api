@@ -2,19 +2,29 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01averagestatistics.service;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import nl.kmartin.dartsmatcherapi.features.x01.x01averagestatistics.model.X01AverageStatistics;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
 
 public interface IX01AverageStatisticsService {
 
+    /**
+     * Accumulates average statistics from a player's score for one round.
+     *
+     * The existing statistics are expected to represent all previously processed rounds.
+     * Overall statistics are always updated, while first-nine statistics are updated only
+     * for rounds belonging to the first nine darts of the leg.
+     *
+     * @param playerAverageStats the accumulated average statistics to update
+     * @param playerScore        the score for the round being processed
+     * @param roundNumber        the round number
+     * @param checkoutDartsUsed  number of darts used when checking out, or null when no checkout occurred
+     */
     void updateAverageStats(
             @NotNull @Valid X01AverageStatistics playerAverageStats,
             @NotNull @Valid X01LegRoundScore playerScore,
             @Positive int roundNumber,
-            @Min(X01Leg.MINIMUM_CHECKOUT_DARTS_USED) @Max(X01Leg.MAXIMUM_CHECKOUT_DARTS_USED) Integer checkoutDartsUsed
+            @Positive @Max(X01LegRoundScore.MAXIMUM_DARTS_PER_ROUND) Integer checkoutDartsUsed
     );
 }

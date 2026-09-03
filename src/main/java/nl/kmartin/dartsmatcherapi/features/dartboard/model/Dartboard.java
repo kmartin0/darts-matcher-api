@@ -8,8 +8,8 @@ import java.util.List;
 public final class Dartboard {
     public static final int NUMBER_OF_SECTIONS = 20;
 
-    public static final double SECTION_ANGLE_RADIANS = (Math.PI * 2) / NUMBER_OF_SECTIONS;
-
+    public static final double FULL_ROTATION_RADIANS = Math.PI * 2;
+    public static final double SECTION_ANGLE_RADIANS = FULL_ROTATION_RADIANS / NUMBER_OF_SECTIONS;
     public static final double HALF_SECTION_ANGLE_RADIANS = SECTION_ANGLE_RADIANS / 2;
 
     public static final int DOUBLE_BULL_INNER_RADIUS_MM = 0;

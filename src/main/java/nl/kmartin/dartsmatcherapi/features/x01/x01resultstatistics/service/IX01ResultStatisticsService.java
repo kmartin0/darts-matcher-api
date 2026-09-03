@@ -12,11 +12,25 @@ import java.util.Map;
 
 public interface IX01ResultStatisticsService {
 
+    /**
+     * Updates set-win statistics from a completed set.
+     *
+     * Players with a win or draw result receive one set win.
+     *
+     * @param set        the set to process
+     * @param playersMap the players mapped by player ID
+     */
     void updateSetsWonStatistics(
             @NotNull @Valid X01Set set,
             @NotEmpty Map<@NotNull ObjectId, @NotNull @Valid X01MatchPlayer> playersMap
     );
 
+    /**
+     * Updates leg-win statistics from a completed leg.
+     *
+     * @param leg        the leg to process
+     * @param playersMap the players mapped by player ID
+     */
     void updateLegsWonStatistics(
             @NotNull @Valid X01Leg leg,
             @NotEmpty Map<@NotNull ObjectId, @NotNull @Valid X01MatchPlayer> playersMap

@@ -27,15 +27,6 @@ public class X01LegResultServiceImpl implements IX01LegResultService {
         this.legRoundService = legRoundService;
     }
 
-    /**
-     * Rebuilds the result-related state of a leg.
-     *
-     * Remaining scores are recalculated before determining the first winning turn. When a winner exists,
-     * history after that turn is removed. Otherwise the winner and checkout state are cleared.
-     *
-     * @param leg the leg to update
-     * @param x01 the starting score for the leg
-     */
     @Override
     public void updateLegResult(X01Leg leg, int x01) {
         // Recalculate all remaining scores before determining the result.
@@ -57,14 +48,6 @@ public class X01LegResultServiceImpl implements IX01LegResultService {
         removeScoresAfterWinner(leg, winnerSearch.winner(), winnerSearch.roundNumber());
     }
 
-    /**
-     * Gets the latest remaining score for a player in a leg.
-     *
-     * @param leg      the leg to evaluate
-     * @param playerId the player ID
-     * @param x01      the starting score for the leg
-     * @return the player's latest remaining score, or the starting score when the player has not thrown
-     */
     @Override
     public int getRemainingForPlayer(X01Leg leg, ObjectId playerId, int x01) {
         // Search backwards so the first score found contains the player's latest remaining value.
@@ -79,13 +62,6 @@ public class X01LegResultServiceImpl implements IX01LegResultService {
         return x01;
     }
 
-    /**
-     * Recalculates the remaining score for a player across all rounds in a leg.
-     *
-     * @param leg      the leg to update
-     * @param playerId the player whose remaining scores should be recalculated
-     * @param x01      the starting score for the leg
-     */
     @Override
     public void updateRemainingForPlayer(X01Leg leg, ObjectId playerId, int x01) {
         int remaining = x01;
@@ -100,24 +76,16 @@ public class X01LegResultServiceImpl implements IX01LegResultService {
         }
     }
 
-    /**
-     * Calculates the number of darts used by a player in a leg.
-     *
-     * Complete turns count as three darts. For the leg winner, the final turn uses the recorded checkout dart count,
-     * defaulting to three when that value is unavailable.
-     *
-     * @param leg      the leg to evaluate
-     * @param playerId the player ID
-     * @return the total number of darts used
-     */
     @Override
     public int calculateDartsUsed(X01Leg leg, ObjectId playerId) {
-        // Only the winner can have a partial final turn; default missing checkout dart usage to three.
+        // Only the winner can have a partial final turn; otherwise use the maximum darts per round.
         boolean playerWonLeg = Objects.equals(leg.getWinner(), playerId);
         Integer checkoutRoundNumber = playerWonLeg ? leg.getRounds().lastKey() : null;
-        int checkoutDartsUsed = leg.getCheckoutDartsUsed() != null ? leg.getCheckoutDartsUsed() : X01Leg.MAXIMUM_CHECKOUT_DARTS_USED;
+        int checkoutDartsUsed = leg.getCheckoutDartsUsed() != null
+                ? leg.getCheckoutDartsUsed()
+                : X01LegRoundScore.MAXIMUM_DARTS_PER_ROUND;
 
-        // Count three darts for each recorded turn, except the winner's checkout turn.
+        // Count the maximum darts per round for each recorded turn, except the winner's checkout turn.
         return leg.getRounds().entrySet()
                 .stream()
                 .mapToInt(entry -> {
@@ -128,7 +96,7 @@ public class X01LegResultServiceImpl implements IX01LegResultService {
                         return checkoutDartsUsed;
                     }
 
-                    return 3;
+                    return X01LegRoundScore.MAXIMUM_DARTS_PER_ROUND;
                 })
                 .sum();
     }

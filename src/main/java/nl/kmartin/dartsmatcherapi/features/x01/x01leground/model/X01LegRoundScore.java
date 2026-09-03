@@ -19,11 +19,11 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Turn;
 @NoArgsConstructor
 @AllArgsConstructor
 public class X01LegRoundScore {
+    public static final int MAXIMUM_DARTS_PER_ROUND = 3;
     public static final int MAXIMUM_SCORE = 180;
-    public static final int MAXIMUM_DOUBLES_MISSED = 3;
 
     @PositiveOrZero
-    @Max(MAXIMUM_DOUBLES_MISSED)
+    @Max(MAXIMUM_DARTS_PER_ROUND)
     private Integer doublesMissed;
 
     @PositiveOrZero

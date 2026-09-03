@@ -20,7 +20,7 @@ public class MessageResolver {
      * Resolves a localized message using the current locale.
      *
      * @param messageKey the message key
-     * @param args the message arguments
+     * @param args       the message arguments
      * @return the resolved message, or a fallback message when the key cannot be found
      */
     public String getMessage(String messageKey, Object... args) {

@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundEntry;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
 import org.bson.types.ObjectId;
 
 import java.util.List;
@@ -31,16 +32,13 @@ import java.util.stream.Collectors;
 @Setter
 @NoArgsConstructor
 public class X01Leg {
-    public static final int MINIMUM_CHECKOUT_DARTS_USED = 1;
-    public static final int MAXIMUM_CHECKOUT_DARTS_USED = 3;
-
     private ObjectId winner;
 
     @NotNull
     private ObjectId throwsFirst;
 
-    @Min(MINIMUM_CHECKOUT_DARTS_USED)
-    @Max(MAXIMUM_CHECKOUT_DARTS_USED)
+    @Positive
+    @Max(X01LegRoundScore.MAXIMUM_DARTS_PER_ROUND)
     private Integer checkoutDartsUsed;
 
     @NotNull

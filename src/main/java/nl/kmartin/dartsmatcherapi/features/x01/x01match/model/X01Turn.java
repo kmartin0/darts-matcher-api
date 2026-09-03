@@ -2,6 +2,7 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01match.model;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,11 +26,11 @@ public class X01Turn {
     @ValidDartScore
     private int score;
 
-    @Min(X01Leg.MINIMUM_CHECKOUT_DARTS_USED)
-    @Max(X01Leg.MAXIMUM_CHECKOUT_DARTS_USED)
+    @Positive
+    @Max(X01LegRoundScore.MAXIMUM_DARTS_PER_ROUND)
     private Integer checkoutDartsUsed;
 
     @PositiveOrZero
-    @Max(X01LegRoundScore.MAXIMUM_DOUBLES_MISSED)
+    @Max(X01LegRoundScore.MAXIMUM_DARTS_PER_ROUND)
     private Integer doublesMissed;
 }

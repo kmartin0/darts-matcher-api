@@ -3,7 +3,7 @@ package nl.kmartin.dartsmatcherapi.features.dartboard.model;
 /**
  * Represents a position using polar coordinates relative to the center of the dartboard.
  *
- * @param r the radial distance from the center in millimeters
+ * @param r     the radial distance from the center in millimeters
  * @param theta the angle around the dartboard in radians
  */
 public record PolarCoordinate(double r, double theta) {

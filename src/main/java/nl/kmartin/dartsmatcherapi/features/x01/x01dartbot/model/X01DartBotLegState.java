@@ -17,8 +17,6 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScor
 @NoArgsConstructor
 @AllArgsConstructor
 public class X01DartBotLegState {
-    public static final int DARTS_PER_ROUND = 3;
-
     private int x01;
     private int scoredBeforeRound;
     private int dartsUsedInRound;
@@ -26,6 +24,7 @@ public class X01DartBotLegState {
     private int targetNumOfDarts;
     private double targetOneDartAvg;
     private X01LegRoundScore legRoundScore;
+    private boolean trackDoubles;
 
     /**
      * Calculates the remaining points including the score from the current round.
@@ -60,7 +59,7 @@ public class X01DartBotLegState {
      * @return the number of darts remaining
      */
     public int getDartsLeftInRound() {
-        return DARTS_PER_ROUND - dartsUsedInRound;
+        return X01LegRoundScore.MAXIMUM_DARTS_PER_ROUND - dartsUsedInRound;
     }
 
     /**
