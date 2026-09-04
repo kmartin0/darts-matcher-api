@@ -6,8 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01LegEntry;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01TurnMutation;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
-import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Turn;
 import org.bson.types.ObjectId;
 
 import java.util.List;
@@ -29,26 +29,21 @@ public interface IX01LegService {
     );
 
     /**
-     * Applies a player's turn to a leg round and recalculates the affected leg state.
+     * Applies a new player's turn to a leg round and recalculates the affected leg state.
      *
-     * @param x01          the starting score for the leg
-     * @param leg          the leg to update
-     * @param roundNumber  the round number
-     * @param turn         the turn to apply
-     * @param throwerId    the player that threw the turn
-     * @param trackDoubles whether missed doubles should be tracked
+     * @param turnMutation the turn mutation to apply
      */
-    void applyTurn(
-            @Positive int x01,
-            @NotNull @Valid X01Leg leg,
-            @Positive int roundNumber,
-            @NotNull @Valid X01Turn turn,
-            @NotNull ObjectId throwerId,
-            boolean trackDoubles
-    );
+    void applyTurn(@NotNull @Valid X01TurnMutation turnMutation);
 
     /**
-     * Determines whether a player's score belongs to the checkout round of a leg.
+     * Replaces an existing player's turn in a leg round and recalculates the affected leg state.
+     *
+     * @param turnMutation the turn mutation to apply as a replacement
+     */
+    void replaceTurn(@NotNull @Valid X01TurnMutation turnMutation);
+
+    /**
+     * Determines whether a player's turn belongs to the checkout round of a leg.
      *
      * @param leg         the leg to check
      * @param roundNumber the round number

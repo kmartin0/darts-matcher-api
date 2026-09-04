@@ -2,19 +2,21 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01match.service;
 
 import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.PlayerType;
+import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.model.X01DartBotTurn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.service.IX01DartBotService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01LegEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.service.IX01LegService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundEntry;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01TurnMutation;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.service.IX01LegRoundService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateMatchRequest;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateTurnRequest;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01EditTurnRequest;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.message.X01MatchMessageType;
-import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01EditTurn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
-import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Turn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.repository.IX01MatchRepository;
 import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01Set;
 import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01SetEntry;
@@ -129,7 +131,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
 
     @Override
     @Transactional
-    public X01Match addTurn(ObjectId matchId, X01Turn turn) {
+    public X01Match addTurn(ObjectId matchId, X01CreateTurnRequest turn) {
         X01Match match = getMatch(matchId);
 
         // Apply the submitted turn to the currently active round and thrower.
@@ -143,25 +145,27 @@ public class X01MatchServiceImpl implements IX01MatchService {
 
     @Override
     @Transactional
-    public X01Match editTurn(ObjectId matchId, X01EditTurn editTurn) {
+    public X01Match editTurn(ObjectId matchId, X01EditTurnRequest turnRequest) {
         X01Match match = getMatch(matchId);
 
         // Resolve the leg containing the turn being edited.
-        X01SetEntry setEntry = matchProgressService.getSetOrThrow(match, editTurn.getSet());
-        X01LegEntry legEntry = setProgressService.getLegOrThrow(setEntry.set(), editTurn.getLeg());
+        X01SetEntry setEntry = matchProgressService.getSetOrThrow(match, turnRequest.getSet());
+        X01LegEntry legEntry = setProgressService.getLegOrThrow(setEntry.set(), turnRequest.getLeg());
 
         int x01 = match.getMatchSettings().getX01();
         boolean trackDoubles = match.getMatchSettings().isTrackDoubles();
 
-        // Apply the edited turn and rebuild the leg state affected by the change.
-        legService.applyTurn(
+        // Replace the turn and rebuild the leg state affected by the change.
+        legService.replaceTurn(new X01TurnMutation(
                 x01,
                 legEntry.leg(),
-                editTurn.getRound(),
-                editTurn,
-                editTurn.getPlayerId(),
+                turnRequest.getRound(),
+                turnRequest.getScore(),
+                turnRequest.getCheckoutDartsUsed(),
+                turnRequest.getDoublesMissed(),
+                turnRequest.getPlayerId(),
                 trackDoubles
-        );
+        ));
 
         // Rebuild and persist the match before processing any following Dart Bot turns.
         saveMatchAndProcessBotTurns(match, X01MatchMessageType.EDIT_TURN);
@@ -174,8 +178,8 @@ public class X01MatchServiceImpl implements IX01MatchService {
     public X01Match deleteLastTurn(ObjectId matchId) {
         X01Match match = getMatch(matchId);
 
-        // Remove the latest score and any trailing empty match structure.
-        matchProgressService.removeLastScoreFromMatch(match);
+        // Remove the latest turn and any trailing empty match structure.
+        matchProgressService.removeLastTurnFromMatch(match);
 
         // Rebuild and persist the match before processing any following Dart Bot turns.
         saveMatchAndProcessBotTurns(match, X01MatchMessageType.DELETE_LAST_TURN);
@@ -219,12 +223,34 @@ public class X01MatchServiceImpl implements IX01MatchService {
     }
 
     /**
-     * Applies a turn to the current thrower in the active round.
+     * Applies a turn request to the current thrower in the active round.
      *
-     * @param match the match to update
-     * @param turn  the turn to apply
+     * @param match       the match to update
+     * @param turnRequest the turn creation request
      */
-    private void addTurnToCurrentPlayer(X01Match match, X01Turn turn) {
+    private void addTurnToCurrentPlayer(X01Match match, X01CreateTurnRequest turnRequest) {
+        addTurnToCurrentPlayer(match, turnRequest.getScore(), turnRequest.getCheckoutDartsUsed(), turnRequest.getDoublesMissed());
+    }
+
+    /**
+     * Applies a generated Dart Bot turn to the current thrower in the active round.
+     *
+     * @param match       the match to update
+     * @param dartBotTurn the generated Dart Bot turn
+     */
+    private void addTurnToCurrentPlayer(X01Match match, X01DartBotTurn dartBotTurn) {
+        addTurnToCurrentPlayer(match, dartBotTurn.score(), dartBotTurn.checkoutDartsUsed(), dartBotTurn.doublesMissed());
+    }
+
+    /**
+     * Applies turn values to the current thrower in the active round.
+     *
+     * @param match             the match to update
+     * @param score             the points scored in the turn
+     * @param checkoutDartsUsed the number of darts used for the checkout
+     * @param doublesMissed     the number of doubles missed
+     */
+    private void addTurnToCurrentPlayer(X01Match match, int score, Integer checkoutDartsUsed, Integer doublesMissed) {
         // Resolve or create the active set, leg and round.
         X01SetEntry currentSetEntry = matchProgressService.getCurrentSetOrCreate(match)
                 .orElseThrow(() -> new ResourceNotFoundException(X01Set.class, null));
@@ -249,14 +275,16 @@ public class X01MatchServiceImpl implements IX01MatchService {
         boolean trackDoubles = match.getMatchSettings().isTrackDoubles();
 
         // Apply the turn and rebuild the affected leg state.
-        legService.applyTurn(
+        legService.applyTurn(new X01TurnMutation(
                 x01,
                 currentLegEntry.leg(),
                 currentRoundEntry.roundNumber(),
-                turn,
+                score,
+                checkoutDartsUsed,
+                doublesMissed,
                 currentThrower,
                 trackDoubles
-        );
+        ));
     }
 
     /**
@@ -280,7 +308,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
             }
 
             // Generate and apply the Dart Bot turn before rebuilding and publishing the resulting state.
-            X01Turn dartBotTurn = dartBotService.createDartBotTurn(match);
+            X01DartBotTurn dartBotTurn = dartBotService.createDartBotTurn(match);
             addTurnToCurrentPlayer(match, dartBotTurn);
             saveMatch(match, X01MatchMessageType.ADD_BOT_TURN);
 

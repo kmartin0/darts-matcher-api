@@ -106,13 +106,13 @@ public class X01MatchProgressServiceImpl implements IX01MatchProgressService {
     }
 
     @Override
-    public void removeLastScoreFromMatch(X01Match match) {
+    public void removeLastTurnFromMatch(X01Match match) {
         // Traverse sets in reverse so trailing empty rounds, legs and sets are cleaned up with the removed score.
         Iterator<Integer> reverseSetsIterator = match.getSets().descendingKeySet().iterator();
 
         while (reverseSetsIterator.hasNext()) {
             X01Set set = match.getSets().get(reverseSetsIterator.next());
-            boolean scoreRemoved = setProgressService.removeLastScoreFromSet(set);
+            boolean scoreRemoved = setProgressService.removeLastTurnFromSet(set);
 
             // Remove a set when deleting its final score also removed its final leg.
             if (set.getLegs().isEmpty()) reverseSetsIterator.remove();

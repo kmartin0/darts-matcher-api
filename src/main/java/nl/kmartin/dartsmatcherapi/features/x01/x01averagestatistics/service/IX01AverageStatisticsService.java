@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import nl.kmartin.dartsmatcherapi.features.x01.x01averagestatistics.model.X01AverageStatistics;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01Turn;
 
 public interface IX01AverageStatisticsService {
 
@@ -23,8 +23,8 @@ public interface IX01AverageStatisticsService {
      */
     void updateAverageStats(
             @NotNull @Valid X01AverageStatistics playerAverageStats,
-            @NotNull @Valid X01LegRoundScore playerScore,
+            @NotNull @Valid X01Turn playerScore,
             @Positive int roundNumber,
-            @Positive @Max(X01LegRoundScore.MAXIMUM_DARTS_PER_ROUND) Integer checkoutDartsUsed
+            @Positive @Max(X01Turn.MAXIMUM_DARTS_PER_TURN) Integer checkoutDartsUsed
     );
 }

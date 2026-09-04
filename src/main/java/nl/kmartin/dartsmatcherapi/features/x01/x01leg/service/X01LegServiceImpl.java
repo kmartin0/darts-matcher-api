@@ -5,10 +5,11 @@ import nl.kmartin.dartsmatcherapi.error.response.TargetError;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01LegEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundEntry;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01Turn;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01TurnMutation;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.service.IX01LegRoundService;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateTurnRequest;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
-import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Turn;
 import nl.kmartin.dartsmatcherapi.i18n.MessageKeys;
 import nl.kmartin.dartsmatcherapi.i18n.MessageResolver;
 import org.bson.types.ObjectId;
@@ -21,9 +22,9 @@ import java.util.TreeMap;
 import java.util.stream.IntStream;
 
 /**
- * Coordinates creation, scoring and rule handling for X01 legs.
+ * Coordinates creation, turn processing and rule handling for X01 legs.
  *
- * Applies turns, maintains checkout state and delegates progression and result calculations.
+ * Applies and replaces turns, maintains checkout state and delegates progression and result calculations.
  */
 @Service
 @Validated
@@ -55,21 +56,45 @@ public class X01LegServiceImpl implements IX01LegService {
     }
 
     @Override
-    public void applyTurn(int x01, X01Leg leg, int roundNumber, X01Turn turn, ObjectId throwerId, boolean trackDoubles) {
+    public void applyTurn(X01TurnMutation turnMutation) {
         // Determine if a turn may be applied to this leg.
-        checkLegEditable(leg, throwerId);
+        checkLegEditable(turnMutation.leg(), turnMutation.throwerId());
 
-        // Capture checkout state before replacing the existing score.
-        boolean wasCheckoutRound = isPlayerCheckoutRound(leg, roundNumber, throwerId);
+        // Resolve the round and add the new turn.
+        X01LegRoundEntry legRoundEntry = legProgressService.getLegRoundOrThrow(turnMutation.leg(), turnMutation.roundNumber());
+        X01Turn turn = new X01Turn(turnMutation.score(), turnMutation.doublesMissed(), turnMutation.trackDoubles());
+        legRoundService.addTurn(legRoundEntry.round(), turnMutation.throwerId(), turn);
 
-        X01LegRoundScore roundScore = addRoundScore(leg, roundNumber, turn, throwerId, trackDoubles);
+        // Process the applied turn result and rebuild the affected player state.
+        processTurnResult(turnMutation.leg(), turn, turnMutation.checkoutDartsUsed(), turnMutation.throwerId(), turnMutation.x01());
 
-        // Rebuild this player's remaining values before processing the new score.
-        legResultService.updateRemainingForPlayer(leg, throwerId, x01);
-        processRoundScore(leg, roundScore, turn.getCheckoutDartsUsed(), throwerId, x01, wasCheckoutRound);
+        // Rebuild the leg result after applying the turn.
+        legResultService.updateLegResult(turnMutation.leg(), turnMutation.x01());
+    }
 
-        // Rebuild the winner and remove history that became stale after the edit.
-        legResultService.updateLegResult(leg, x01);
+    @Override
+    public void replaceTurn(X01TurnMutation turnMutation) {
+        // Determine if a turn may be replaced in this leg.
+        checkLegEditable(turnMutation.leg(), turnMutation.throwerId());
+
+        // Capture checkout state before replacing the existing turn.
+        boolean wasCheckoutRound = isPlayerCheckoutRound(turnMutation.leg(), turnMutation.roundNumber(), turnMutation.throwerId());
+
+        // Resolve the round and replace the existing turn.
+        X01LegRoundEntry legRoundEntry = legProgressService.getLegRoundOrThrow(turnMutation.leg(), turnMutation.roundNumber());
+        X01Turn turn = new X01Turn(turnMutation.score(), turnMutation.doublesMissed(), turnMutation.trackDoubles());
+        legRoundService.replaceTurn(legRoundEntry.round(), turnMutation.throwerId(), turn);
+
+        // Process the replacement turn result and rebuild the affected player state.
+        processTurnResult(turnMutation.leg(), turn, turnMutation.checkoutDartsUsed(), turnMutation.throwerId(), turnMutation.x01());
+
+        // Clear checkout dart usage when the previous checkout is no longer a checkout.
+        if (wasCheckoutRound && turn.getRemaining() != 0) {
+            turnMutation.leg().setCheckoutDartsUsed(null);
+        }
+
+        // Rebuild the winner and remove history that became stale after the replacement.
+        legResultService.updateLegResult(turnMutation.leg(), turnMutation.x01());
     }
 
     @Override
@@ -101,20 +126,20 @@ public class X01LegServiceImpl implements IX01LegService {
     }
 
     /**
-     * Verifies whether a player's score may be modified in a leg.
+     * Verifies whether a player's turn may be modified in a leg.
      *
-     * Once the leg is concluded, only the winning player's score may be modified.
+     * Once the leg is concluded, only the winning player's turn may be modified.
      *
      * @param leg      the leg to check
-     * @param playerId the player whose score is being modified
-     * @throws InvalidArgumentsException when another player's score is modified after the leg has been won
+     * @param playerId the player whose turn is being modified
+     * @throws InvalidArgumentsException when another player's turn is modified after the leg has been won
      */
     private void checkLegEditable(X01Leg leg, ObjectId playerId) {
         // A concluded leg can only be changed through the winning player's turn.
         if (legProgressService.isLegConcluded(leg) && !Objects.equals(leg.getWinner(), playerId)) {
             throw new InvalidArgumentsException(
                     new TargetError(
-                            X01Turn.FIELD_SCORE,
+                            X01CreateTurnRequest.FIELD_SCORE,
                             messageResolver.getMessage(MessageKeys.MESSAGE_LEG_ALREADY_WON)
                     )
             );
@@ -122,84 +147,48 @@ public class X01LegServiceImpl implements IX01LegService {
     }
 
     /**
-     * Adds or replaces a player's score in a leg round.
+     * Processes the result of an applied or replaced turn.
      *
-     * @param leg          the leg containing the round
-     * @param roundNumber  the round number
-     * @param turn         the turn to store
-     * @param throwerId    the player that threw the turn
-     * @param trackDoubles whether missed doubles should be tracked
-     * @return the stored round score
-     */
-    private X01LegRoundScore addRoundScore(X01Leg leg, int roundNumber, X01Turn turn, ObjectId throwerId, boolean trackDoubles) {
-        X01LegRoundEntry legRoundEntry = legProgressService.getLegRoundOrThrow(leg, roundNumber);
-
-        X01LegRoundScore roundScore = new X01LegRoundScore(turn, trackDoubles);
-        legRoundEntry.round().getScores().put(throwerId, roundScore);
-
-        return roundScore;
-    }
-
-    /**
-     * Processes a round score after its remaining value has been recalculated.
+     * Rebuilds the player's remaining values, repairs illegal turns,
+     * and updates checkout dart usage when the turn completes the leg.
      *
-     * Illegal scores are repaired, while valid scores update checkout state when necessary.
-     *
-     * @param leg               the leg containing the score
-     * @param roundScore        the updated round score
+     * @param leg               the leg containing the turn
+     * @param turn              the turn to process
      * @param checkoutDartsUsed the checkout darts supplied with the turn
      * @param playerId          the player that threw the turn
      * @param x01               the starting score for the leg
-     * @param wasCheckoutRound  whether the turn previously represented the checkout
      */
-    private void processRoundScore(X01Leg leg, X01LegRoundScore roundScore, Integer checkoutDartsUsed, ObjectId playerId, int x01, boolean wasCheckoutRound) {
-        if (!legRoundService.isRoundScoreLegal(roundScore, checkoutDartsUsed)) {
-            handleIllegalRoundScore(leg, roundScore, playerId, x01, wasCheckoutRound);
+    private void processTurnResult(X01Leg leg, X01Turn turn, Integer checkoutDartsUsed, ObjectId playerId, int x01) {
+        // Rebuild the player's remaining values after updating the turn.
+        legResultService.updateRemainingForPlayer(leg, playerId, x01);
+
+        // Repair illegal turns before updating checkout state.
+        if (!legRoundService.isTurnLegal(turn, checkoutDartsUsed)) {
+            handleIllegalTurn(leg, turn, playerId, x01);
             return;
         }
 
-        updateCheckoutDartsUsed(leg, roundScore, checkoutDartsUsed, wasCheckoutRound);
-    }
-
-    /**
-     * Repairs an illegal round score by converting it to a zero-score turn.
-     *
-     * Checkout dart usage is cleared when the repaired turn was the previous checkout, after which the player's
-     * remaining score history is recalculated.
-     *
-     * @param leg              the leg containing the score
-     * @param roundScore       the illegal round score
-     * @param playerId         the player that threw the score
-     * @param x01              the starting score for the leg
-     * @param wasCheckoutRound whether the score previously represented the checkout
-     */
-    private void handleIllegalRoundScore(X01Leg leg, X01LegRoundScore roundScore, ObjectId playerId, int x01, boolean wasCheckoutRound) {
-        // A bust or invalid checkout counts as a zero-score turn.
-        roundScore.setScore(0);
-
-        if (wasCheckoutRound) {
-            leg.setCheckoutDartsUsed(null);
-        }
-
-        // Rebuild remaining values after changing the recorded score.
-        legResultService.updateRemainingForPlayer(leg, playerId, x01);
-    }
-
-    /**
-     * Updates checkout dart usage after applying a valid round score.
-     *
-     * @param leg               the leg to update
-     * @param roundScore        the updated round score
-     * @param checkoutDartsUsed the number of darts used for the checkout
-     * @param wasCheckoutRound  whether the score previously represented the checkout
-     */
-    private void updateCheckoutDartsUsed(X01Leg leg, X01LegRoundScore roundScore, Integer checkoutDartsUsed, boolean wasCheckoutRound) {
-        if (roundScore.getRemaining() == 0) {
-            // The updated score is now the checkout.
+        // Update checkout dart usage when the turn completes the leg.
+        if (turn.getRemaining() == 0) {
             leg.setCheckoutDartsUsed(checkoutDartsUsed);
-        } else if (wasCheckoutRound) {
-            // The previous checkout was edited into a non-winning score.
-            leg.setCheckoutDartsUsed(null);
         }
+    }
+
+    /**
+     * Repairs an illegal turn by converting it to a zero-score turn.
+     *
+     * The player's remaining score history is recalculated after changing the recorded turn.
+     *
+     * @param leg      the leg containing the turn
+     * @param turn     the illegal turn
+     * @param playerId the player that threw the turn
+     * @param x01      the starting score for the leg
+     */
+    private void handleIllegalTurn(X01Leg leg, X01Turn turn, ObjectId playerId, int x01) {
+        // A bust or invalid checkout counts as a zero-score turn.
+        turn.setScore(0);
+
+        // Rebuild remaining values after changing the recorded turn.
+        legResultService.updateRemainingForPlayer(leg, playerId, x01);
     }
 }

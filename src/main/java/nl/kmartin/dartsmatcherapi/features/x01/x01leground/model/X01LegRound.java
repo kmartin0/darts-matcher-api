@@ -13,8 +13,7 @@ import java.util.LinkedHashMap;
 /**
  * Represents a round within an X01 leg.
  *
- * Player scores are stored in throwing order so the sequence of turns within
- * the round can be preserved.
+ * Player turns are stored in throwing order so the sequence within the round can be preserved.
  */
 @Getter
 @Setter
@@ -22,5 +21,5 @@ import java.util.LinkedHashMap;
 @AllArgsConstructor
 public class X01LegRound {
     @NotNull
-    private LinkedHashMap<@NotNull ObjectId, @NotNull @Valid X01LegRoundScore> scores = new LinkedHashMap<>();
+    private LinkedHashMap<@NotNull ObjectId, @NotNull @Valid X01Turn> turns = new LinkedHashMap<>();
 }

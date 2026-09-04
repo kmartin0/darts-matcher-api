@@ -75,22 +75,22 @@ public class X01SetProgressServiceImpl implements IX01SetProgressService {
     }
 
     @Override
-    public boolean removeLastScoreFromSet(X01Set set) {
+    public boolean removeLastTurnFromSet(X01Set set) {
         if (set.getLegs().isEmpty()) return false;
 
-        // Traverse legs from newest to oldest until a score can be removed.
+        // Traverse legs from newest to oldest until a turn can be removed.
         Iterator<Integer> reverseLegsIterator = set.getLegs().descendingKeySet().iterator();
 
         while (reverseLegsIterator.hasNext()) {
             X01Leg leg = set.getLegs().get(reverseLegsIterator.next());
-            boolean scoreRemoved = legProgressService.removeLastScoreFromLeg(leg);
+            boolean isTurnRemoved = legProgressService.removeLastTurnFromLeg(leg);
 
             // Remove an empty leg before continuing through earlier history.
             if (leg.getRounds().isEmpty()) {
                 reverseLegsIterator.remove();
             }
 
-            if (scoreRemoved) {
+            if (isTurnRemoved) {
                 return true;
             }
         }

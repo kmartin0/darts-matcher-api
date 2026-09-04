@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.Dart;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01Turn;
 
 import java.util.List;
 import java.util.Set;
@@ -24,7 +24,7 @@ public record X01Checkout(
         int checkout,
 
         @Positive
-        @Max(X01LegRoundScore.MAXIMUM_DARTS_PER_ROUND)
+        @Max(X01Turn.MAXIMUM_DARTS_PER_TURN)
         int minDarts,
 
         @NotNull

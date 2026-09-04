@@ -2,10 +2,11 @@ package nl.kmartin.dartsmatcherapi.features;
 
 import nl.kmartin.dartsmatcherapi.features.basematch.model.PlayerType;
 import nl.kmartin.dartsmatcherapi.features.testutils.X01FeatureTestFactory;
+import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.model.X01DartBotTurn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.service.IX01DartBotService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01Turn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01BestOf;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01BestOfType;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01ClearByTwoRule;
@@ -14,7 +15,6 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchProgress;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchSettings;
-import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Turn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.repository.IX01MatchRepository;
 import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01Set;
 import nl.kmartin.dartsmatcherapi.i18n.MessageResolver;
@@ -106,17 +106,16 @@ public class X01DartBotTests {
                 break;
             }
             match.getMatchProgress().setCurrentRound(round);
-            X01Turn x01Turn = dartBotService.createDartBotTurn(match);
-            X01LegRoundScore roundScore = new X01LegRoundScore(
-                    x01Turn.getDoublesMissed(),
-                    x01Turn.getScore(),
-                    remaining - x01Turn.getScore()
+            X01DartBotTurn dartBotTurn = dartBotService.createDartBotTurn(match);
+            X01Turn x01Turn = new X01Turn(
+                    dartBotTurn.doublesMissed(),
+                    dartBotTurn.score(),
+                    remaining - dartBotTurn.score()
             );
 
-            currentLeg.getRounds().put(round++, new X01LegRound(new LinkedHashMap<>(Map.of(dartBotId, roundScore))));
-            remaining = roundScore.getRemaining();
-            round++;
-            dartsUsed = dartsUsed + (x01Turn.getCheckoutDartsUsed() == null ? 3 : x01Turn.getCheckoutDartsUsed());
+            currentLeg.getRounds().put(round++, new X01LegRound(new LinkedHashMap<>(Map.of(dartBotId, x01Turn))));
+            remaining = x01Turn.getRemaining();
+            dartsUsed = dartsUsed + (dartBotTurn.checkoutDartsUsed() == null ? 3 : dartBotTurn.checkoutDartsUsed());
         }
 
         assertDartsUsedWithinBounds(targetAvg, match.getMatchSettings().getX01(), dartsUsed);

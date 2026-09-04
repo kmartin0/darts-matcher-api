@@ -64,11 +64,11 @@ public interface IX01MatchProgressService {
     );
 
     /**
-     * Removes the most recently recorded score and any trailing empty match structure.
+     * Removes the most recently recorded turn and any trailing empty match structure.
      *
-     * @param match the match whose last score should be removed
+     * @param match the match whose last turn should be removed
      */
-    void removeLastScoreFromMatch(@NotNull @Valid X01Match match);
+    void removeLastTurnFromMatch(@NotNull @Valid X01Match match);
 
     /**
      * Rebuilds the current match progress and creates missing structure when the match can continue.

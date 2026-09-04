@@ -56,10 +56,10 @@ public interface IX01SetProgressService {
     boolean isSetConcluded(@NotNull @Valid X01Set set);
 
     /**
-     * Removes the most recently recorded score from a set.
+     * Removes the most recently recorded turn from a set.
      *
      * @param set the set to update
-     * @return whether a score was removed
+     * @return whether a turn was removed
      */
-    boolean removeLastScoreFromSet(@NotNull @Valid X01Set set);
+    boolean removeLastTurnFromSet(@NotNull @Valid X01Set set);
 }

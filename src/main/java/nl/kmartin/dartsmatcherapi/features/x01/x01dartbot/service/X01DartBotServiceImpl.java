@@ -4,6 +4,7 @@ import nl.kmartin.dartsmatcherapi.features.basematch.model.PlayerType;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.Dart;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.DartThrow;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.DartboardSectionArea;
+import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.model.X01DartBotTurn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.model.X01DartBotTurnSnapshot;
 import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.model.X01DartBotTurnState;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
@@ -11,7 +12,6 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01LegEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.service.IX01LegResultService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
-import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Turn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.IX01MatchProgressService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01SetEntry;
 import nl.kmartin.dartsmatcherapi.util.NumberUtils;
@@ -49,7 +49,7 @@ public class X01DartBotServiceImpl implements IX01DartBotService {
     }
 
     @Override
-    public X01Turn createDartBotTurn(X01Match match) {
+    public X01DartBotTurn createDartBotTurn(X01Match match) {
         // Resolve and verify the current dart bot player.
         X01MatchPlayer dartBotPlayer = getCurrentDartBotPlayer(match);
 
@@ -70,8 +70,8 @@ public class X01DartBotServiceImpl implements IX01DartBotService {
                 ? dartBotTurnState.getDartsUsedInTurn()
                 : null;
 
-        // Convert the completed turn state into the turn persisted on the match.
-        return new X01Turn(
+        // Convert the completed turn state into the generated dart bot turn.
+        return new X01DartBotTurn(
                 dartBotTurnState.getScoreInTurn(),
                 checkoutDartsUsed,
                 dartBotTurnState.getDoublesMissedInTurn()

@@ -1,7 +1,7 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01averagestatistics.service;
 
 import nl.kmartin.dartsmatcherapi.features.x01.x01averagestatistics.model.X01AverageStatistics;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01Turn;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -14,14 +14,14 @@ public class X01AverageStatisticsServiceImpl implements IX01AverageStatisticsSer
     @Override
     public void updateAverageStats(
             X01AverageStatistics playerAverageStats,
-            X01LegRoundScore playerScore,
+            X01Turn playerScore,
             int roundNumber,
             Integer checkoutDartsUsed
     ) {
         // Use the recorded checkout dart count for a partial final round; otherwise count a full round.
         int dartsUsed = checkoutDartsUsed != null
                 ? checkoutDartsUsed
-                : X01LegRoundScore.MAXIMUM_DARTS_PER_ROUND;
+                : X01Turn.MAXIMUM_DARTS_PER_TURN;
 
         // Accumulate the overall throwing totals and recalculate the three-dart average.
         updatePointsThrown(playerAverageStats, playerScore);
@@ -42,7 +42,7 @@ public class X01AverageStatisticsServiceImpl implements IX01AverageStatisticsSer
      * @param playerAverageStats the average statistics to update
      * @param playerScore        the score for the current round
      */
-    private void updatePointsThrown(X01AverageStatistics playerAverageStats, X01LegRoundScore playerScore) {
+    private void updatePointsThrown(X01AverageStatistics playerAverageStats, X01Turn playerScore) {
         playerAverageStats.setPointsThrown(
                 playerAverageStats.getPointsThrown() + playerScore.getScore()
         );
@@ -80,7 +80,7 @@ public class X01AverageStatisticsServiceImpl implements IX01AverageStatisticsSer
      * @param playerAverageStats the average statistics to update
      * @param playerScore        the score for the current round
      */
-    private void updatePointsThrownFirstNine(X01AverageStatistics playerAverageStats, X01LegRoundScore playerScore) {
+    private void updatePointsThrownFirstNine(X01AverageStatistics playerAverageStats, X01Turn playerScore) {
         playerAverageStats.setPointsThrownFirstNine(
                 playerAverageStats.getPointsThrownFirstNine() + playerScore.getScore()
         );
@@ -121,6 +121,6 @@ public class X01AverageStatisticsServiceImpl implements IX01AverageStatisticsSer
      */
     private int calculateThreeDartAverage(int pointsThrown, int dartsThrown) {
         double oneDartAverage = (double) pointsThrown / dartsThrown;
-        return (int) Math.round(oneDartAverage * X01LegRoundScore.MAXIMUM_DARTS_PER_ROUND);
+        return (int) Math.round(oneDartAverage * X01Turn.MAXIMUM_DARTS_PER_TURN);
     }
 }

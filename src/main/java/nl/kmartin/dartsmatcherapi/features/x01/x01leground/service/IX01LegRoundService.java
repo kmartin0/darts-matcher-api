@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01Turn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
 import org.bson.types.ObjectId;
 
@@ -27,27 +27,55 @@ public interface IX01LegRoundService {
     );
 
     /**
-     * Removes the most recently added score from a round.
+     * Adds a player's turn to the round.
      *
-     * @param legRound the round from which to remove the score
-     * @return whether a score was removed
+     * @param legRound the round to update
+     * @param playerId the player whose turn is being added
+     * @param turn     the turn to add
+     * @return the added turn
      */
-    boolean removeLastScoreFromRound(@NotNull @Valid X01LegRound legRound);
+    X01Turn addTurn(
+            @NotNull @Valid X01LegRound legRound,
+            @NotNull ObjectId playerId,
+            @NotNull @Valid X01Turn turn
+    );
 
     /**
-     * Removes scores recorded after the player that won the leg.
+     * Replaces a player's existing turn in the round.
+     *
+     * @param legRound the round to update
+     * @param playerId the player whose turn is being replaced
+     * @param turn     the replacement turn
+     * @return the replacement turn
+     */
+    X01Turn replaceTurn(
+            @NotNull @Valid X01LegRound legRound,
+            @NotNull ObjectId playerId,
+            @NotNull @Valid X01Turn turn
+    );
+
+    /**
+     * Removes the most recently added turn from a round.
+     *
+     * @param legRound the round from which to remove the turn
+     * @return whether a turn was removed
+     */
+    boolean removeLastTurnFromRound(@NotNull @Valid X01LegRound legRound);
+
+    /**
+     * Removes turns recorded after the player that won the leg.
      *
      * @param round     the round to trim
      * @param legWinner the player that won the leg
      */
-    void removeScoresAfterWinner(@NotNull @Valid X01LegRound round, @NotNull ObjectId legWinner);
+    void removeTurnsAfterWinner(@NotNull @Valid X01LegRound round, @NotNull ObjectId legWinner);
 
     /**
-     * Determines whether a round score represents a legal X01 state.
+     * Determines whether a turn represents a legal X01 state.
      *
-     * @param roundScore        the round score to validate
+     * @param turn              the turn to validate
      * @param checkoutDartsUsed the number of darts used for the checkout
-     * @return whether the round score is legal
+     * @return whether the turn is legal
      */
-    boolean isRoundScoreLegal(@NotNull @Valid X01LegRoundScore roundScore, Integer checkoutDartsUsed);
+    boolean isTurnLegal(@NotNull @Valid X01Turn turn, Integer checkoutDartsUsed);
 }

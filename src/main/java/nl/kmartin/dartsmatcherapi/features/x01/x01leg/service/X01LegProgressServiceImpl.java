@@ -41,11 +41,11 @@ public class X01LegProgressServiceImpl implements IX01LegProgressService {
 
     @Override
     public Optional<X01LegRoundEntry> getCurrentLegRound(X01Leg leg, List<X01MatchPlayer> players) {
-        // Return the earliest round that is still missing a score for at least one player.
+        // Return the earliest round that is still missing a turn for at least one player.
         return leg.getRounds().entrySet()
                 .stream()
                 .filter(entry -> players.stream()
-                        .anyMatch(player -> !entry.getValue().getScores().containsKey(player.getPlayerId())))
+                        .anyMatch(player -> !entry.getValue().getTurns().containsKey(player.getPlayerId())))
                 .findFirst()
                 .map(X01LegRoundEntry::new);
     }
@@ -71,22 +71,22 @@ public class X01LegProgressServiceImpl implements IX01LegProgressService {
     }
 
     @Override
-    public boolean removeLastScoreFromLeg(X01Leg leg) {
+    public boolean removeLastTurnFromLeg(X01Leg leg) {
         if (leg.getRounds().isEmpty()) return false;
 
         Iterator<Integer> reverseRoundsIterator = leg.getRounds().descendingKeySet().iterator();
 
-        // Traverse backwards so the most recently recorded score is removed first.
+        // Traverse backwards so the most recently recorded turn is removed first.
         while (reverseRoundsIterator.hasNext()) {
             X01LegRound round = leg.getRounds().get(reverseRoundsIterator.next());
-            boolean scoreRemoved = legRoundService.removeLastScoreFromRound(round);
+            boolean isTurnRemoved = legRoundService.removeLastTurnFromRound(round);
 
             // Remove rounds that become empty, including already-empty trailing rounds.
-            if (round.getScores().isEmpty()) {
+            if (round.getTurns().isEmpty()) {
                 reverseRoundsIterator.remove();
             }
 
-            if (scoreRemoved) {
+            if (isTurnRemoved) {
                 return true;
             }
         }

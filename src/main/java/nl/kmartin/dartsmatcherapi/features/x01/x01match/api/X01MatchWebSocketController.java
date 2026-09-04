@@ -1,10 +1,10 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01match.api;
 
 import jakarta.validation.Valid;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateTurnRequest;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01EditTurnRequest;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.message.X01MatchMessageType;
-import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01EditTurn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
-import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Turn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.IX01MatchService;
 import nl.kmartin.dartsmatcherapi.websocket.WebSocketDestinations;
 import nl.kmartin.dartsmatcherapi.websocket.WebSocketHeaders;
@@ -57,21 +57,21 @@ public class X01MatchWebSocketController {
     /**
      * Adds a turn and publishes the updated match.
      *
-     * @param matchId   the match id
-     * @param turn      the turn to add
-     * @param publishId the optional client publish id
-     * @param sessionId the WebSocket session id
+     * @param matchId     the match id
+     * @param turnRequest the turn creation request
+     * @param publishId   the optional client publish id
+     * @param sessionId   the WebSocket session id
      */
     @MessageMapping(WebSocketDestinations.X01.ADD_TURN)
     public void addTurn(
             @DestinationVariable ObjectId matchId,
-            @Valid @Payload X01Turn turn,
+            @Valid @Payload X01CreateTurnRequest turnRequest,
             @Header(value = WebSocketHeaders.PUBLISH_ID, required = false) String publishId,
             @Header(SimpMessageHeaderAccessor.SESSION_ID_HEADER) String sessionId
     ) {
         webSocketEventPublisher.sendToUser(
                 X01MatchMessageType.ADD_HUMAN_TURN,
-                matchService.addTurn(matchId, turn),
+                matchService.addTurn(matchId, turnRequest),
                 sessionId,
                 publishId
         );
@@ -80,21 +80,21 @@ public class X01MatchWebSocketController {
     /**
      * Edits a turn and publishes the updated match.
      *
-     * @param matchId   the match id
-     * @param editTurn  the turn edit
-     * @param publishId the optional client publish id
-     * @param sessionId the WebSocket session id
+     * @param matchId     the match id
+     * @param turnRequest the turn edit request
+     * @param publishId   the optional client publish id
+     * @param sessionId   the WebSocket session id
      */
     @MessageMapping(WebSocketDestinations.X01.EDIT_TURN)
     public void editTurn(
             @DestinationVariable ObjectId matchId,
-            @Valid @Payload X01EditTurn editTurn,
+            @Valid @Payload X01EditTurnRequest turnRequest,
             @Header(value = WebSocketHeaders.PUBLISH_ID, required = false) String publishId,
             @Header(SimpMessageHeaderAccessor.SESSION_ID_HEADER) String sessionId
     ) {
         webSocketEventPublisher.sendToUser(
                 X01MatchMessageType.EDIT_TURN,
-                matchService.editTurn(matchId, editTurn),
+                matchService.editTurn(matchId, turnRequest),
                 sessionId,
                 publishId
         );

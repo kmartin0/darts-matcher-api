@@ -38,6 +38,7 @@ public final class MessageKeys {
     public static final String MESSAGE_X01_PLAYER_NOT_FOUND = "message.x01.player.not.found";
     public static final String MESSAGE_X01_DART_BOT_CURRENT_THROWER_ERROR = "message.x01.dart.bot.current.thrower.error";
     public static final String MESSAGE_X01_INVALID_SCORE = "message.x01.invalid.score";
+    public static final String MESSAGE_X01_TURN_ALREADY_EXISTS = "message.x01.turn.already.exists";
     public static final String MESSAGE_RESOURCE_NOT_FOUND = "message.resource.not.found";
     public static final String MESSAGE_TOO_MANY_BOTS = "message.too.many.bots";
     public static final String MESSAGE_BOT_REQUIRES_HUMAN = "message.bot.requires.human";

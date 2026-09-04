@@ -1,22 +1,22 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01scorestatistics.service;
 
-import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01Turn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01scorestatistics.model.X01ScoreStatistics;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * Updates X01 score statistics from processed leg-round scores.
+ * Updates X01 score statistics from processed turns.
  */
 @Service
 @Validated
 public class X01ScoreStatisticsServiceImpl implements IX01ScoreStatisticsService {
 
     @Override
-    public void updateScoreStatistics(X01ScoreStatistics scoreStatistics, X01LegRoundScore playerScore) {
-        int score = playerScore.getScore();
+    public void updateScoreStatistics(X01ScoreStatistics scoreStatistics, X01Turn playerTurn) {
+        int score = playerTurn.getScore();
 
-        // Place the round score in its highest matching score range.
+        // Place the turn score in its highest matching score range.
         if (score == X01ScoreStatistics.TON_EIGHTY) {
             scoreStatistics.incrementTonEighty();
         } else if (score >= X01ScoreStatistics.MINIMUM_TON_FORTY_PLUS) {

@@ -23,7 +23,7 @@ public interface IX01LegProgressService {
     X01LegRoundEntry getLegRoundOrThrow(@NotNull @Valid X01Leg leg, int roundNumber);
 
     /**
-     * Gets the first round in which at least one player has not yet scored.
+     * Gets the first round in which at least one player has not yet thrown.
      *
      * @param leg     the leg to evaluate
      * @param players the match players
@@ -51,10 +51,10 @@ public interface IX01LegProgressService {
     boolean isLegConcluded(@NotNull @Valid X01Leg leg);
 
     /**
-     * Removes the most recently recorded score from a leg.
+     * Removes the most recently recorded turn from a leg.
      *
      * @param leg the leg to update
-     * @return whether a score was removed
+     * @return whether a turn was removed
      */
-    boolean removeLastScoreFromLeg(@NotNull @Valid X01Leg leg);
+    boolean removeLastTurnFromLeg(@NotNull @Valid X01Leg leg);
 }

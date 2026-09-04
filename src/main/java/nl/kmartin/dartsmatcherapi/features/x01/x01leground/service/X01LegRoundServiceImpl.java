@@ -1,9 +1,14 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01leground.service;
 
+import nl.kmartin.dartsmatcherapi.error.exception.InvalidArgumentsException;
+import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
+import nl.kmartin.dartsmatcherapi.error.response.TargetError;
 import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.service.IX01CheckoutService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01Turn;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateTurnRequest;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
+import nl.kmartin.dartsmatcherapi.i18n.MessageKeys;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -16,7 +21,7 @@ import java.util.stream.IntStream;
 /**
  * Provides operations for determining and maintaining player turns within X01 leg rounds.
  *
- * Uses the insertion order of round scores to preserve the order in which players threw.
+ * Uses the insertion order of turns to preserve the order in which players threw.
  */
 @Service
 @Validated
@@ -37,26 +42,48 @@ public class X01LegRoundServiceImpl implements IX01LegRoundService {
         // Order the players starting with the player that threw first in the leg.
         List<X01MatchPlayer> orderedPlayers = getThrowingOrder(throwsFirstInLeg, players);
 
-        // The first player without a score is the next player to throw.
+        // The first player without a turn is the next player to throw.
         return orderedPlayers.stream()
                 .map(X01MatchPlayer::getPlayerId)
-                .filter(playerId -> !legRound.getScores().containsKey(playerId))
+                .filter(playerId -> !legRound.getTurns().containsKey(playerId))
                 .findFirst()
                 .orElse(null);
     }
 
     @Override
-    public boolean removeLastScoreFromRound(X01LegRound legRound) {
-        if (legRound.getScores().isEmpty()) return false;
+    public X01Turn addTurn(X01LegRound legRound, ObjectId playerId, X01Turn turn) {
+        if (legRound.getTurns().containsKey(playerId)) {
+            throw new InvalidArgumentsException(
+                    new TargetError(X01CreateTurnRequest.FIELD_SCORE, MessageKeys.MESSAGE_X01_TURN_ALREADY_EXISTS)
+            );
+        }
 
-        // Scores are stored in insertion order, so remove the final entry.
-        Iterator<ObjectId> scoresIterator = legRound.getScores().keySet().iterator();
+        legRound.getTurns().put(playerId, turn);
+        return turn;
+    }
 
-        while (scoresIterator.hasNext()) {
-            scoresIterator.next();
+    @Override
+    public X01Turn replaceTurn(X01LegRound legRound, ObjectId playerId, X01Turn turn) {
+        if (!legRound.getTurns().containsKey(playerId)) {
+            throw new ResourceNotFoundException(X01Turn.class, playerId);
+        }
 
-            if (!scoresIterator.hasNext()) {
-                scoresIterator.remove();
+        legRound.getTurns().put(playerId, turn);
+        return turn;
+    }
+
+    @Override
+    public boolean removeLastTurnFromRound(X01LegRound legRound) {
+        if (legRound.getTurns().isEmpty()) return false;
+
+        // Turns are stored in insertion order, so remove the final entry.
+        Iterator<ObjectId> turnsIterator = legRound.getTurns().keySet().iterator();
+
+        while (turnsIterator.hasNext()) {
+            turnsIterator.next();
+
+            if (!turnsIterator.hasNext()) {
+                turnsIterator.remove();
                 return true;
             }
         }
@@ -65,16 +92,16 @@ public class X01LegRoundServiceImpl implements IX01LegRoundService {
     }
 
     @Override
-    public void removeScoresAfterWinner(X01LegRound round, ObjectId legWinner) {
-        // Walk the scores in throwing order and remove everything after the winning turn.
-        Iterator<ObjectId> scoresIterator = round.getScores().keySet().iterator();
+    public void removeTurnsAfterWinner(X01LegRound round, ObjectId legWinner) {
+        // Walk the turns in throwing order and remove everything after the winning turn.
+        Iterator<ObjectId> turnsIterator = round.getTurns().keySet().iterator();
         boolean winnerHasThrown = false;
 
-        while (scoresIterator.hasNext()) {
-            ObjectId playerId = scoresIterator.next();
+        while (turnsIterator.hasNext()) {
+            ObjectId playerId = turnsIterator.next();
 
             if (winnerHasThrown) {
-                scoresIterator.remove();
+                turnsIterator.remove();
             } else if (playerId.equals(legWinner)) {
                 winnerHasThrown = true;
             }
@@ -82,16 +109,16 @@ public class X01LegRoundServiceImpl implements IX01LegRoundService {
     }
 
     @Override
-    public boolean isRoundScoreLegal(X01LegRoundScore roundScore, Integer checkoutDartsUsed) {
-        int remaining = roundScore.getRemaining();
+    public boolean isTurnLegal(X01Turn turn, Integer checkoutDartsUsed) {
+        int remaining = turn.getRemaining();
 
-        // A bust can never represent a legal round score.
+        // A bust can never represent a legal turn.
         if (checkoutService.isRemainingBust(remaining)) return false;
 
         // Reaching zero additionally requires a valid checkout with the supplied dart count.
         if (checkoutService.isRemainingZero(remaining)) {
             return checkoutDartsUsed != null
-                    && checkoutService.isScoreCheckout(roundScore.getScore(), checkoutDartsUsed);
+                    && checkoutService.isScoreCheckout(turn.getScore(), checkoutDartsUsed);
         }
 
         return true;

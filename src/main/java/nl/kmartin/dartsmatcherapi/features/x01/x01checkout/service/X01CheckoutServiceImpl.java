@@ -7,7 +7,7 @@ import nl.kmartin.dartsmatcherapi.error.response.TargetError;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.Dart;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.DartboardSectionArea;
 import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.model.X01Checkout;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01Turn;
 import nl.kmartin.dartsmatcherapi.i18n.MessageKeys;
 import nl.kmartin.dartsmatcherapi.i18n.MessageResolver;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -144,7 +143,7 @@ public class X01CheckoutServiceImpl implements IX01CheckoutService {
      * @return whether the number of darts used is within the valid checkout range
      */
     private boolean isValidDartsUsed(int dartsUsed) {
-        return dartsUsed > 0 && dartsUsed <= X01LegRoundScore.MAXIMUM_DARTS_PER_ROUND;
+        return dartsUsed > 0 && dartsUsed <= X01Turn.MAXIMUM_DARTS_PER_TURN;
     }
 
     /**

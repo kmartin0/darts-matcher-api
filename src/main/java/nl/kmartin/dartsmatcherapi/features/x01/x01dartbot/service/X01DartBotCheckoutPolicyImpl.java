@@ -3,7 +3,6 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.service;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.Dart;
 import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.service.IX01CheckoutService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.model.X01DartBotTurnSnapshot;
-import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.model.X01DartBotTurnState;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 

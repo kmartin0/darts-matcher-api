@@ -8,7 +8,7 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.service.IX01LegService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundEntry;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01Turn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
 import nl.kmartin.dartsmatcherapi.features.x01.x01resultstatistics.service.IX01ResultStatisticsService;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  * Orchestrates the calculation of statistics for all players in an X01 match.
  *
  * Rebuilds player statistics from the match history by processing sets, legs, rounds
- * and individual player scores through the specialized statistics services.
+ * and individual player turns through the specialized statistics services.
  */
 @Service
 @Validated
@@ -60,12 +60,12 @@ public class X01StatisticsServiceImpl implements IX01StatisticsService {
         // Reset all accumulated statistics before rebuilding them from the match history.
         resetPlayerStatistics(match.getPlayers());
 
-        // Map players by ID so recorded scores can be associated with their player.
+        // Map players by ID so recorded turns can be associated with their player.
         Map<ObjectId, X01MatchPlayer> playersMap = match.getPlayers()
                 .stream()
                 .collect(Collectors.toMap(X01MatchPlayer::getPlayerId, Function.identity()));
 
-        // Process the complete match hierarchy from sets down to individual player scores.
+        // Process the complete match hierarchy from sets down to individual player turns.
         processSets(match.getSets(), match.getMatchSettings().isTrackDoubles(), playersMap);
     }
 
@@ -123,8 +123,8 @@ public class X01StatisticsServiceImpl implements IX01StatisticsService {
                 .stream()
                 .map(X01LegRoundEntry::new)
                 .forEach(roundEntry ->
-                        processRoundScores(
-                                roundEntry.round().getScores(),
+                        processRoundTurns(
+                                roundEntry.round().getTurns(),
                                 leg,
                                 roundEntry,
                                 trackDoubles,
@@ -134,75 +134,75 @@ public class X01StatisticsServiceImpl implements IX01StatisticsService {
     }
 
     /**
-     * Processes all player scores belonging to a round.
+     * Processes all player turns belonging to a round.
      *
-     * @param roundScores   the player scores in the round
+     * @param roundTurns    the player turns in the round
      * @param leg           the leg containing the round
      * @param legRoundEntry the round entry
      * @param trackDoubles  whether missed doubles should be tracked
      * @param playersMap    the players mapped by player ID
      */
-    private void processRoundScores(
-            Map<ObjectId, X01LegRoundScore> roundScores,
+    private void processRoundTurns(
+            Map<ObjectId, X01Turn> roundTurns,
             X01Leg leg,
             X01LegRoundEntry legRoundEntry,
             boolean trackDoubles,
             Map<ObjectId, X01MatchPlayer> playersMap
     ) {
-        // Process statistics only for scores that can be associated with a match player.
-        roundScores.forEach((playerId, roundScore) -> {
+        // Process statistics only for turns that can be associated with a match player.
+        roundTurns.forEach((playerId, turn) -> {
             X01MatchPlayer player = playersMap.get(playerId);
 
             if (player != null) {
-                processPlayerScore(player, leg, legRoundEntry, roundScore, trackDoubles);
+                processPlayerTurn(player, leg, legRoundEntry, turn, trackDoubles);
             }
         });
     }
 
     /**
-     * Updates all statistics affected by a player's round score.
+     * Updates all statistics affected by a player's turn.
      *
-     * @param player        the player that scored
-     * @param leg           the leg containing the score
-     * @param legRoundEntry the round containing the score
-     * @param playerScore   the player's round score
+     * @param player        the player that threw the turn
+     * @param leg           the leg containing the turn
+     * @param legRoundEntry the round containing the turn
+     * @param playerTurn    the player's turn
      * @param trackDoubles  whether missed doubles should be tracked
      */
-    private void processPlayerScore(
+    private void processPlayerTurn(
             X01MatchPlayer player,
             X01Leg leg,
             X01LegRoundEntry legRoundEntry,
-            X01LegRoundScore playerScore,
+            X01Turn playerTurn,
             boolean trackDoubles
     ) {
         X01Statistics playerStats = player.getStatistics();
 
-        // Determine whether this score represents the player's successful checkout round.
-        boolean isScoreCheckout = legService.isPlayerCheckoutRound(
+        // Determine whether this turn represents the player's successful checkout round.
+        boolean isCheckoutTurn = legService.isPlayerCheckoutRound(
                 leg,
                 legRoundEntry.roundNumber(),
                 player.getPlayerId()
         );
 
         // Update the score-range statistics.
-        scoreStatisticsService.updateScoreStatistics(playerStats.getScoreStatistics(), playerScore);
+        scoreStatisticsService.updateScoreStatistics(playerStats.getScoreStatistics(), playerTurn);
 
         // Update successful and missed checkout statistics.
         X01CheckoutStatistics checkoutStats = playerStats.getCheckoutStats();
         checkoutStatisticsService.updateCheckoutStatistics(
                 checkoutStats,
-                playerScore,
-                isScoreCheckout,
+                playerTurn,
+                isCheckoutTurn,
                 trackDoubles
         );
 
-        // Update overall and first-nine averages using the actual dart count for a checkout round.
+        // Update overall and first-nine averages using the actual dart count for a checkout turn.
         X01AverageStatistics averageStats = playerStats.getAverageStats();
-        Integer checkoutDartsUsed = isScoreCheckout ? leg.getCheckoutDartsUsed() : null;
+        Integer checkoutDartsUsed = isCheckoutTurn ? leg.getCheckoutDartsUsed() : null;
 
         averageStatisticsService.updateAverageStats(
                 averageStats,
-                playerScore,
+                playerTurn,
                 legRoundEntry.roundNumber(),
                 checkoutDartsUsed
         );

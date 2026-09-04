@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Getter;
@@ -14,7 +13,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundEntry;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01Turn;
 import org.bson.types.ObjectId;
 
 import java.util.List;
@@ -38,7 +37,7 @@ public class X01Leg {
     private ObjectId throwsFirst;
 
     @Positive
-    @Max(X01LegRoundScore.MAXIMUM_DARTS_PER_ROUND)
+    @Max(X01Turn.MAXIMUM_DARTS_PER_TURN)
     private Integer checkoutDartsUsed;
 
     @NotNull

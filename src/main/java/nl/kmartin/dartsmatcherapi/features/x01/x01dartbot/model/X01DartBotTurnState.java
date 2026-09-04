@@ -1,7 +1,7 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.model;
 
 import lombok.Getter;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundScore;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01Turn;
 
 /**
  * Stores the state used while playing a dart bot's turn in an X01 leg.
@@ -70,7 +70,7 @@ public class X01DartBotTurnState {
      * @return the number of darts remaining
      */
     public int getDartsLeftInTurn() {
-        return X01LegRoundScore.MAXIMUM_DARTS_PER_ROUND - dartsUsedInTurn;
+        return X01Turn.MAXIMUM_DARTS_PER_TURN - dartsUsedInTurn;
     }
 
     /**

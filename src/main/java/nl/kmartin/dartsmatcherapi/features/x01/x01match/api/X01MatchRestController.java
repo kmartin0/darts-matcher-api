@@ -2,9 +2,9 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01match.api;
 
 import jakarta.validation.Valid;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateMatchRequest;
-import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01EditTurn;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateTurnRequest;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01EditTurnRequest;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
-import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Turn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.IX01MatchService;
 import nl.kmartin.dartsmatcherapi.rest.RestEndpoints;
 import org.bson.types.ObjectId;
@@ -83,27 +83,27 @@ public class X01MatchRestController {
     /**
      * Adds a turn to an X01 match.
      *
-     * @param matchId the match id
-     * @param turn    the turn to add
+     * @param matchId     the match id
+     * @param turnRequest the turn creation request
      * @return the updated match
      */
     @PostMapping(path = RestEndpoints.X01.MATCH_TURNS, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public X01Match addTurn(@PathVariable ObjectId matchId, @Valid @RequestBody X01Turn turn) {
-        return matchService.addTurn(matchId, turn);
+    public X01Match addTurn(@PathVariable ObjectId matchId, @Valid @RequestBody X01CreateTurnRequest turnRequest) {
+        return matchService.addTurn(matchId, turnRequest);
     }
 
     /**
      * Edits an existing turn in an X01 match.
      *
-     * @param matchId  the match id
-     * @param editTurn the turn edit
+     * @param matchId     the match id
+     * @param turnRequest the turn edit request
      * @return the updated match
      */
     @PostMapping(path = RestEndpoints.X01.MATCH_TURNS_EDIT, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public X01Match editTurn(@PathVariable ObjectId matchId, @Valid @RequestBody X01EditTurn editTurn) {
-        return matchService.editTurn(matchId, editTurn);
+    public X01Match editTurn(@PathVariable ObjectId matchId, @Valid @RequestBody X01EditTurnRequest turnRequest) {
+        return matchService.editTurn(matchId, turnRequest);
     }
 
     /**
