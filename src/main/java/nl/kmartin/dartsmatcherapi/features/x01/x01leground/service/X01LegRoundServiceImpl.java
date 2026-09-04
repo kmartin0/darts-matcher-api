@@ -3,7 +3,6 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01leground.service;
 import nl.kmartin.dartsmatcherapi.error.exception.InvalidArgumentsException;
 import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
 import nl.kmartin.dartsmatcherapi.error.response.TargetError;
-import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.service.IX01CheckoutService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01Turn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateTurnRequest;
@@ -26,12 +25,6 @@ import java.util.stream.IntStream;
 @Service
 @Validated
 public class X01LegRoundServiceImpl implements IX01LegRoundService {
-
-    private final IX01CheckoutService checkoutService;
-
-    public X01LegRoundServiceImpl(IX01CheckoutService checkoutService) {
-        this.checkoutService = checkoutService;
-    }
 
     @Override
     public ObjectId getCurrentThrowerInRound(
@@ -106,22 +99,6 @@ public class X01LegRoundServiceImpl implements IX01LegRoundService {
                 winnerHasThrown = true;
             }
         }
-    }
-
-    @Override
-    public boolean isTurnLegal(X01Turn turn, Integer checkoutDartsUsed) {
-        int remaining = turn.getRemaining();
-
-        // A bust can never represent a legal turn.
-        if (checkoutService.isRemainingBust(remaining)) return false;
-
-        // Reaching zero additionally requires a valid checkout with the supplied dart count.
-        if (checkoutService.isRemainingZero(remaining)) {
-            return checkoutDartsUsed != null
-                    && checkoutService.isScoreCheckout(turn.getScore(), checkoutDartsUsed);
-        }
-
-        return true;
     }
 
     /**

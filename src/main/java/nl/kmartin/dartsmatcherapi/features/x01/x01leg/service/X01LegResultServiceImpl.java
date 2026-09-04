@@ -10,6 +10,7 @@ import org.springframework.validation.annotation.Validated;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.Objects;
 
 /**
@@ -50,30 +51,13 @@ public class X01LegResultServiceImpl implements IX01LegResultService {
 
     @Override
     public int getRemainingForPlayer(X01Leg leg, ObjectId playerId, int x01) {
-        // Search backwards so the first turn found contains the player's latest remaining value.
-        for (X01LegRound round : leg.getRounds().descendingMap().values()) {
-            X01Turn playerTurn = round.getTurns().get(playerId);
-
-            if (playerTurn != null) {
-                return playerTurn.getRemaining();
-            }
-        }
-
-        return x01;
+        return getRemainingForPlayerInRounds(leg.getRounds(), playerId, x01);
     }
 
     @Override
-    public void updateRemainingForPlayer(X01Leg leg, ObjectId playerId, int x01) {
-        int remaining = x01;
-
-        // Rebuild the player's remaining score chronologically from the start of the leg.
-        for (X01LegRound round : leg.getRounds().values()) {
-            X01Turn turn = round.getTurns().get(playerId);
-            if (turn == null) continue;
-
-            remaining -= turn.getScore();
-            turn.setRemaining(remaining);
-        }
+    public int getRemainingForPlayerBeforeRound(X01Leg leg, ObjectId playerId, int roundNumber, int x01) {
+        NavigableMap<Integer, X01LegRound> roundsBeforeTarget = leg.getRounds().headMap(roundNumber, false);
+        return getRemainingForPlayerInRounds(roundsBeforeTarget, playerId, x01);
     }
 
     @Override
@@ -99,6 +83,27 @@ public class X01LegResultServiceImpl implements IX01LegResultService {
                     return X01Turn.MAXIMUM_DARTS_PER_TURN;
                 })
                 .sum();
+    }
+
+    /**
+     * Gets a player's latest remaining score from the supplied rounds.
+     *
+     * @param rounds   the rounds to search
+     * @param playerId the player ID
+     * @param x01      the starting score for the leg
+     * @return the latest remaining score, or the starting score when the player has not thrown
+     */
+    private int getRemainingForPlayerInRounds(NavigableMap<Integer, X01LegRound> rounds, ObjectId playerId, int x01) {
+        // Search backwards so the first turn found contains the player's latest remaining value.
+        for (X01LegRound round : rounds.descendingMap().values()) {
+            X01Turn playerTurn = round.getTurns().get(playerId);
+
+            if (playerTurn != null) {
+                return playerTurn.getRemaining();
+            }
+        }
+
+        return x01;
     }
 
     /**

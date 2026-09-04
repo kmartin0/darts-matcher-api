@@ -29,14 +29,20 @@ public interface IX01LegService {
     );
 
     /**
-     * Applies a new player's turn to a leg round and recalculates the affected leg state.
+     * Applies a new player's turn to a leg round.
+     *
+     * Processes the submitted turn according to X01 rules, adds it to the round
+     * and rebuilds the resulting leg state.
      *
      * @param turnMutation the turn mutation to apply
      */
     void applyTurn(@NotNull @Valid X01TurnMutation turnMutation);
 
     /**
-     * Replaces an existing player's turn in a leg round and recalculates the affected leg state.
+     * Replaces an existing player's turn in a leg round.
+     *
+     * Processes the replacement according to X01 rules, ensures following turns
+     * remain valid and rebuilds the resulting leg state.
      *
      * @param turnMutation the turn mutation to apply as a replacement
      */

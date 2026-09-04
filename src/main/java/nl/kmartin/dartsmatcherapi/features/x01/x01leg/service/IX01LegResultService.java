@@ -27,13 +27,15 @@ public interface IX01LegResultService {
     int getRemainingForPlayer(@NotNull @Valid X01Leg leg, @NotNull ObjectId playerId, @Positive int x01);
 
     /**
-     * Recalculates the remaining score for a player across all rounds in a leg.
+     * Gets a player's remaining score immediately before a round.
      *
-     * @param leg      the leg to update
-     * @param playerId the player whose remaining scores should be recalculated
-     * @param x01      the starting score for the leg
+     * @param leg         the leg to evaluate
+     * @param playerId    the player ID
+     * @param roundNumber the round number
+     * @param x01         the starting score for the leg
+     * @return the remaining score before the round, or the starting score when the player has not yet thrown
      */
-    void updateRemainingForPlayer(@NotNull @Valid X01Leg leg, @NotNull ObjectId playerId, @Positive int x01);
+    int getRemainingForPlayerBeforeRound(@NotNull @Valid X01Leg leg, @NotNull ObjectId playerId, @Positive int roundNumber, @Positive int x01);
 
     /**
      * Calculates the number of darts used by a player in a leg.

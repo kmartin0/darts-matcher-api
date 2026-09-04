@@ -161,8 +161,8 @@ public class X01MatchServiceImpl implements IX01MatchService {
                 legEntry.leg(),
                 turnRequest.getRound(),
                 turnRequest.getScore(),
-                turnRequest.getCheckoutDartsUsed(),
                 turnRequest.getDoublesMissed(),
+                turnRequest.getCheckoutDartsUsed(),
                 turnRequest.getPlayerId(),
                 trackDoubles
         ));
@@ -280,8 +280,8 @@ public class X01MatchServiceImpl implements IX01MatchService {
                 currentLegEntry.leg(),
                 currentRoundEntry.roundNumber(),
                 score,
-                checkoutDartsUsed,
                 doublesMissed,
+                checkoutDartsUsed,
                 currentThrower,
                 trackDoubles
         ));

@@ -16,8 +16,8 @@ import org.bson.types.ObjectId;
  * @param leg               the leg to mutate
  * @param roundNumber       the round number
  * @param score             the scored points
- * @param checkoutDartsUsed the number of darts used for the checkout
  * @param doublesMissed     the number of doubles missed
+ * @param checkoutDartsUsed the number of darts used for the checkout
  * @param throwerId         the player that threw the turn
  * @param trackDoubles      whether missed doubles should be tracked
  */
@@ -26,8 +26,8 @@ public record X01TurnMutation(
         @NotNull @Valid X01Leg leg,
         @Positive int roundNumber,
         @ValidDartScore int score,
-        @Positive @Max(X01Turn.MAXIMUM_DARTS_PER_TURN) Integer checkoutDartsUsed,
         @PositiveOrZero @Max(X01Turn.MAXIMUM_DARTS_PER_TURN) Integer doublesMissed,
+        @Positive @Max(X01Turn.MAXIMUM_DARTS_PER_TURN) Integer checkoutDartsUsed,
         @NotNull ObjectId throwerId,
         boolean trackDoubles
 ) {

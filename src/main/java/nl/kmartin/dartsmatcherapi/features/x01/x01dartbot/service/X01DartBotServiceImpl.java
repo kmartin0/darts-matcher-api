@@ -73,8 +73,8 @@ public class X01DartBotServiceImpl implements IX01DartBotService {
         // Convert the completed turn state into the generated dart bot turn.
         return new X01DartBotTurn(
                 dartBotTurnState.getScoreInTurn(),
-                checkoutDartsUsed,
-                dartBotTurnState.getDoublesMissedInTurn()
+                dartBotTurnState.getDoublesMissedInTurn(),
+                checkoutDartsUsed
         );
     }
 

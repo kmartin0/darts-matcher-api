@@ -21,30 +21,31 @@ public class X01Turn {
     public static final int MAXIMUM_SCORE_PER_TURN = 180;
 
     @PositiveOrZero
-    @Max(MAXIMUM_DARTS_PER_TURN)
-    private Integer doublesMissed;
-
-    @PositiveOrZero
     @Max(MAXIMUM_SCORE_PER_TURN)
     private int score;
 
     @PositiveOrZero
     private int remaining;
 
+    @PositiveOrZero
+    @Max(MAXIMUM_DARTS_PER_TURN)
+    private Integer doublesMissed;
+
     /**
-     * Creates a turn from submitted turn values.
+     * Creates a processed turn from submitted turn values.
      *
-     * Missed doubles are stored only when double tracking is enabled. Remaining
-     * points are calculated separately while processing the leg.
+     * Missed doubles are stored only when double tracking is enabled.
      *
      * @param score         the points scored in the turn
+     * @param remaining     the remaining score after the turn
      * @param doublesMissed the number of doubles missed
      * @param trackDoubles  whether missed doubles should be tracked
      */
-    public X01Turn(int score, Integer doublesMissed, boolean trackDoubles) {
+    public X01Turn(int score, int remaining, Integer doublesMissed, boolean trackDoubles) {
+        this.score = score;
+        this.remaining = remaining;
         this.doublesMissed = trackDoubles
                 ? (doublesMissed != null ? doublesMissed : 0)
                 : null;
-        this.score = score;
     }
 }

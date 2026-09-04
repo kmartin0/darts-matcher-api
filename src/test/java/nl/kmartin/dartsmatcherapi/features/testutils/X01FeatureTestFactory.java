@@ -125,7 +125,8 @@ public class X01FeatureTestFactory {
                 messageResolverMock,
                 createLegProgressService(),
                 createLegResultService(),
-                createLegRoundService()
+                createLegRoundService(),
+                createCheckoutService()
         );
     }
 
@@ -138,7 +139,7 @@ public class X01FeatureTestFactory {
     }
 
     public IX01LegRoundService createLegRoundService() {
-        return new X01LegRoundServiceImpl(createCheckoutService());
+        return new X01LegRoundServiceImpl();
     }
 
     public IX01StandingsService createStandingsService() {

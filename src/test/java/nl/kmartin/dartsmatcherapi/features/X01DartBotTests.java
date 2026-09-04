@@ -108,9 +108,9 @@ public class X01DartBotTests {
             match.getMatchProgress().setCurrentRound(round);
             X01DartBotTurn dartBotTurn = dartBotService.createDartBotTurn(match);
             X01Turn x01Turn = new X01Turn(
-                    dartBotTurn.doublesMissed(),
                     dartBotTurn.score(),
-                    remaining - dartBotTurn.score()
+                    remaining - dartBotTurn.score(),
+                    dartBotTurn.doublesMissed()
             );
 
             currentLeg.getRounds().put(round++, new X01LegRound(new LinkedHashMap<>(Map.of(dartBotId, x01Turn))));

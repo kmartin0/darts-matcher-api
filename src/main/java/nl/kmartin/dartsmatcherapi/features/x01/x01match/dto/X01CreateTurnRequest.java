@@ -24,11 +24,11 @@ public class X01CreateTurnRequest {
     @ValidDartScore
     private int score;
 
-    @Positive
-    @Max(X01Turn.MAXIMUM_DARTS_PER_TURN)
-    private Integer checkoutDartsUsed;
-
     @PositiveOrZero
     @Max(X01Turn.MAXIMUM_DARTS_PER_TURN)
     private Integer doublesMissed;
+
+    @Positive
+    @Max(X01Turn.MAXIMUM_DARTS_PER_TURN)
+    private Integer checkoutDartsUsed;
 }

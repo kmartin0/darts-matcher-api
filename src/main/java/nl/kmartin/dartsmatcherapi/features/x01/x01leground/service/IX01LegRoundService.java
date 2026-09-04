@@ -69,13 +69,4 @@ public interface IX01LegRoundService {
      * @param legWinner the player that won the leg
      */
     void removeTurnsAfterWinner(@NotNull @Valid X01LegRound round, @NotNull ObjectId legWinner);
-
-    /**
-     * Determines whether a turn represents a legal X01 state.
-     *
-     * @param turn              the turn to validate
-     * @param checkoutDartsUsed the number of darts used for the checkout
-     * @return whether the turn is legal
-     */
-    boolean isTurnLegal(@NotNull @Valid X01Turn turn, Integer checkoutDartsUsed);
 }
