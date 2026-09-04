@@ -1,19 +1,16 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01leg.service;
 
-import nl.kmartin.dartsmatcherapi.error.exception.InvalidArgumentsException;
-import nl.kmartin.dartsmatcherapi.error.response.TargetError;
+import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.model.X01CheckoutInsufficientDartsException;
 import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.service.IX01CheckoutService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01LegEntry;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegAlreadyWonException;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01Turn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01TurnMutation;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.service.IX01LegRoundService;
-import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateTurnRequest;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
-import nl.kmartin.dartsmatcherapi.i18n.MessageKeys;
-import nl.kmartin.dartsmatcherapi.i18n.MessageResolver;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -33,20 +30,17 @@ import java.util.stream.IntStream;
 @Validated
 public class X01LegServiceImpl implements IX01LegService {
 
-    private final MessageResolver messageResolver;
     private final IX01LegProgressService legProgressService;
     private final IX01LegResultService legResultService;
     private final IX01LegRoundService legRoundService;
     private final IX01CheckoutService checkoutService;
 
     public X01LegServiceImpl(
-            MessageResolver messageResolver,
             IX01LegProgressService legProgressService,
             IX01LegResultService legResultService,
             IX01LegRoundService legRoundService,
             IX01CheckoutService checkoutService
     ) {
-        this.messageResolver = messageResolver;
         this.legProgressService = legProgressService;
         this.legResultService = legResultService;
         this.legRoundService = legRoundService;
@@ -136,17 +130,12 @@ public class X01LegServiceImpl implements IX01LegService {
      *
      * @param leg      the leg to check
      * @param playerId the player whose turn is being modified
-     * @throws InvalidArgumentsException when another player's turn is modified after the leg has been won
+     * @throws X01LegAlreadyWonException when another player's turn is modified after the leg has been won
      */
     private void checkLegEditable(X01Leg leg, ObjectId playerId) {
         // A concluded leg can only be changed through the winning player's turn.
         if (legProgressService.isLegConcluded(leg) && !Objects.equals(leg.getWinner(), playerId)) {
-            throw new InvalidArgumentsException(
-                    new TargetError(
-                            X01CreateTurnRequest.FIELD_SCORE,
-                            messageResolver.getMessage(MessageKeys.MESSAGE_LEG_ALREADY_WON)
-                    )
-            );
+            throw new X01LegAlreadyWonException();
         }
     }
 
@@ -161,6 +150,7 @@ public class X01LegServiceImpl implements IX01LegService {
      * @param turnMutation        the turn mutation to process
      * @param checkFollowingTurns whether following turns must also remain legal
      * @return the processed turn
+     * @throws X01CheckoutInsufficientDartsException when the checkout requires more darts than were used
      */
     private X01Turn createTurn(X01TurnMutation turnMutation, boolean checkFollowingTurns) {
         // Calculate the remaining score produced by the submitted turn.
@@ -194,6 +184,7 @@ public class X01LegServiceImpl implements IX01LegService {
      * @param turnMutation the edit being evaluated
      * @param remaining    the remaining score after the edited turn
      * @return whether all following turns remain legal
+     * @throws X01CheckoutInsufficientDartsException when the checkout requires more darts than were used
      */
     private boolean areFollowingTurnsLegal(X01TurnMutation turnMutation, int remaining) {
         NavigableMap<Integer, X01LegRound> roundsAfterTurn = turnMutation.leg()
@@ -226,6 +217,7 @@ public class X01LegServiceImpl implements IX01LegService {
      * @param remaining         the remaining score after the turn
      * @param checkoutDartsUsed the number of darts used for the checkout
      * @return whether the turn is legal
+     * @throws X01CheckoutInsufficientDartsException when the checkout requires more darts than were used
      */
     private boolean isTurnLegal(int score, int remaining, Integer checkoutDartsUsed) {
         // A bust can never represent a legal turn.

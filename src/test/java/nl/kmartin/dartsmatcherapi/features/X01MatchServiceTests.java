@@ -16,6 +16,7 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.X01MatchServiceI
 import nl.kmartin.dartsmatcherapi.features.x01.x01set.service.IX01SetProgressService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01standings.service.IX01StandingsService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01statistics.service.IX01StatisticsService;
+import nl.kmartin.dartsmatcherapi.i18n.MessageResolver;
 import nl.kmartin.dartsmatcherapi.websocket.event.IWebSocketEventPublisher;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Assertions;
@@ -64,6 +65,9 @@ public class X01MatchServiceTests {
     @Mock
     IX01StandingsService standingsService;
 
+    @Mock
+    MessageResolver messageResolver;
+
 
     @BeforeEach
     void setUp() {
@@ -78,7 +82,8 @@ public class X01MatchServiceTests {
                 legRoundService,
                 dartBotService,
                 webSocketEventPublisher,
-                standingsService
+                standingsService,
+                messageResolver
         );
     }
 

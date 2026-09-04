@@ -1,6 +1,7 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01match.api;
 
 import jakarta.validation.Valid;
+import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateTurnRequest;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01EditTurnRequest;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.message.X01MatchMessageType;
@@ -43,6 +44,7 @@ public class X01MatchWebSocketController {
      *
      * @param matchId the match id
      * @return a message containing the current match
+     * @throws ResourceNotFoundException when the match does not exist
      */
     @SubscribeMapping(WebSocketDestinations.X01.MATCH)
     public WebSocketMessage<X01MatchMessageType, X01Match> subscribeX01Match(
@@ -61,6 +63,7 @@ public class X01MatchWebSocketController {
      * @param turnRequest the turn creation request
      * @param publishId   the optional client publish id
      * @param sessionId   the WebSocket session id
+     * @throws ResourceNotFoundException when the match or active set, leg or round cannot be resolved
      */
     @MessageMapping(WebSocketDestinations.X01.ADD_TURN)
     public void addTurn(
@@ -84,6 +87,7 @@ public class X01MatchWebSocketController {
      * @param turnRequest the turn edit request
      * @param publishId   the optional client publish id
      * @param sessionId   the WebSocket session id
+     * @throws ResourceNotFoundException when the match, target set, leg, round or player's existing turn cannot be found
      */
     @MessageMapping(WebSocketDestinations.X01.EDIT_TURN)
     public void editTurn(
@@ -106,6 +110,7 @@ public class X01MatchWebSocketController {
      * @param matchId   the match id
      * @param publishId the optional client publish id
      * @param sessionId the WebSocket session id
+     * @throws ResourceNotFoundException when the match does not exist
      */
     @MessageMapping(WebSocketDestinations.X01.DELETE_LAST_TURN)
     public void deleteLastTurn(
@@ -127,6 +132,7 @@ public class X01MatchWebSocketController {
      * @param matchId   the match id
      * @param publishId the optional client publish id
      * @param sessionId the WebSocket session id
+     * @throws ResourceNotFoundException when the match does not exist
      */
     @MessageMapping(WebSocketDestinations.X01.DELETE_MATCH)
     public void deleteMatch(
@@ -150,6 +156,7 @@ public class X01MatchWebSocketController {
      * @param matchId   the match id
      * @param publishId the optional client publish id
      * @param sessionId the WebSocket session id
+     * @throws ResourceNotFoundException when the match does not exist
      */
     @MessageMapping(WebSocketDestinations.X01.RESET_MATCH)
     public void resetMatch(
@@ -171,6 +178,7 @@ public class X01MatchWebSocketController {
      * @param matchId   the match id
      * @param publishId the optional client publish id
      * @param sessionId the WebSocket session id
+     * @throws ResourceNotFoundException when the match does not exist
      */
     @MessageMapping(WebSocketDestinations.X01.REPROCESS_MATCH)
     public void reprocessMatch(

@@ -2,7 +2,6 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01checkout.service;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import nl.kmartin.dartsmatcherapi.error.exception.InvalidArgumentsException;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.Dart;
 import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.model.X01Checkout;
 
@@ -40,7 +39,7 @@ public interface IX01CheckoutService {
      * @param score     the score to check
      * @param dartsUsed the number of darts used
      * @return whether the score can be checked out
-     * @throws InvalidArgumentsException if the checkout requires more darts than were used
+     * @throws X01CheckoutInsufficientDartsException when the checkout requires more darts than were used
      */
     boolean isScoreCheckout(int score, int dartsUsed);
 

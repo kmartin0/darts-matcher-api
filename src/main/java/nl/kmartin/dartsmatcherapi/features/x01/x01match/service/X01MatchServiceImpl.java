@@ -1,14 +1,20 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01match.service;
 
+import nl.kmartin.dartsmatcherapi.error.exception.InvalidArgumentsException;
 import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
+import nl.kmartin.dartsmatcherapi.error.response.ErrorTargets;
+import nl.kmartin.dartsmatcherapi.error.response.TargetError;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.PlayerType;
+import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.model.X01CheckoutInsufficientDartsException;
 import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.model.X01DartBotTurn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.service.IX01DartBotService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01LegEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.service.IX01LegService;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegAlreadyWonException;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundEntry;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01TurnAlreadyExistsException;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01TurnMutation;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.service.IX01LegRoundService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateMatchRequest;
@@ -23,6 +29,8 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01SetEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01set.service.IX01SetProgressService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01standings.service.IX01StandingsService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01statistics.service.IX01StatisticsService;
+import nl.kmartin.dartsmatcherapi.i18n.MessageKeys;
+import nl.kmartin.dartsmatcherapi.i18n.MessageResolver;
 import nl.kmartin.dartsmatcherapi.websocket.WebSocketDestinations;
 import nl.kmartin.dartsmatcherapi.websocket.event.IWebSocketEventPublisher;
 import org.bson.types.ObjectId;
@@ -60,6 +68,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
     private final IX01DartBotService dartBotService;
     private final IWebSocketEventPublisher webSocketEventPublisher;
     private final IX01StandingsService standingsService;
+    private final MessageResolver messageResolver;
 
     public X01MatchServiceImpl(
             IX01MatchRepository matchRepository,
@@ -72,7 +81,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
             IX01LegRoundService legRoundService,
             IX01DartBotService dartBotService,
             IWebSocketEventPublisher webSocketEventPublisher,
-            IX01StandingsService standingsService
+            IX01StandingsService standingsService, MessageResolver messageResolver
     ) {
         this.matchRepository = matchRepository;
         this.matchSetupService = matchSetupService;
@@ -85,6 +94,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
         this.dartBotService = dartBotService;
         this.webSocketEventPublisher = webSocketEventPublisher;
         this.standingsService = standingsService;
+        this.messageResolver = messageResolver;
     }
 
     @Override
@@ -101,7 +111,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
 
     @Override
     @Transactional(readOnly = true)
-    public X01Match getMatch(ObjectId matchId) throws ResourceNotFoundException {
+    public X01Match getMatch(ObjectId matchId) {
         return matchRepository.findById(matchId)
                 .orElseThrow(() -> new ResourceNotFoundException(X01Match.class, matchId));
     }
@@ -131,11 +141,19 @@ public class X01MatchServiceImpl implements IX01MatchService {
 
     @Override
     @Transactional
-    public X01Match addTurn(ObjectId matchId, X01CreateTurnRequest turn) {
+    public X01Match addTurn(ObjectId matchId, X01CreateTurnRequest turnRequest) {
         X01Match match = getMatch(matchId);
 
         // Apply the submitted turn to the currently active round and thrower.
-        addTurnToCurrentPlayer(match, turn);
+        try {
+            addTurnToCurrentPlayer(match, turnRequest);
+        } catch (X01TurnAlreadyExistsException e) {
+            throw mapTurnAlreadyExistsException();
+        } catch (X01CheckoutInsufficientDartsException e) {
+            throw mapCheckoutInsufficientDartsException(e);
+        } catch (X01LegAlreadyWonException e) {
+            throw mapLegAlreadyWonException();
+        }
 
         // Rebuild and persist the match before processing any following Dart Bot turns.
         saveMatchAndProcessBotTurns(match, X01MatchMessageType.ADD_HUMAN_TURN);
@@ -156,16 +174,22 @@ public class X01MatchServiceImpl implements IX01MatchService {
         boolean trackDoubles = match.getMatchSettings().isTrackDoubles();
 
         // Replace the turn and rebuild the leg state affected by the change.
-        legService.replaceTurn(new X01TurnMutation(
-                x01,
-                legEntry.leg(),
-                turnRequest.getRound(),
-                turnRequest.getScore(),
-                turnRequest.getDoublesMissed(),
-                turnRequest.getCheckoutDartsUsed(),
-                turnRequest.getPlayerId(),
-                trackDoubles
-        ));
+        try {
+            legService.replaceTurn(new X01TurnMutation(
+                    x01,
+                    legEntry.leg(),
+                    turnRequest.getRound(),
+                    turnRequest.getScore(),
+                    turnRequest.getDoublesMissed(),
+                    turnRequest.getCheckoutDartsUsed(),
+                    turnRequest.getPlayerId(),
+                    trackDoubles
+            ));
+        } catch (X01CheckoutInsufficientDartsException e) {
+            throw mapCheckoutInsufficientDartsException(e);
+        } catch (X01LegAlreadyWonException e) {
+            throw mapLegAlreadyWonException();
+        }
 
         // Rebuild and persist the match before processing any following Dart Bot turns.
         saveMatchAndProcessBotTurns(match, X01MatchMessageType.EDIT_TURN);
@@ -227,6 +251,10 @@ public class X01MatchServiceImpl implements IX01MatchService {
      *
      * @param match       the match to update
      * @param turnRequest the turn creation request
+     * @throws X01TurnAlreadyExistsException         when the current thrower already has a turn in the active round
+     * @throws X01LegAlreadyWonException             when another player's turn is applied after the leg has been won
+     * @throws X01CheckoutInsufficientDartsException when the checkout requires more darts than were used
+     * @throws ResourceNotFoundException             when the active set, leg or round cannot be resolved
      */
     private void addTurnToCurrentPlayer(X01Match match, X01CreateTurnRequest turnRequest) {
         addTurnToCurrentPlayer(match, turnRequest.getScore(), turnRequest.getCheckoutDartsUsed(), turnRequest.getDoublesMissed());
@@ -237,6 +265,10 @@ public class X01MatchServiceImpl implements IX01MatchService {
      *
      * @param match       the match to update
      * @param dartBotTurn the generated Dart Bot turn
+     * @throws X01TurnAlreadyExistsException         when the current thrower already has a turn in the active round
+     * @throws X01LegAlreadyWonException             when another player's turn is applied after the leg has been won
+     * @throws X01CheckoutInsufficientDartsException when the checkout requires more darts than were used
+     * @throws ResourceNotFoundException             when the active set, leg or round cannot be resolved
      */
     private void addTurnToCurrentPlayer(X01Match match, X01DartBotTurn dartBotTurn) {
         addTurnToCurrentPlayer(match, dartBotTurn.score(), dartBotTurn.checkoutDartsUsed(), dartBotTurn.doublesMissed());
@@ -249,6 +281,10 @@ public class X01MatchServiceImpl implements IX01MatchService {
      * @param score             the points scored in the turn
      * @param checkoutDartsUsed the number of darts used for the checkout
      * @param doublesMissed     the number of doubles missed
+     * @throws X01TurnAlreadyExistsException         when the current thrower already has a turn in the active round
+     * @throws X01LegAlreadyWonException             when another player's turn is applied after the leg has been won
+     * @throws X01CheckoutInsufficientDartsException when the checkout requires more darts than were used
+     * @throws ResourceNotFoundException             when the active set, leg or round cannot be resolved
      */
     private void addTurnToCurrentPlayer(X01Match match, int score, Integer checkoutDartsUsed, Integer doublesMissed) {
         // Resolve or create the active set, leg and round.
@@ -258,13 +294,10 @@ public class X01MatchServiceImpl implements IX01MatchService {
         X01LegEntry currentLegEntry = matchProgressService.getCurrentLegOrCreate(match, currentSetEntry)
                 .orElseThrow(() -> new ResourceNotFoundException(X01Leg.class, null));
 
-        X01LegRoundEntry currentRoundEntry = matchProgressService.getCurrentLegRoundOrCreate(
-                        match,
-                        currentLegEntry.leg()
-                )
+        X01LegRoundEntry currentRoundEntry = matchProgressService.getCurrentLegRoundOrCreate(match, currentLegEntry.leg())
                 .orElseThrow(() -> new ResourceNotFoundException(X01LegRound.class, null));
 
-        // Determine the current thrower from the scores already recorded in the active round.
+        // Determine the current thrower from the turns already recorded in the active round.
         ObjectId currentThrower = legRoundService.getCurrentThrowerInRound(
                 currentRoundEntry.round(),
                 currentLegEntry.leg().getThrowsFirst(),
@@ -292,6 +325,11 @@ public class X01MatchServiceImpl implements IX01MatchService {
      *
      * @param match       the match to save
      * @param messageType the message type for the triggering operation
+     * @throws X01TurnAlreadyExistsException         when the current thrower already has a turn in the active round
+     * @throws X01LegAlreadyWonException             when another player's turn is applied after the leg has been won
+     * @throws X01CheckoutInsufficientDartsException when the checkout requires more darts than were used
+     * @throws ResourceNotFoundException             when the active set, leg or round cannot be resolved
+     * @throws IllegalStateException                 when more than the allowed number of consecutive Dart Bot turns is reached
      */
     private void saveMatchAndProcessBotTurns(X01Match match, X01MatchMessageType messageType) {
         // Process and persist the triggering match state before checking whether a bot should throw.
@@ -398,6 +436,53 @@ public class X01MatchServiceImpl implements IX01MatchService {
                 WebSocketDestinations.broadcast(WebSocketDestinations.X01.MATCH, matchId),
                 messageType,
                 payload
+        );
+    }
+
+    /**
+     * Maps an existing-turn domain error to the corresponding request-field error.
+     *
+     * @return the mapped invalid-arguments exception
+     */
+    private InvalidArgumentsException mapTurnAlreadyExistsException() {
+        return new InvalidArgumentsException(
+                new TargetError(
+                        ErrorTargets.SCORE,
+                        messageResolver.getMessage(MessageKeys.MESSAGE_X01_TURN_ALREADY_EXISTS)
+                )
+        );
+    }
+
+    /**
+     * Maps an already-won leg error to the corresponding request-field error.
+     *
+     * @return the mapped invalid-arguments exception
+     */
+    private InvalidArgumentsException mapLegAlreadyWonException() {
+        return new InvalidArgumentsException(
+                new TargetError(
+                        ErrorTargets.SCORE,
+                        messageResolver.getMessage(MessageKeys.MESSAGE_LEG_ALREADY_WON)
+                )
+        );
+    }
+
+    /**
+     * Maps an insufficient checkout dart count to the corresponding request-field error.
+     *
+     * @param exception the checkout validation exception
+     * @return the mapped invalid-arguments exception
+     */
+    private InvalidArgumentsException mapCheckoutInsufficientDartsException(X01CheckoutInsufficientDartsException exception) {
+        return new InvalidArgumentsException(
+                new TargetError(
+                        ErrorTargets.CHECKOUT_DARTS_USED,
+                        messageResolver.getMessage(
+                                MessageKeys.MESSAGE_IMPOSSIBLE_CHECKOUT_MIN_DARTS,
+                                exception.getScore(),
+                                exception.getDartsUsed()
+                        )
+                )
         );
     }
 }

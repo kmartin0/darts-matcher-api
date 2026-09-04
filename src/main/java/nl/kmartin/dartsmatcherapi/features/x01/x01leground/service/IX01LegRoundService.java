@@ -3,8 +3,10 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01leground.service;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01Turn;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01TurnAlreadyExistsException;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
 import org.bson.types.ObjectId;
 
@@ -32,9 +34,9 @@ public interface IX01LegRoundService {
      * @param legRound the round to update
      * @param playerId the player whose turn is being added
      * @param turn     the turn to add
-     * @return the added turn
+     * @throws X01TurnAlreadyExistsException when the player already has a turn in the round
      */
-    X01Turn addTurn(
+    void addTurn(
             @NotNull @Valid X01LegRound legRound,
             @NotNull ObjectId playerId,
             @NotNull @Valid X01Turn turn
@@ -46,9 +48,9 @@ public interface IX01LegRoundService {
      * @param legRound the round to update
      * @param playerId the player whose turn is being replaced
      * @param turn     the replacement turn
-     * @return the replacement turn
+     * @throws ResourceNotFoundException when the player has no turn in the round
      */
-    X01Turn replaceTurn(
+    void replaceTurn(
             @NotNull @Valid X01LegRound legRound,
             @NotNull ObjectId playerId,
             @NotNull @Valid X01Turn turn

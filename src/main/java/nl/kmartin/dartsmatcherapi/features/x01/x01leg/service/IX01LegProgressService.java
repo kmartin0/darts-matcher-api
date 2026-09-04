@@ -3,6 +3,7 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01leg.service;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
@@ -18,7 +19,7 @@ public interface IX01LegProgressService {
      * @param leg         the leg to search
      * @param roundNumber the round number
      * @return the matching round entry
-     * @throws nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException when the round does not exist
+     * @throws ResourceNotFoundException when the round does not exist
      */
     X01LegRoundEntry getLegRoundOrThrow(@NotNull @Valid X01Leg leg, int roundNumber);
 

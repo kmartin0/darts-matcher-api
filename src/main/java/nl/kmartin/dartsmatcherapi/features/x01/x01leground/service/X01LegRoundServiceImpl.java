@@ -1,13 +1,10 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01leground.service;
 
-import nl.kmartin.dartsmatcherapi.error.exception.InvalidArgumentsException;
 import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
-import nl.kmartin.dartsmatcherapi.error.response.TargetError;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01Turn;
-import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateTurnRequest;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01TurnAlreadyExistsException;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
-import nl.kmartin.dartsmatcherapi.i18n.MessageKeys;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -44,25 +41,21 @@ public class X01LegRoundServiceImpl implements IX01LegRoundService {
     }
 
     @Override
-    public X01Turn addTurn(X01LegRound legRound, ObjectId playerId, X01Turn turn) {
+    public void addTurn(X01LegRound legRound, ObjectId playerId, X01Turn turn) {
         if (legRound.getTurns().containsKey(playerId)) {
-            throw new InvalidArgumentsException(
-                    new TargetError(X01CreateTurnRequest.FIELD_SCORE, MessageKeys.MESSAGE_X01_TURN_ALREADY_EXISTS)
-            );
+            throw new X01TurnAlreadyExistsException();
         }
 
         legRound.getTurns().put(playerId, turn);
-        return turn;
     }
 
     @Override
-    public X01Turn replaceTurn(X01LegRound legRound, ObjectId playerId, X01Turn turn) {
+    public void replaceTurn(X01LegRound legRound, ObjectId playerId, X01Turn turn) {
         if (!legRound.getTurns().containsKey(playerId)) {
             throw new ResourceNotFoundException(X01Turn.class, playerId);
         }
 
         legRound.getTurns().put(playerId, turn);
-        return turn;
     }
 
     @Override

@@ -86,7 +86,8 @@ public class X01FeatureTestFactory {
                 createLegRoundService(),
                 createDartBotService(),
                 createWebsocketEventPublisher(),
-                createStandingsService()
+                createStandingsService(),
+                messageResolverMock
         );
     }
 
@@ -122,7 +123,6 @@ public class X01FeatureTestFactory {
 
     public IX01LegService createLegService() {
         return new X01LegServiceImpl(
-                messageResolverMock,
                 createLegProgressService(),
                 createLegResultService(),
                 createLegRoundService(),

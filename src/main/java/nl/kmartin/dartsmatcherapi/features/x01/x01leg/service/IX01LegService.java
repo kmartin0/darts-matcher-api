@@ -4,8 +4,12 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
+import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.model.X01CheckoutInsufficientDartsException;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01LegEntry;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegAlreadyWonException;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01TurnAlreadyExistsException;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01TurnMutation;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
 import org.bson.types.ObjectId;
@@ -35,6 +39,10 @@ public interface IX01LegService {
      * and rebuilds the resulting leg state.
      *
      * @param turnMutation the turn mutation to apply
+     * @throws X01CheckoutInsufficientDartsException when the checkout requires more darts than were used
+     * @throws X01LegAlreadyWonException             when another player's turn is applied after the leg has been won
+     * @throws X01TurnAlreadyExistsException         when the player already has a turn in the target round
+     * @throws ResourceNotFoundException             when the target round cannot be found
      */
     void applyTurn(@NotNull @Valid X01TurnMutation turnMutation);
 
@@ -45,6 +53,9 @@ public interface IX01LegService {
      * remain valid and rebuilds the resulting leg state.
      *
      * @param turnMutation the turn mutation to apply as a replacement
+     * @throws X01CheckoutInsufficientDartsException when the checkout requires more darts than were used
+     * @throws X01LegAlreadyWonException             when another player's turn is replaced after the leg has been won
+     * @throws ResourceNotFoundException             when the target round or player's existing turn cannot be found
      */
     void replaceTurn(@NotNull @Valid X01TurnMutation turnMutation);
 

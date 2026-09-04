@@ -2,7 +2,7 @@ package nl.kmartin.dartsmatcherapi.error.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
-import nl.kmartin.dartsmatcherapi.error.util.ErrorUtil;
+import nl.kmartin.dartsmatcherapi.error.util.TargetErrorUtil;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -34,7 +34,7 @@ public class ErrorResponse implements Serializable {
         this.code = apiErrorCode.getHttpStatus().value();
         this.description = description;
         this.error = apiErrorCode.name();
-        this.targetErrors = ErrorUtil.targetErrorsToMap(targetErrors);
+        this.targetErrors = TargetErrorUtil.targetErrorsToMap(targetErrors);
     }
 
     /**

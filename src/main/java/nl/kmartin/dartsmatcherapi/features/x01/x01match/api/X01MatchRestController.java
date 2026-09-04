@@ -1,6 +1,7 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01match.api;
 
 import jakarta.validation.Valid;
+import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateMatchRequest;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateTurnRequest;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01EditTurnRequest;
@@ -50,6 +51,7 @@ public class X01MatchRestController {
      *
      * @param matchId the match id
      * @return the requested match
+     * @throws ResourceNotFoundException when the match does not exist
      */
     @GetMapping(path = RestEndpoints.X01.MATCH, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
@@ -61,7 +63,7 @@ public class X01MatchRestController {
      * Gets multiple X01 matches by id.
      *
      * @param ids the match ids
-     * @return the matching matches
+     * @return the matching x01 matches
      */
     @GetMapping(path = RestEndpoints.X01.MATCHES, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
@@ -73,6 +75,7 @@ public class X01MatchRestController {
      * Checks whether an X01 match exists.
      *
      * @param matchId the match id
+     * @throws ResourceNotFoundException when the match does not exist
      */
     @GetMapping(path = RestEndpoints.X01.MATCH_EXISTS)
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -86,6 +89,7 @@ public class X01MatchRestController {
      * @param matchId     the match id
      * @param turnRequest the turn creation request
      * @return the updated match
+     * @throws ResourceNotFoundException when the match or active set, leg or round cannot be resolved
      */
     @PostMapping(path = RestEndpoints.X01.MATCH_TURNS, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
@@ -99,6 +103,7 @@ public class X01MatchRestController {
      * @param matchId     the match id
      * @param turnRequest the turn edit request
      * @return the updated match
+     * @throws ResourceNotFoundException when the match, target set, leg, round or player's existing turn cannot be found
      */
     @PostMapping(path = RestEndpoints.X01.MATCH_TURNS_EDIT, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
@@ -111,6 +116,7 @@ public class X01MatchRestController {
      *
      * @param matchId the match id
      * @return the updated match
+     * @throws ResourceNotFoundException when the match does not exist
      */
     @PostMapping(path = RestEndpoints.X01.MATCH_TURNS_DELETE_LAST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
@@ -122,6 +128,7 @@ public class X01MatchRestController {
      * Deletes an X01 match.
      *
      * @param matchId the match id
+     * @throws ResourceNotFoundException when the match does not exist
      */
     @DeleteMapping(path = RestEndpoints.X01.MATCH)
     @ResponseStatus(HttpStatus.OK)
@@ -134,6 +141,7 @@ public class X01MatchRestController {
      *
      * @param matchId the match id
      * @return the reset match
+     * @throws ResourceNotFoundException when the match does not exist
      */
     @PostMapping(path = RestEndpoints.X01.MATCH_RESET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
@@ -146,6 +154,7 @@ public class X01MatchRestController {
      *
      * @param matchId the match id
      * @return the reprocessed match
+     * @throws ResourceNotFoundException when the match does not exist
      */
     @PostMapping(path = RestEndpoints.X01.MATCH_REPROCESS, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)

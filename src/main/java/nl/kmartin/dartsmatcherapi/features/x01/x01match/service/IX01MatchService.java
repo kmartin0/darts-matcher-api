@@ -28,7 +28,7 @@ public interface IX01MatchService {
      * @return the requested match
      * @throws ResourceNotFoundException when the match does not exist
      */
-    X01Match getMatch(@NotNull ObjectId matchId) throws ResourceNotFoundException;
+    X01Match getMatch(@NotNull ObjectId matchId);
 
     /**
      * Gets existing X01 matches for the supplied ids while preserving the requested order.
@@ -54,6 +54,7 @@ public interface IX01MatchService {
      * @param matchId     the match id
      * @param turnRequest the turn creation request
      * @return the updated match
+     * @throws ResourceNotFoundException when the match or active set, leg or round cannot be resolved
      */
     X01Match addTurn(@NotNull ObjectId matchId, @NotNull @Valid X01CreateTurnRequest turnRequest);
 
@@ -63,6 +64,7 @@ public interface IX01MatchService {
      * @param matchId     the match id
      * @param turnRequest the turn edit request including its match position
      * @return the updated match
+     * @throws ResourceNotFoundException when the match, target set, leg, round or player's existing turn cannot be found
      */
     X01Match editTurn(@NotNull ObjectId matchId, @NotNull @Valid X01EditTurnRequest turnRequest);
 
@@ -71,6 +73,7 @@ public interface IX01MatchService {
      *
      * @param matchId the match id
      * @return the updated match
+     * @throws ResourceNotFoundException when the match does not exist
      */
     X01Match deleteLastTurn(@NotNull ObjectId matchId);
 
@@ -78,6 +81,7 @@ public interface IX01MatchService {
      * Deletes an X01 match.
      *
      * @param matchId the match id
+     * @throws ResourceNotFoundException when the match does not exist
      */
     void deleteMatch(@NotNull ObjectId matchId);
 
@@ -86,6 +90,7 @@ public interface IX01MatchService {
      *
      * @param matchId the match id
      * @return the reset match
+     * @throws ResourceNotFoundException when the match does not exist
      */
     X01Match resetMatch(@NotNull ObjectId matchId);
 
@@ -94,6 +99,7 @@ public interface IX01MatchService {
      *
      * @param matchId the match id
      * @return the reprocessed match
+     * @throws ResourceNotFoundException when the match does not exist
      */
     X01Match reprocessMatch(@NotNull ObjectId matchId);
 }

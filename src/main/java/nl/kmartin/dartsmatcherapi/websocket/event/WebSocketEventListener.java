@@ -1,6 +1,6 @@
 package nl.kmartin.dartsmatcherapi.websocket.event;
 
-import nl.kmartin.dartsmatcherapi.error.util.ErrorUtil;
+import nl.kmartin.dartsmatcherapi.error.util.TargetErrorUtil;
 import nl.kmartin.dartsmatcherapi.websocket.WebSocketDestinations;
 import nl.kmartin.dartsmatcherapi.websocket.WebSocketHeaders;
 import nl.kmartin.dartsmatcherapi.websocket.event.model.WebSocketBroadcastEvent;
@@ -64,7 +64,7 @@ public class WebSocketEventListener {
                 event.error(),
                 event.description(),
                 event.error().getHttpStatus().value(),
-                ErrorUtil.targetErrorsToMap(event.targetErrors())
+                TargetErrorUtil.targetErrorsToMap(event.targetErrors())
         );
 
         sendToUser(WebSocketDestinations.ERROR_QUEUE, message, event.sessionId(), event.publishId());

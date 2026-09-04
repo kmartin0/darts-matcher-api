@@ -2,13 +2,11 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01checkout.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import nl.kmartin.dartsmatcherapi.error.exception.InvalidArgumentsException;
-import nl.kmartin.dartsmatcherapi.error.response.TargetError;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.Dart;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.DartboardSectionArea;
 import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.model.X01Checkout;
+import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.model.X01CheckoutInsufficientDartsException;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01Turn;
-import nl.kmartin.dartsmatcherapi.i18n.MessageKeys;
 import nl.kmartin.dartsmatcherapi.i18n.MessageResolver;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -28,14 +26,12 @@ import java.util.stream.Collectors;
 @Service
 @Validated
 public class X01CheckoutServiceImpl implements IX01CheckoutService {
-    private final MessageResolver messageResolver;
     private final Map<Integer, X01Checkout> checkoutsMap;
 
     public X01CheckoutServiceImpl(
             @Value("classpath:data/checkouts.json") Resource checkoutsResourceFile,
             MessageResolver messageResolver
     ) {
-        this.messageResolver = messageResolver;
         this.checkoutsMap = createCheckoutMap(checkoutsResourceFile);
     }
 
@@ -68,16 +64,7 @@ public class X01CheckoutServiceImpl implements IX01CheckoutService {
 
         // Reject checkouts that cannot be completed with the supplied number of darts.
         if (!isEnoughDartsUsedForCheckout(checkout.get(), dartsUsed)) {
-            throw new InvalidArgumentsException(
-                    new TargetError(
-                            "dartsUsed",
-                            messageResolver.getMessage(
-                                    MessageKeys.MESSAGE_IMPOSSIBLE_CHECKOUT_MIN_DARTS,
-                                    score,
-                                    dartsUsed
-                            )
-                    )
-            );
+            throw new X01CheckoutInsufficientDartsException(score, dartsUsed);
         }
 
         return true;
