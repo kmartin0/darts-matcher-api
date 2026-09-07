@@ -40,6 +40,14 @@ public interface IX01MatchProgressService {
     Optional<X01SetEntry> getCurrentSetOrCreate(@NotNull @Valid X01Match match);
 
     /**
+     * Gets the current unfinished leg in the match.
+     *
+     * @param match the match to inspect
+     * @return the current leg, or empty when no unfinished leg exists
+     */
+    Optional<X01LegEntry> getCurrentLeg(@NotNull @Valid X01Match match);
+
+    /**
      * Gets the current leg or creates the next leg when the set can continue.
      *
      * @param match           the match containing the set

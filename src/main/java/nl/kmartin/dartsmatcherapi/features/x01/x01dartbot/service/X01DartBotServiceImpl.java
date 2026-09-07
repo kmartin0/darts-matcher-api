@@ -1,6 +1,5 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.service;
 
-import nl.kmartin.dartsmatcherapi.features.basematch.model.PlayerType;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.Dart;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.DartThrow;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.DartboardSectionArea;
@@ -8,19 +7,13 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.model.X01DartBotTurn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.model.X01DartBotTurnSnapshot;
 import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.model.X01DartBotTurnState;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01LegEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.service.IX01LegResultService;
-import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
-import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.IX01MatchProgressService;
-import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01SetEntry;
 import nl.kmartin.dartsmatcherapi.util.NumberUtils;
-import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Orchestrates the creation of turns for X01 dart bot players.
@@ -34,35 +27,21 @@ import java.util.Optional;
 public class X01DartBotServiceImpl implements IX01DartBotService {
     private static final double TARGET_DART_COUNT_VARIANCE = 0.05;
 
-    private final IX01MatchProgressService matchProgressService;
     private final IX01DartBotThrowSimulator dartBotThrowSimulator;
     private final IX01LegResultService legResultService;
 
     public X01DartBotServiceImpl(
-            IX01MatchProgressService matchProgressService,
             IX01DartBotThrowSimulator dartBotThrowSimulator,
             IX01LegResultService legResultService
     ) {
-        this.matchProgressService = matchProgressService;
         this.dartBotThrowSimulator = dartBotThrowSimulator;
         this.legResultService = legResultService;
     }
 
     @Override
-    public X01DartBotTurn createDartBotTurn(X01Match match) {
-        // Resolve and verify the current dart bot player.
-        X01MatchPlayer dartBotPlayer = getCurrentDartBotPlayer(match);
-
-        // Resolve the current set and leg, creating them when required by the match progress.
-        Optional<X01SetEntry> currentSetEntry = matchProgressService.getCurrentSetOrCreate(match);
-        X01LegEntry currentLegEntry = currentSetEntry
-                .flatMap(setEntry -> matchProgressService.getCurrentLegOrCreate(match, setEntry))
-                .orElseThrow(() -> new IllegalStateException(
-                        "Unable to resolve the current leg while creating a dart bot turn"
-                ));
-
+    public X01DartBotTurn createDartBotTurn(X01MatchPlayer dartBotPlayer, X01Leg leg, int x01, boolean trackDoubles) {
         // Build the current turn state and play the bot's turn by mutating that state.
-        X01DartBotTurnState dartBotTurnState = createDartBotTurnState(match, dartBotPlayer, currentLegEntry.leg());
+        X01DartBotTurnState dartBotTurnState = createDartBotTurnState(dartBotPlayer, leg, x01, trackDoubles);
         playTurn(dartBotTurnState);
 
         // Record checkout dart usage only when this turn completed the leg.
@@ -79,42 +58,18 @@ public class X01DartBotServiceImpl implements IX01DartBotService {
     }
 
     /**
-     * Resolves the current thrower and verifies that it is a configured dart bot.
+     * Creates the dart bot state used while simulating a turn.
      *
-     * @param match the current match
-     * @return the current dart bot player
-     * @throws IllegalStateException when the current thrower is not a configured dart bot
-     */
-    private X01MatchPlayer getCurrentDartBotPlayer(X01Match match) {
-        ObjectId currentThrower = match.getMatchProgress().getCurrentThrower();
-
-        // Find the current player and verify that it has dart bot configuration.
-        return match.getPlayers()
-                .stream()
-                .filter(matchPlayer ->
-                        matchPlayer.getPlayerId().equals(currentThrower)
-                                && matchPlayer.getPlayerType() == PlayerType.DART_BOT
-                                && matchPlayer.getX01DartBotSettings() != null
-                )
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Current thrower is not a configured dart bot"));
-    }
-
-    /**
-     * Creates the dart bot state used while simulating the current turn.
-     *
-     * @param match         the current match
      * @param dartBotPlayer the dart bot player
-     * @param currentLeg    the current leg
+     * @param leg           the leg containing the bot's previous turns
+     * @param x01           the starting score for the leg
+     * @param trackDoubles  whether missed doubles are tracked
      * @return the state used to simulate the dart bot's turn
      */
-    private X01DartBotTurnState createDartBotTurnState(X01Match match, X01MatchPlayer dartBotPlayer, X01Leg currentLeg) {
-        int x01 = match.getMatchSettings().getX01();
-        boolean trackDoubles = match.getMatchSettings().isTrackDoubles();
-
+    private X01DartBotTurnState createDartBotTurnState(X01MatchPlayer dartBotPlayer, X01Leg leg, int x01, boolean trackDoubles) {
         // Calculate the points and darts accumulated before the current turn.
-        int scoredBeforeTurn = x01 - legResultService.getRemainingForPlayer(currentLeg, dartBotPlayer.getPlayerId(), x01);
-        int dartsUsedBeforeTurn = legResultService.calculateDartsUsed(currentLeg, dartBotPlayer.getPlayerId());
+        int scoredBeforeTurn = x01 - legResultService.getRemainingForPlayer(leg, dartBotPlayer.getPlayerId(), x01);
+        int dartsUsedBeforeTurn = legResultService.calculateDartsUsed(leg, dartBotPlayer.getPlayerId());
 
         // Use the configured playing strength to determine the bot's target leg length for this turn.
         double targetOneDartAvg = dartBotPlayer.getX01DartBotSettings().getOneDartAverage();

@@ -7,16 +7,9 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.service.IX01DartBotSer
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01Turn;
-import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01BestOf;
-import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01BestOfType;
-import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01ClearByTwoRule;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01DartBotSettings;
-import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
-import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchProgress;
-import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchSettings;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.repository.IX01MatchRepository;
-import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01Set;
 import org.bson.types.ObjectId;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
@@ -27,14 +20,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
 @ExtendWith(MockitoExtension.class)
 public class X01DartBotServiceTests {
+    private static final int X01 = 501;
+    private static final boolean TRACK_DOUBLES = true;
     private static final int MAX_AVG_TO_TEST = 180;
     private static final int MIN_AVG_TO_TEST = 1;
     private static final int ITERATION_PER_TARGET = 100;
@@ -56,43 +49,31 @@ public class X01DartBotServiceTests {
     @Test
     void dartBotCompletesLegsWithinTargetAverageBounds() {
         final ObjectId dartBotId = new ObjectId();
-        final X01Match match = createTestMatch(dartBotId);
 
         // Test the configured average range.
         for (int targetAvg = MAX_AVG_TO_TEST; targetAvg >= MIN_AVG_TO_TEST; targetAvg--) {
-            executeTestForTargetAvg(match, dartBotId, targetAvg);
+            executeTestForTargetAvg(dartBotId, targetAvg);
         }
     }
 
-    private void executeTestForTargetAvg(X01Match match, ObjectId dartBotId, int targetAvg) {
+    private void executeTestForTargetAvg(ObjectId dartBotId, int targetAvg) {
         printTargetAvg(targetAvg);
 
         // Rebuild the bot player and leg state for the current target average.
         X01Leg x01Leg = new X01Leg(null, dartBotId, new TreeMap<>());
-        X01Set x01Set = new X01Set(new TreeMap<>(Map.of(1, x01Leg)), dartBotId, null);
 
         X01DartBotSettings dartBotSettings = new X01DartBotSettings(targetAvg);
-        X01MatchPlayer dartBotPlayer = new X01MatchPlayer(
-                dartBotId,
-                "Dart Bot",
-                PlayerType.DART_BOT,
-                null,
-                dartBotSettings,
-                null
-        );
-
-        match.setSets(new TreeMap<>(Map.of(1, x01Set)));
-        match.setPlayers(new ArrayList<>(Collections.singletonList(dartBotPlayer)));
+        X01MatchPlayer dartBotPlayer = new X01MatchPlayer(dartBotId, "Dart Bot", PlayerType.DART_BOT, null, dartBotSettings, null);
 
         // Print the target dart range for inspection.
-        System.out.println(TargetDartsBoundaries.create(targetAvg, match.getMatchSettings().getX01()));
+        System.out.println(TargetDartsBoundaries.create(targetAvg, X01));
 
         // Track the dart-count distribution.
         Map<Integer, Integer> dartsUsedMap = new TreeMap<>();
 
         // Simulate multiple legs for this target average.
         for (int j = 0; j < ITERATION_PER_TARGET; j++) {
-            int dartsUsed = simulateLeg(targetAvg, match, x01Leg, dartBotId);
+            int dartsUsed = simulateLeg(targetAvg, dartBotPlayer, x01Leg, dartBotId);
             dartsUsedMap.put(dartsUsed, dartsUsedMap.getOrDefault(dartsUsed, 0) + 1);
 
             // Reset the recorded turns so the next simulation starts from a fresh leg.
@@ -102,9 +83,9 @@ public class X01DartBotServiceTests {
         System.out.println("Darts Used Map: " + dartsUsedMap);
     }
 
-    private int simulateLeg(int targetAvg, X01Match match, X01Leg currentLeg, ObjectId dartBotId) {
+    private int simulateLeg(int targetAvg, X01MatchPlayer dartBotPlayer, X01Leg currentLeg, ObjectId dartBotId) {
         int round = 1;
-        int remaining = match.getMatchSettings().getX01();
+        int remaining = X01;
         int dartsUsed = 0;
 
         // Continue generating bot turns until the leg has been checked out.
@@ -114,11 +95,13 @@ public class X01DartBotServiceTests {
                 Assertions.fail("Remaining went below zero (remaining=" + remaining + ", round=" + round + ")");
             }
 
-            // Keep match progress aligned with the simulated round because the bot derives its state from the match.
-            match.getMatchProgress().setCurrentRound(round);
-
             // Generate the next bot turn and map it to an X01Turn.
-            X01DartBotTurn dartBotTurn = dartBotService.createDartBotTurn(match);
+            X01DartBotTurn dartBotTurn = dartBotService.createDartBotTurn(
+                    dartBotPlayer,
+                    currentLeg,
+                    X01,
+                    TRACK_DOUBLES
+            );
             int remainingAfterTurn = remaining - dartBotTurn.score();
             X01Turn x01Turn = new X01Turn(dartBotTurn.score(), remainingAfterTurn, dartBotTurn.doublesMissed());
 
@@ -131,15 +114,15 @@ public class X01DartBotServiceTests {
         }
 
         // Verify the completed leg stays within the expected dart-count range.
-        assertDartsUsedWithinBounds(targetAvg, match.getMatchSettings().getX01(), dartsUsed);
+        assertDartsUsedWithinBounds(targetAvg, dartsUsed);
 
         // Return the number of darts used by the bot to finish the leg.
         return dartsUsed;
     }
 
-    private void assertDartsUsedWithinBounds(int targetAvg, int x01, int dartsUsed) {
+    private void assertDartsUsedWithinBounds(int targetAvg, int dartsUsed) {
         // Derive the acceptable dart-count range from the configured target average.
-        TargetDartsBoundaries targetDartsBoundaries = TargetDartsBoundaries.create(targetAvg, x01);
+        TargetDartsBoundaries targetDartsBoundaries = TargetDartsBoundaries.create(targetAvg, X01);
 
         // Verify the bot did not complete the leg too quickly for the configured average.
         Assertions.assertTrue(
@@ -155,27 +138,6 @@ public class X01DartBotServiceTests {
         );
     }
 
-    private X01Match createTestMatch(ObjectId starter) {
-        X01Match match = new X01Match();
-        match.setId(new ObjectId());
-
-        // Use the smallest match structure needed for repeatedly simulating a single 501 leg.
-        X01ClearByTwoRule clearByTwoRule = new X01ClearByTwoRule(false, 0);
-        X01BestOf bestOf = new X01BestOf(
-                1,
-                1,
-                X01BestOfType.SETS,
-                clearByTwoRule,
-                clearByTwoRule,
-                clearByTwoRule
-        );
-
-        match.setMatchSettings(new X01MatchSettings(501, true, bestOf));
-        match.setMatchProgress(new X01MatchProgress(1, 1, 1, starter));
-
-        return match;
-    }
-
     private void printTargetAvg(int targetAvg) {
         System.out.println();
         System.out.println("=".repeat(20));
@@ -183,11 +145,7 @@ public class X01DartBotServiceTests {
         System.out.println("=".repeat(20));
     }
 
-    private record TargetDartsBoundaries(
-            int upperTargetNumOfDarts,
-            int targetNumOfDarts,
-            int lowerTargetNumOfDarts
-    ) {
+    private record TargetDartsBoundaries(int upperTargetNumOfDarts, int targetNumOfDarts, int lowerTargetNumOfDarts) {
 
         public static TargetDartsBoundaries create(int targetAvg, int x01) {
             // Convert the configured three-dart average into the expected number of darts required for the leg.

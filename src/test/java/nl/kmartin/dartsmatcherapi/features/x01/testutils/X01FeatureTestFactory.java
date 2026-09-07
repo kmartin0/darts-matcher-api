@@ -182,7 +182,6 @@ public class X01FeatureTestFactory {
 
     public IX01DartBotService createDartBotService() {
         return new X01DartBotServiceImpl(
-                createMatchProgressService(),
                 createDartBotThrowSimulator(),
                 createLegResultService()
         );

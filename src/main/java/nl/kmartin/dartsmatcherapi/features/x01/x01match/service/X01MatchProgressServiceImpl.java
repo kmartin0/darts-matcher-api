@@ -80,6 +80,12 @@ public class X01MatchProgressServiceImpl implements IX01MatchProgressService {
     }
 
     @Override
+    public Optional<X01LegEntry> getCurrentLeg(X01Match match) {
+        return getCurrentSet(match)
+                .flatMap(setEntry -> setProgressService.getCurrentLeg(setEntry.set()));
+    }
+
+    @Override
     public Optional<X01LegEntry> getCurrentLegOrCreate(X01Match match, X01SetEntry currentSetEntry) {
         X01Set currentSet = currentSetEntry.set();
         Optional<X01LegEntry> currentLegEntry = setProgressService.getCurrentLeg(currentSet);

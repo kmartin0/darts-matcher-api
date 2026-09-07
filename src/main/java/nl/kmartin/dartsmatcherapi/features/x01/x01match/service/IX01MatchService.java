@@ -18,6 +18,7 @@ public interface IX01MatchService {
      *
      * @param request the match creation request
      * @return the created match
+     * @throws IllegalStateException when Dart Bot processing encounters invalid match state
      */
     X01Match createMatch(@NotNull @Valid X01CreateMatchRequest request);
 
@@ -55,6 +56,7 @@ public interface IX01MatchService {
      * @param turnRequest the turn creation request
      * @return the updated match
      * @throws ResourceNotFoundException when the match or active set, leg or round cannot be resolved
+     * @throws IllegalStateException     when Dart Bot processing encounters invalid match state
      */
     X01Match addTurn(@NotNull ObjectId matchId, @NotNull @Valid X01CreateTurnRequest turnRequest);
 
@@ -65,6 +67,7 @@ public interface IX01MatchService {
      * @param turnRequest the turn edit request including its match position
      * @return the updated match
      * @throws ResourceNotFoundException when the match, target set, leg, round or player's existing turn cannot be found
+     * @throws IllegalStateException     when Dart Bot processing encounters invalid match state
      */
     X01Match editTurn(@NotNull ObjectId matchId, @NotNull @Valid X01EditTurnRequest turnRequest);
 
@@ -74,6 +77,7 @@ public interface IX01MatchService {
      * @param matchId the match id
      * @return the updated match
      * @throws ResourceNotFoundException when the match does not exist
+     * @throws IllegalStateException     when Dart Bot processing encounters invalid match state
      */
     X01Match deleteLastTurn(@NotNull ObjectId matchId);
 
@@ -91,6 +95,7 @@ public interface IX01MatchService {
      * @param matchId the match id
      * @return the reset match
      * @throws ResourceNotFoundException when the match does not exist
+     * @throws IllegalStateException     when Dart Bot processing encounters invalid match state
      */
     X01Match resetMatch(@NotNull ObjectId matchId);
 
@@ -100,6 +105,7 @@ public interface IX01MatchService {
      * @param matchId the match id
      * @return the reprocessed match
      * @throws ResourceNotFoundException when the match does not exist
+     * @throws IllegalStateException     when Dart Bot processing encounters invalid match state
      */
     X01Match reprocessMatch(@NotNull ObjectId matchId);
 }

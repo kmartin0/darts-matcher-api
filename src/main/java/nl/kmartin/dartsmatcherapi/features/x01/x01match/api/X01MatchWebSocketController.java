@@ -64,6 +64,7 @@ public class X01MatchWebSocketController {
      * @param publishId   the optional client publish id
      * @param sessionId   the WebSocket session id
      * @throws ResourceNotFoundException when the match or active set, leg or round cannot be resolved
+     * @throws IllegalStateException when Dart Bot processing encounters invalid match state
      */
     @MessageMapping(WebSocketDestinations.X01.ADD_TURN)
     public void addTurn(
@@ -88,6 +89,7 @@ public class X01MatchWebSocketController {
      * @param publishId   the optional client publish id
      * @param sessionId   the WebSocket session id
      * @throws ResourceNotFoundException when the match, target set, leg, round or player's existing turn cannot be found
+     * @throws IllegalStateException when Dart Bot processing encounters invalid match state
      */
     @MessageMapping(WebSocketDestinations.X01.EDIT_TURN)
     public void editTurn(
@@ -111,6 +113,7 @@ public class X01MatchWebSocketController {
      * @param publishId the optional client publish id
      * @param sessionId the WebSocket session id
      * @throws ResourceNotFoundException when the match does not exist
+     * @throws IllegalStateException when Dart Bot processing encounters invalid match state
      */
     @MessageMapping(WebSocketDestinations.X01.DELETE_LAST_TURN)
     public void deleteLastTurn(
@@ -157,6 +160,7 @@ public class X01MatchWebSocketController {
      * @param publishId the optional client publish id
      * @param sessionId the WebSocket session id
      * @throws ResourceNotFoundException when the match does not exist
+     * @throws IllegalStateException when Dart Bot processing encounters invalid match state
      */
     @MessageMapping(WebSocketDestinations.X01.RESET_MATCH)
     public void resetMatch(
@@ -179,6 +183,7 @@ public class X01MatchWebSocketController {
      * @param publishId the optional client publish id
      * @param sessionId the WebSocket session id
      * @throws ResourceNotFoundException when the match does not exist
+     * @throws IllegalStateException when Dart Bot processing encounters invalid match state
      */
     @MessageMapping(WebSocketDestinations.X01.REPROCESS_MATCH)
     public void reprocessMatch(

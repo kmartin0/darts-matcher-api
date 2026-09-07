@@ -146,7 +146,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
 
         // Apply the submitted turn to the currently active round and thrower.
         try {
-            addTurnToCurrentPlayer(match, turnRequest);
+            addTurnToCurrentPlayer(match, turnRequest.getScore(), turnRequest.getCheckoutDartsUsed(), turnRequest.getDoublesMissed());
         } catch (X01TurnAlreadyExistsException e) {
             throw mapTurnAlreadyExistsException();
         } catch (X01CheckoutInsufficientDartsException e) {
@@ -247,34 +247,6 @@ public class X01MatchServiceImpl implements IX01MatchService {
     }
 
     /**
-     * Applies a turn request to the current thrower in the active round.
-     *
-     * @param match       the match to update
-     * @param turnRequest the turn creation request
-     * @throws X01TurnAlreadyExistsException         when the current thrower already has a turn in the active round
-     * @throws X01LegAlreadyWonException             when another player's turn is applied after the leg has been won
-     * @throws X01CheckoutInsufficientDartsException when the checkout requires more darts than were used
-     * @throws ResourceNotFoundException             when the active set, leg or round cannot be resolved
-     */
-    private void addTurnToCurrentPlayer(X01Match match, X01CreateTurnRequest turnRequest) {
-        addTurnToCurrentPlayer(match, turnRequest.getScore(), turnRequest.getCheckoutDartsUsed(), turnRequest.getDoublesMissed());
-    }
-
-    /**
-     * Applies a generated Dart Bot turn to the current thrower in the active round.
-     *
-     * @param match       the match to update
-     * @param dartBotTurn the generated Dart Bot turn
-     * @throws X01TurnAlreadyExistsException         when the current thrower already has a turn in the active round
-     * @throws X01LegAlreadyWonException             when another player's turn is applied after the leg has been won
-     * @throws X01CheckoutInsufficientDartsException when the checkout requires more darts than were used
-     * @throws ResourceNotFoundException             when the active set, leg or round cannot be resolved
-     */
-    private void addTurnToCurrentPlayer(X01Match match, X01DartBotTurn dartBotTurn) {
-        addTurnToCurrentPlayer(match, dartBotTurn.score(), dartBotTurn.checkoutDartsUsed(), dartBotTurn.doublesMissed());
-    }
-
-    /**
      * Applies turn values to the current thrower in the active round.
      *
      * @param match             the match to update
@@ -329,7 +301,8 @@ public class X01MatchServiceImpl implements IX01MatchService {
      * @throws X01LegAlreadyWonException             when another player's turn is applied after the leg has been won
      * @throws X01CheckoutInsufficientDartsException when the checkout requires more darts than were used
      * @throws ResourceNotFoundException             when the active set, leg or round cannot be resolved
-     * @throws IllegalStateException                 when more than the allowed number of consecutive Dart Bot turns is reached
+     * @throws IllegalStateException                 when more than the allowed number of consecutive Dart Bot turns is reached,
+     *                                               or when the current Dart Bot state cannot be resolved
      */
     private void saveMatchAndProcessBotTurns(X01Match match, X01MatchMessageType messageType) {
         // Process and persist the triggering match state before checking whether a bot should throw.
@@ -346,12 +319,39 @@ public class X01MatchServiceImpl implements IX01MatchService {
             }
 
             // Generate and apply the Dart Bot turn before rebuilding and publishing the resulting state.
-            X01DartBotTurn dartBotTurn = dartBotService.createDartBotTurn(match);
-            addTurnToCurrentPlayer(match, dartBotTurn);
+            X01DartBotTurn dartBotTurn = createDartBotTurnForCurrentPlayer(match);
+            addTurnToCurrentPlayer(match, dartBotTurn.score(), dartBotTurn.checkoutDartsUsed(), dartBotTurn.doublesMissed());
             saveMatch(match, X01MatchMessageType.ADD_BOT_TURN);
 
             botTurnsProcessed++;
         }
+    }
+
+    /**
+     * Creates a Dart Bot turn for the current configured Dart Bot player and active leg.
+     *
+     * @param match the match containing the current Dart Bot turn state
+     * @return the generated Dart Bot turn
+     * @throws IllegalStateException when the current thrower is not a configured Dart Bot or the current leg cannot be resolved
+     */
+    private X01DartBotTurn createDartBotTurnForCurrentPlayer(X01Match match) {
+        ObjectId currentThrower = match.getMatchProgress().getCurrentThrower();
+
+        X01MatchPlayer dartBotPlayer = getPlayerById(match, currentThrower)
+                .filter(player ->
+                        player.getPlayerType() == PlayerType.DART_BOT && player.getX01DartBotSettings() != null
+                )
+                .orElseThrow(() -> new IllegalStateException("Current thrower is not a configured Dart Bot"));
+
+        X01LegEntry currentLegEntry = matchProgressService.getCurrentLeg(match)
+                .orElseThrow(() -> new IllegalStateException("Unable to resolve the current leg for Dart Bot turn creation"));
+
+        return dartBotService.createDartBotTurn(
+                dartBotPlayer,
+                currentLegEntry.leg(),
+                match.getMatchSettings().getX01(),
+                match.getMatchSettings().isTrackDoubles()
+        );
     }
 
     /**
