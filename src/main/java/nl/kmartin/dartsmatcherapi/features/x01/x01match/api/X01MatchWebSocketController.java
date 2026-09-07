@@ -1,6 +1,7 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01match.api;
 
 import jakarta.validation.Valid;
+import nl.kmartin.dartsmatcherapi.error.exception.InvalidArgumentsException;
 import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateTurnRequest;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01EditTurnRequest;
@@ -12,6 +13,7 @@ import nl.kmartin.dartsmatcherapi.websocket.destination.WebSocketHeaders;
 import nl.kmartin.dartsmatcherapi.websocket.event.publisher.IWebSocketEventPublisher;
 import nl.kmartin.dartsmatcherapi.websocket.message.model.WebSocketMessage;
 import org.bson.types.ObjectId;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -63,8 +65,10 @@ public class X01MatchWebSocketController {
      * @param turnRequest the turn creation request
      * @param publishId   the optional client publish id
      * @param sessionId   the WebSocket session id
-     * @throws ResourceNotFoundException when the match or active set, leg or round cannot be resolved
-     * @throws IllegalStateException when Dart Bot processing encounters invalid match state
+     * @throws InvalidArgumentsException         when the submitted turn cannot be applied to the current match state
+     * @throws ResourceNotFoundException         when the match or active set, leg or round cannot be resolved
+     * @throws OptimisticLockingFailureException when the match was modified concurrently
+     * @throws IllegalStateException             when Dart Bot processing encounters invalid match state
      */
     @MessageMapping(WebSocketDestinations.X01.ADD_TURN)
     public void addTurn(
@@ -88,8 +92,10 @@ public class X01MatchWebSocketController {
      * @param turnRequest the turn edit request
      * @param publishId   the optional client publish id
      * @param sessionId   the WebSocket session id
-     * @throws ResourceNotFoundException when the match, target set, leg, round or player's existing turn cannot be found
-     * @throws IllegalStateException when Dart Bot processing encounters invalid match state
+     * @throws InvalidArgumentsException         when the submitted turn cannot be applied to the resulting match state
+     * @throws ResourceNotFoundException         when the match, target set, leg, round or player's existing turn cannot be found
+     * @throws OptimisticLockingFailureException when the match was modified concurrently
+     * @throws IllegalStateException             when Dart Bot processing encounters invalid match state
      */
     @MessageMapping(WebSocketDestinations.X01.EDIT_TURN)
     public void editTurn(
@@ -112,8 +118,9 @@ public class X01MatchWebSocketController {
      * @param matchId   the match id
      * @param publishId the optional client publish id
      * @param sessionId the WebSocket session id
-     * @throws ResourceNotFoundException when the match does not exist
-     * @throws IllegalStateException when Dart Bot processing encounters invalid match state
+     * @throws ResourceNotFoundException         when the match does not exist
+     * @throws OptimisticLockingFailureException when the match was modified concurrently
+     * @throws IllegalStateException             when Dart Bot processing encounters invalid match state
      */
     @MessageMapping(WebSocketDestinations.X01.DELETE_LAST_TURN)
     public void deleteLastTurn(
@@ -159,8 +166,9 @@ public class X01MatchWebSocketController {
      * @param matchId   the match id
      * @param publishId the optional client publish id
      * @param sessionId the WebSocket session id
-     * @throws ResourceNotFoundException when the match does not exist
-     * @throws IllegalStateException when Dart Bot processing encounters invalid match state
+     * @throws ResourceNotFoundException         when the match does not exist
+     * @throws OptimisticLockingFailureException when the match was modified concurrently
+     * @throws IllegalStateException             when Dart Bot processing encounters invalid match state
      */
     @MessageMapping(WebSocketDestinations.X01.RESET_MATCH)
     public void resetMatch(
@@ -182,8 +190,9 @@ public class X01MatchWebSocketController {
      * @param matchId   the match id
      * @param publishId the optional client publish id
      * @param sessionId the WebSocket session id
-     * @throws ResourceNotFoundException when the match does not exist
-     * @throws IllegalStateException when Dart Bot processing encounters invalid match state
+     * @throws ResourceNotFoundException         when the match does not exist
+     * @throws OptimisticLockingFailureException when the match was modified concurrently
+     * @throws IllegalStateException             when Dart Bot processing encounters invalid match state
      */
     @MessageMapping(WebSocketDestinations.X01.REPROCESS_MATCH)
     public void reprocessMatch(

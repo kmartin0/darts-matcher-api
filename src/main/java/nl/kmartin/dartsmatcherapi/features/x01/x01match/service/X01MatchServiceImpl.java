@@ -34,6 +34,7 @@ import nl.kmartin.dartsmatcherapi.i18n.MessageResolver;
 import nl.kmartin.dartsmatcherapi.websocket.destination.WebSocketDestinations;
 import nl.kmartin.dartsmatcherapi.websocket.event.publisher.IWebSocketEventPublisher;
 import org.bson.types.ObjectId;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -301,6 +302,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
      * @throws X01LegAlreadyWonException             when another player's turn is applied after the leg has been won
      * @throws X01CheckoutInsufficientDartsException when the checkout requires more darts than were used
      * @throws ResourceNotFoundException             when the active set, leg or round cannot be resolved
+     * @throws OptimisticLockingFailureException     when the match was modified concurrently
      * @throws IllegalStateException                 when more than the allowed number of consecutive Dart Bot turns is reached,
      *                                               or when the current Dart Bot state cannot be resolved
      */
@@ -359,6 +361,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
      *
      * @param match       the match to save
      * @param messageType the message type to publish
+     * @throws OptimisticLockingFailureException when the match was modified concurrently
      */
     private void saveMatch(X01Match match, X01MatchMessageType messageType) {
         if (messageType == X01MatchMessageType.DELETE_MATCH) {

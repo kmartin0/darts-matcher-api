@@ -1,6 +1,7 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01match.api;
 
 import jakarta.validation.Valid;
+import nl.kmartin.dartsmatcherapi.error.exception.InvalidArgumentsException;
 import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateMatchRequest;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateTurnRequest;
@@ -9,6 +10,7 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.IX01MatchService;
 import nl.kmartin.dartsmatcherapi.rest.RestEndpoints;
 import org.bson.types.ObjectId;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -90,8 +92,10 @@ public class X01MatchRestController {
      * @param matchId     the match id
      * @param turnRequest the turn creation request
      * @return the updated match
-     * @throws ResourceNotFoundException when the match or active set, leg or round cannot be resolved
-     * @throws IllegalStateException when Dart Bot processing encounters invalid match state
+     * @throws InvalidArgumentsException         when the submitted turn cannot be applied to the current match state
+     * @throws ResourceNotFoundException         when the match or active set, leg or round cannot be resolved
+     * @throws OptimisticLockingFailureException when the match was modified concurrently
+     * @throws IllegalStateException             when Dart Bot processing encounters invalid match state
      */
     @PostMapping(path = RestEndpoints.X01.MATCH_TURNS, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
@@ -105,8 +109,10 @@ public class X01MatchRestController {
      * @param matchId     the match id
      * @param turnRequest the turn edit request
      * @return the updated match
-     * @throws ResourceNotFoundException when the match, target set, leg, round or player's existing turn cannot be found
-     * @throws IllegalStateException when Dart Bot processing encounters invalid match state
+     * @throws InvalidArgumentsException         when the submitted turn cannot be applied to the resulting match state
+     * @throws ResourceNotFoundException         when the match, target set, leg, round or player's existing turn cannot be found
+     * @throws OptimisticLockingFailureException when the match was modified concurrently
+     * @throws IllegalStateException             when Dart Bot processing encounters invalid match state
      */
     @PostMapping(path = RestEndpoints.X01.MATCH_TURNS_EDIT, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
@@ -119,8 +125,9 @@ public class X01MatchRestController {
      *
      * @param matchId the match id
      * @return the updated match
-     * @throws ResourceNotFoundException when the match does not exist
-     * @throws IllegalStateException when Dart Bot processing encounters invalid match state
+     * @throws ResourceNotFoundException         when the match does not exist
+     * @throws OptimisticLockingFailureException when the match was modified concurrently
+     * @throws IllegalStateException             when Dart Bot processing encounters invalid match state
      */
     @PostMapping(path = RestEndpoints.X01.MATCH_TURNS_DELETE_LAST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
@@ -145,8 +152,9 @@ public class X01MatchRestController {
      *
      * @param matchId the match id
      * @return the reset match
-     * @throws ResourceNotFoundException when the match does not exist
-     * @throws IllegalStateException when Dart Bot processing encounters invalid match state
+     * @throws ResourceNotFoundException         when the match does not exist
+     * @throws OptimisticLockingFailureException when the match was modified concurrently
+     * @throws IllegalStateException             when Dart Bot processing encounters invalid match state
      */
     @PostMapping(path = RestEndpoints.X01.MATCH_RESET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
@@ -159,8 +167,9 @@ public class X01MatchRestController {
      *
      * @param matchId the match id
      * @return the reprocessed match
-     * @throws ResourceNotFoundException when the match does not exist
-     * @throws IllegalStateException when Dart Bot processing encounters invalid match state
+     * @throws ResourceNotFoundException         when the match does not exist
+     * @throws OptimisticLockingFailureException when the match was modified concurrently
+     * @throws IllegalStateException             when Dart Bot processing encounters invalid match state
      */
     @PostMapping(path = RestEndpoints.X01.MATCH_REPROCESS, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
