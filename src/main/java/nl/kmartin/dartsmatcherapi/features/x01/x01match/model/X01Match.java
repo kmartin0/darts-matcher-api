@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.BaseMatch;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.MatchStatus;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.MatchType;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
  */
 @Getter
 @Setter
+@ToString(callSuper = true)
 @Document(collection = "x01_matches")
 @TypeAlias("X01Match")
 public class X01Match extends BaseMatch<X01MatchPlayer> {

@@ -1,4 +1,4 @@
-package nl.kmartin.dartsmatcherapi.websocket.event;
+package nl.kmartin.dartsmatcherapi.websocket.event.publisher;
 
 import nl.kmartin.dartsmatcherapi.error.response.ApiErrorCode;
 import nl.kmartin.dartsmatcherapi.error.response.TargetError;

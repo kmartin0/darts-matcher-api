@@ -1,9 +1,11 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01scorestatistics.model;
 
 import jakarta.validation.constraints.PositiveOrZero;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * Stores score statistics for an X01 player.
@@ -12,7 +14,9 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
+@AllArgsConstructor
 public class X01ScoreStatistics {
     public static final int MINIMUM_FORTY_PLUS = 40;
     public static final int MINIMUM_SIXTY_PLUS = 60;

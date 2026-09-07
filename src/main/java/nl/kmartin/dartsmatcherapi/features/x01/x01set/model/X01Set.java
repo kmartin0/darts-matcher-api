@@ -10,6 +10,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.ResultType;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01LegEntry;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
  */
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
 public class X01Set {
     @NotNull

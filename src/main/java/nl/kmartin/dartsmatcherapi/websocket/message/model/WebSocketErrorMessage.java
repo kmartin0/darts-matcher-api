@@ -1,4 +1,4 @@
-package nl.kmartin.dartsmatcherapi.websocket.message;
+package nl.kmartin.dartsmatcherapi.websocket.message.model;
 
 import nl.kmartin.dartsmatcherapi.error.response.ApiErrorCode;
 

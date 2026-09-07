@@ -94,6 +94,20 @@ public class X01CheckoutServiceImpl implements IX01CheckoutService {
         return isRemainingZero(remaining) && lastDartArea.isDouble();
     }
 
+    @Override
+    public boolean isTurnResultLegal(int score, int remaining, Integer checkoutDartsUsed) {
+        // A bust can never represent a legal turn result.
+        if (isRemainingBust(remaining)) return false;
+
+        // Reaching zero additionally requires a valid checkout with the supplied dart count.
+        if (isRemainingZero(remaining)) {
+            return checkoutDartsUsed != null
+                    && isScoreCheckout(score, checkoutDartsUsed);
+        }
+
+        return true;
+    }
+
     /**
      * Loads the checkout data from the resource file and maps it by checkout score.
      *

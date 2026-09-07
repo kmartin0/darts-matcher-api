@@ -1,0 +1,209 @@
+{
+  "id": "6a9e6f1b9b153cef071f49c7",
+  "version": null,
+  "broadcastVersion": 10,
+  "startDate": "2026-09-07T08:00:27Z",
+  "endDate": null,
+  "matchStatus": "IN_PLAY",
+  "matchType": "X01",
+  "players": [
+    {
+      "playerId": "6a9e6f1b9b153cef071f49c6",
+      "playerName": "Player 1",
+      "playerType": "HUMAN",
+      "resultType": "LOSS",
+      "x01DartBotSettings": null,
+      "statistics": {
+        "resultStatistics": {
+          "setsWon": 99,
+          "legsWon": 99
+        },
+        "averageStats": {
+          "pointsThrown": 9999,
+          "dartsThrown": 99,
+          "average": 999,
+          "pointsThrownFirstNine": 9999,
+          "dartsThrownFirstNine": 99,
+          "averageFirstNine": 999
+        },
+        "checkoutStats": {
+          "checkoutHighest": 999,
+          "checkoutTonPlus": 99,
+          "checkoutPercentage": 99,
+          "checkoutsMissed": 99,
+          "checkoutsHit": 99
+        },
+        "scoreStatistics": {
+          "fortyPlus": 99,
+          "sixtyPlus": 99,
+          "eightyPlus": 99,
+          "tonPlus": 99,
+          "tonFortyPlus": 99,
+          "tonEighty": 99
+        }
+      }
+    }
+  ],
+  "matchSettings": {
+    "x01": 501,
+    "trackDoubles": false,
+    "bestOf": {
+      "sets": 1,
+      "legs": 2,
+      "bestOfType": "LEGS",
+      "clearByTwoSetsRule": {
+        "enabled": false,
+        "limit": 0
+      },
+      "clearByTwoLegsRule": {
+        "enabled": false,
+        "limit": 0
+      },
+      "clearByTwoLegsInFinalSetRule": {
+        "enabled": false,
+        "limit": 0
+      }
+    }
+  },
+  "sets": [
+    {
+      "setNumber": 1,
+      "set": {
+        "throwsFirst": "6a9e6f1b9b153cef071f49c6",
+        "result": {
+          "6a9e6f1b9b153cef071f49c6": "LOSS"
+        },
+        "legs": [
+          {
+            "legNumber": 1,
+            "leg": {
+              "winner": null,
+              "throwsFirst": "6a9e6f1b9b153cef071f49c6",
+              "checkoutDartsUsed": 3,
+              "rounds": [
+                {
+                  "roundNumber": 1,
+                  "round": {
+                    "turns": {
+                      "6a9e6f1b9b153cef071f49c6": {
+                        "score": 180,
+                        "remaining": 999,
+                        "doublesMissed": null
+                      }
+                    }
+                  }
+                },
+                {
+                  "roundNumber": 2,
+                  "round": {
+                    "turns": {
+                      "6a9e6f1b9b153cef071f49c6": {
+                        "score": 180,
+                        "remaining": 999,
+                        "doublesMissed": null
+                      }
+                    }
+                  }
+                },
+                {
+                  "roundNumber": 3,
+                  "round": {
+                    "turns": {
+                      "6a9e6f1b9b153cef071f49c6": {
+                        "score": 141,
+                        "remaining": 999,
+                        "doublesMissed": null
+                      }
+                    }
+                  }
+                },
+                {
+                  "roundNumber": 4,
+                  "round": {
+                    "turns": {
+                      "6a9e6f1b9b153cef071f49c6": {
+                        "score": 60,
+                        "remaining": -60,
+                        "doublesMissed": null
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "legNumber": 2,
+            "leg": {
+              "winner": null,
+              "throwsFirst": "6a9e6f1b9b153cef071f49c6",
+              "checkoutDartsUsed": null,
+              "rounds": [
+                {
+                  "roundNumber": 1,
+                  "round": {
+                    "turns": {
+                      "6a9e6f1b9b153cef071f49c6": {
+                        "score": 180,
+                        "remaining": 321,
+                        "doublesMissed": null
+                      }
+                    }
+                  }
+                },
+                {
+                  "roundNumber": 2,
+                  "round": {
+                    "turns": {
+                      "6a9e6f1b9b153cef071f49c6": {
+                        "score": 180,
+                        "remaining": 141,
+                        "doublesMissed": null
+                      }
+                    }
+                  }
+                },
+                {
+                  "roundNumber": 3,
+                  "round": {
+                    "turns": {
+                      "6a9e6f1b9b153cef071f49c6": {
+                        "score": 180,
+                        "remaining": -39,
+                        "doublesMissed": null
+                      }
+                    }
+                  }
+                },
+                {
+                  "roundNumber": 4,
+                  "round": {
+                    "turns": {
+                      "6a9e6f1b9b153cef071f49c6": {
+                        "score": 65,
+                        "remaining": -104,
+                        "doublesMissed": null
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "matchProgress": {
+    "currentSet": 99,
+    "currentLeg": 99,
+    "currentRound": 99,
+    "currentThrower": "6a9e6f1b9b153cef071f49c6"
+  },
+  "standings": {
+    "6a9e6f1b9b153cef071f49c6": {
+      "setsWon": 99,
+      "legsWonInCurrentSet": 99
+    }
+  }
+}

@@ -2,8 +2,10 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01statistics.model;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import nl.kmartin.dartsmatcherapi.features.x01.x01averagestatistics.model.X01AverageStatistics;
 import nl.kmartin.dartsmatcherapi.features.x01.x01checkoutstatistics.model.X01CheckoutStatistics;
 import nl.kmartin.dartsmatcherapi.features.x01.x01resultstatistics.model.X01ResultStatistics;
@@ -17,6 +19,8 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01scorestatistics.model.X01Score
  */
 @Getter
 @Setter
+@ToString
+@AllArgsConstructor
 public class X01Statistics {
     @NotNull
     @Valid

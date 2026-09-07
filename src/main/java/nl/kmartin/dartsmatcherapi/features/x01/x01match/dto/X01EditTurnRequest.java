@@ -2,9 +2,11 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01match.dto;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import org.bson.types.ObjectId;
 
 /**
@@ -12,6 +14,7 @@ import org.bson.types.ObjectId;
  */
 @Getter
 @Setter
+@ToString(callSuper = true)
 @NoArgsConstructor
 public class X01EditTurnRequest extends X01CreateTurnRequest {
 
@@ -26,4 +29,20 @@ public class X01EditTurnRequest extends X01CreateTurnRequest {
 
     @Positive
     private int round;
+
+    public X01EditTurnRequest(
+            int score,
+            Integer doublesMissed,
+            Integer checkoutDartsUsed,
+            ObjectId playerId,
+            int set,
+            int leg,
+            int round
+    ) {
+        super(score, doublesMissed, checkoutDartsUsed);
+        this.playerId = playerId;
+        this.set = set;
+        this.leg = leg;
+        this.round = round;
+    }
 }

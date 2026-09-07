@@ -1,4 +1,4 @@
-package nl.kmartin.dartsmatcherapi.websocket;
+package nl.kmartin.dartsmatcherapi.websocket.error;
 
 import jakarta.validation.ConstraintViolationException;
 import nl.kmartin.dartsmatcherapi.error.exception.InvalidArgumentsException;
@@ -8,7 +8,8 @@ import nl.kmartin.dartsmatcherapi.error.response.TargetError;
 import nl.kmartin.dartsmatcherapi.error.util.TargetErrorUtil;
 import nl.kmartin.dartsmatcherapi.i18n.MessageKeys;
 import nl.kmartin.dartsmatcherapi.i18n.MessageResolver;
-import nl.kmartin.dartsmatcherapi.websocket.event.IWebSocketEventPublisher;
+import nl.kmartin.dartsmatcherapi.websocket.destination.WebSocketHeaders;
+import nl.kmartin.dartsmatcherapi.websocket.event.publisher.IWebSocketEventPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionFailedException;

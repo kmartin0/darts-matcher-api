@@ -1,4 +1,4 @@
-package nl.kmartin.dartsmatcherapi.websocket;
+package nl.kmartin.dartsmatcherapi.websocket.destination;
 
 /**
  * Defines the headers used by WebSocket messages.

@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import nl.kmartin.dartsmatcherapi.features.dartboard.model.Dart;
 import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.model.X01Checkout;
+import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.model.X01CheckoutInsufficientDartsException;
 
 import java.util.List;
 import java.util.Optional;
@@ -78,4 +79,15 @@ public interface IX01CheckoutService {
      * @return whether the remaining score is zero
      */
     boolean isRemainingZero(int remaining);
+
+    /**
+     * Determines whether a turn produces a legal X01 result.
+     *
+     * @param score             the points scored in the turn
+     * @param remaining         the remaining score after the turn
+     * @param checkoutDartsUsed the number of darts used for the checkout
+     * @return whether the turn result is legal
+     * @throws X01CheckoutInsufficientDartsException when the checkout requires more darts than were used
+     */
+    boolean isTurnResultLegal(int score, int remaining, Integer checkoutDartsUsed);
 }

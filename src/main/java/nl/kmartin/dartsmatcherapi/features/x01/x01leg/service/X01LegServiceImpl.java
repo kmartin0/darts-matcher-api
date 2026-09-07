@@ -165,7 +165,7 @@ public class X01LegServiceImpl implements IX01LegService {
         int remaining = remainingBeforeTurn - score;
 
         // Validate the submitted turn and, for replacements, the turns that follow it.
-        boolean turnLegal = isTurnLegal(score, remaining, turnMutation.checkoutDartsUsed());
+        boolean turnLegal = checkoutService.isTurnResultLegal(score, remaining, turnMutation.checkoutDartsUsed());
         boolean followingTurnsLegal = !checkFollowingTurns || areFollowingTurnsLegal(turnMutation, remaining);
         boolean isLegal = turnLegal && followingTurnsLegal;
 
@@ -202,31 +202,9 @@ public class X01LegServiceImpl implements IX01LegService {
 
             remaining -= turn.getScore();
 
-            if (!isTurnLegal(turn.getScore(), remaining, turnMutation.checkoutDartsUsed())) {
+            if (!checkoutService.isTurnResultLegal(turn.getScore(), remaining, turnMutation.checkoutDartsUsed())) {
                 return false;
             }
-        }
-
-        return true;
-    }
-
-    /**
-     * Determines whether a turn produces a legal X01 state.
-     *
-     * @param score             the points scored in the turn
-     * @param remaining         the remaining score after the turn
-     * @param checkoutDartsUsed the number of darts used for the checkout
-     * @return whether the turn is legal
-     * @throws X01CheckoutInsufficientDartsException when the checkout requires more darts than were used
-     */
-    private boolean isTurnLegal(int score, int remaining, Integer checkoutDartsUsed) {
-        // A bust can never represent a legal turn.
-        if (checkoutService.isRemainingBust(remaining)) return false;
-
-        // Reaching zero additionally requires a valid checkout with the supplied dart count.
-        if (checkoutService.isRemainingZero(remaining)) {
-            return checkoutDartsUsed != null
-                    && checkoutService.isScoreCheckout(score, checkoutDartsUsed);
         }
 
         return true;

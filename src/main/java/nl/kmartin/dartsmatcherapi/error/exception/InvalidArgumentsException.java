@@ -1,6 +1,7 @@
 package nl.kmartin.dartsmatcherapi.error.exception;
 
 import lombok.Getter;
+import lombok.ToString;
 import nl.kmartin.dartsmatcherapi.error.response.TargetError;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
  * Stores the target-specific errors so they can be included in the API error response.
  */
 @Getter
+@ToString(callSuper = true)
 public class InvalidArgumentsException extends RuntimeException {
     private final List<TargetError> errors;
 

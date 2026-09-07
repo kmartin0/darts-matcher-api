@@ -1,5 +1,6 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01leg.service;
 
+import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.service.IX01CheckoutService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01Turn;
@@ -23,9 +24,11 @@ import java.util.Objects;
 public class X01LegResultServiceImpl implements IX01LegResultService {
 
     private final IX01LegRoundService legRoundService;
+    private final IX01CheckoutService checkoutService;
 
-    public X01LegResultServiceImpl(IX01LegRoundService legRoundService) {
+    public X01LegResultServiceImpl(IX01LegRoundService legRoundService, IX01CheckoutService checkoutService) {
         this.legRoundService = legRoundService;
+        this.checkoutService = checkoutService;
     }
 
     @Override
@@ -141,7 +144,7 @@ public class X01LegResultServiceImpl implements IX01LegResultService {
     }
 
     /**
-     * Recalculates the remaining scores for all recorded players across a leg.
+     * Recalculates and normalizes the remaining scores for all recorded players across a leg.
      *
      * @param leg the leg to update
      * @param x01 the starting score for the leg
@@ -153,8 +156,17 @@ public class X01LegResultServiceImpl implements IX01LegResultService {
         leg.getRounds().values().forEach(round -> {
             round.getTurns().forEach((playerId, turn) -> {
                 int previousRemaining = remainingMap.getOrDefault(playerId, x01);
-                turn.setRemaining(previousRemaining - turn.getScore());
-                remainingMap.put(playerId, turn.getRemaining());
+                int score = turn.getScore();
+                int remainingAfter = previousRemaining - score;
+
+                // Normalize busts to zero while preserving the previous remaining score.
+                if (checkoutService.isRemainingBust(remainingAfter)) {
+                    turn.setScore(0);
+                    remainingAfter = previousRemaining;
+                }
+
+                turn.setRemaining(remainingAfter);
+                remainingMap.put(playerId, remainingAfter);
             });
         });
     }

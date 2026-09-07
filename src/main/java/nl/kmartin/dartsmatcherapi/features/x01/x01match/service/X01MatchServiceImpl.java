@@ -31,8 +31,8 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01standings.service.IX01Standing
 import nl.kmartin.dartsmatcherapi.features.x01.x01statistics.service.IX01StatisticsService;
 import nl.kmartin.dartsmatcherapi.i18n.MessageKeys;
 import nl.kmartin.dartsmatcherapi.i18n.MessageResolver;
-import nl.kmartin.dartsmatcherapi.websocket.WebSocketDestinations;
-import nl.kmartin.dartsmatcherapi.websocket.event.IWebSocketEventPublisher;
+import nl.kmartin.dartsmatcherapi.websocket.destination.WebSocketDestinations;
+import nl.kmartin.dartsmatcherapi.websocket.event.publisher.IWebSocketEventPublisher;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

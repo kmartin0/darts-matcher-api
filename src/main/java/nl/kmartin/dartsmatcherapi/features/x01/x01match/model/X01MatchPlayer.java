@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.MatchPlayer;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.PlayerType;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.ResultType;
@@ -17,6 +18,7 @@ import org.bson.types.ObjectId;
  */
 @Getter
 @Setter
+@ToString(callSuper = true)
 @NoArgsConstructor
 @ValidX01DartBotSettings
 public class X01MatchPlayer extends MatchPlayer {

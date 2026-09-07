@@ -2,6 +2,7 @@ package nl.kmartin.dartsmatcherapi.error.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
+import lombok.ToString;
 import nl.kmartin.dartsmatcherapi.error.util.TargetErrorUtil;
 
 import java.io.Serializable;
@@ -15,6 +16,7 @@ import java.util.Map;
  * target-specific errors that clients can use to associate errors with fields.
  */
 @Getter
+@ToString
 public class ErrorResponse implements Serializable {
     private final String error;
     private final String description;

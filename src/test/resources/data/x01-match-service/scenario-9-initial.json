@@ -1,0 +1,76 @@
+{
+  "id": "68be91c9a24f5d3c7e0184a1",
+  "version": 3,
+  "broadcastVersion": 5,
+  "startDate": "2026-09-07T08:30:00Z",
+  "endDate": null,
+  "matchStatus": "IN_PLAY",
+  "matchType": "X01",
+  "players": [
+    {
+      "playerId": "68be91c9a24f5d3c7e0184a0",
+      "playerName": "Player 1",
+      "playerType": "HUMAN",
+      "resultType": null,
+      "x01DartBotSettings": null,
+      "statistics": {
+        "resultStatistics": {
+          "setsWon": 0,
+          "legsWon": 0
+        },
+        "averageStats": {
+          "pointsThrown": 0,
+          "dartsThrown": 0,
+          "average": null,
+          "pointsThrownFirstNine": 0,
+          "dartsThrownFirstNine": 0,
+          "averageFirstNine": null
+        },
+        "checkoutStats": {
+          "checkoutHighest": null,
+          "checkoutTonPlus": 0,
+          "checkoutPercentage": null,
+          "checkoutsMissed": null,
+          "checkoutsHit": 0
+        },
+        "scoreStatistics": {
+          "fortyPlus": 0,
+          "sixtyPlus": 0,
+          "eightyPlus": 0,
+          "tonPlus": 0,
+          "tonFortyPlus": 0,
+          "tonEighty": 0
+        }
+      }
+    }
+  ],
+  "matchSettings": {
+    "x01": 501,
+    "trackDoubles": false,
+    "bestOf": {
+      "sets": 1,
+      "legs": 3,
+      "bestOfType": "LEGS",
+      "clearByTwoSetsRule": {
+        "enabled": false,
+        "limit": 0
+      },
+      "clearByTwoLegsRule": {
+        "enabled": false,
+        "limit": 0
+      },
+      "clearByTwoLegsInFinalSetRule": {
+        "enabled": false,
+        "limit": 0
+      }
+    }
+  },
+  "sets": [],
+  "matchProgress": {
+    "currentSet": null,
+    "currentLeg": null,
+    "currentRound": null,
+    "currentThrower": null
+  },
+  "standings": {}
+}

@@ -1,4 +1,4 @@
-package nl.kmartin.dartsmatcherapi.websocket;
+package nl.kmartin.dartsmatcherapi.websocket.config;
 
 import jakarta.servlet.http.HttpSession;
 import nl.kmartin.dartsmatcherapi.logging.MdcKeys;

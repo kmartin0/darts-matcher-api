@@ -8,6 +8,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import nl.kmartin.dartsmatcherapi.validator.noduplicatematchplayername.NoDuplicateMatchPlayerName;
 import nl.kmartin.dartsmatcherapi.validator.validplayercomposition.ValidPlayerComposition;
 import org.bson.types.ObjectId;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
  */
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
 public abstract class BaseMatch<P extends MatchPlayer> {
     public static final int MINIMUM_PLAYERS = 1;

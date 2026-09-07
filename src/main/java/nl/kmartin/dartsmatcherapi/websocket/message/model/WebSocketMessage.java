@@ -1,4 +1,4 @@
-package nl.kmartin.dartsmatcherapi.websocket.message;
+package nl.kmartin.dartsmatcherapi.websocket.message.model;
 
 /**
  * Represents a WebSocket message containing a message type and payload.

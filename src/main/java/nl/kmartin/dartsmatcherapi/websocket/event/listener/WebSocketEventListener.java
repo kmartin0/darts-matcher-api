@@ -1,13 +1,13 @@
-package nl.kmartin.dartsmatcherapi.websocket.event;
+package nl.kmartin.dartsmatcherapi.websocket.event.listener;
 
 import nl.kmartin.dartsmatcherapi.error.util.TargetErrorUtil;
-import nl.kmartin.dartsmatcherapi.websocket.WebSocketDestinations;
-import nl.kmartin.dartsmatcherapi.websocket.WebSocketHeaders;
+import nl.kmartin.dartsmatcherapi.websocket.destination.WebSocketDestinations;
+import nl.kmartin.dartsmatcherapi.websocket.destination.WebSocketHeaders;
 import nl.kmartin.dartsmatcherapi.websocket.event.model.WebSocketBroadcastEvent;
 import nl.kmartin.dartsmatcherapi.websocket.event.model.WebSocketErrorEvent;
 import nl.kmartin.dartsmatcherapi.websocket.event.model.WebSocketSendToUserEvent;
-import nl.kmartin.dartsmatcherapi.websocket.message.WebSocketErrorMessage;
-import nl.kmartin.dartsmatcherapi.websocket.message.WebSocketMessage;
+import nl.kmartin.dartsmatcherapi.websocket.message.model.WebSocketErrorMessage;
+import nl.kmartin.dartsmatcherapi.websocket.message.model.WebSocketMessage;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;

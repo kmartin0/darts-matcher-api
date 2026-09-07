@@ -3,9 +3,11 @@ package nl.kmartin.dartsmatcherapi.features.x01.x01checkoutstatistics.model;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.PositiveOrZero;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.model.X01Checkout;
 
 /**
@@ -16,7 +18,9 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.model.X01Checkout;
  */
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
+@AllArgsConstructor
 public class X01CheckoutStatistics {
     public static final int MINIMUM_TON_PLUS_CHECKOUT = 100;
 

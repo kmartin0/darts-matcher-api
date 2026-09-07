@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01Turn;
 import nl.kmartin.dartsmatcherapi.validator.validdartscore.ValidDartScore;
 
@@ -15,6 +16,7 @@ import nl.kmartin.dartsmatcherapi.validator.validdartscore.ValidDartScore;
  */
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class X01CreateTurnRequest {

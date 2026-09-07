@@ -1,5 +1,8 @@
-package nl.kmartin.dartsmatcherapi.features.testutils;
+package nl.kmartin.dartsmatcherapi.features.x01.testutils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import nl.kmartin.dartsmatcherapi.config.JacksonConfig;
 import nl.kmartin.dartsmatcherapi.features.dartboard.service.DartboardServiceImpl;
 import nl.kmartin.dartsmatcherapi.features.dartboard.service.IDartboardService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01averagestatistics.service.IX01AverageStatisticsService;
@@ -52,25 +55,24 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01standings.service.X01Standings
 import nl.kmartin.dartsmatcherapi.features.x01.x01statistics.service.IX01StatisticsService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01statistics.service.X01StatisticsServiceImpl;
 import nl.kmartin.dartsmatcherapi.i18n.MessageResolver;
-import nl.kmartin.dartsmatcherapi.websocket.event.IWebSocketEventPublisher;
-import nl.kmartin.dartsmatcherapi.websocket.event.WebSocketEventPublisherImpl;
+import nl.kmartin.dartsmatcherapi.websocket.event.publisher.IWebSocketEventPublisher;
+import nl.kmartin.dartsmatcherapi.websocket.event.publisher.WebSocketEventPublisherImpl;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 public class X01FeatureTestFactory {
 
     private final IX01MatchRepository matchRepositoryMock;
-    private final MessageResolver messageResolverMock;
     private final ApplicationEventPublisher eventPublisherMock;
 
     public X01FeatureTestFactory(
             IX01MatchRepository matchRepositoryMock,
-            MessageResolver messageResolverMock,
             ApplicationEventPublisher eventPublisherMock
     ) {
         this.matchRepositoryMock = matchRepositoryMock;
-        this.messageResolverMock = messageResolverMock;
         this.eventPublisherMock = eventPublisherMock;
     }
 
@@ -87,7 +89,7 @@ public class X01FeatureTestFactory {
                 createDartBotService(),
                 createWebsocketEventPublisher(),
                 createStandingsService(),
-                messageResolverMock
+                createMessageResolver()
         );
     }
 
@@ -131,7 +133,10 @@ public class X01FeatureTestFactory {
     }
 
     public IX01LegResultService createLegResultService() {
-        return new X01LegResultServiceImpl(createLegRoundService());
+        return new X01LegResultServiceImpl(
+                createLegRoundService(),
+                createCheckoutService()
+        );
     }
 
     public IX01LegProgressService createLegProgressService() {
@@ -207,7 +212,7 @@ public class X01FeatureTestFactory {
 
     public IX01CheckoutService createCheckoutService() {
         Resource checkoutsResource = new ClassPathResource("data/checkouts.json");
-        return new X01CheckoutServiceImpl(checkoutsResource, messageResolverMock);
+        return new X01CheckoutServiceImpl(checkoutsResource, createMessageResolver());
     }
 
     public IDartboardService createDartboardService() {
@@ -220,5 +225,27 @@ public class X01FeatureTestFactory {
 
     public IWebSocketEventPublisher createWebsocketEventPublisher() {
         return new WebSocketEventPublisherImpl(eventPublisherMock);
+    }
+
+    public MessageResolver createMessageResolver() {
+        ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+        messageSource.setBasename("messages");
+        messageSource.setDefaultEncoding("UTF-8");
+
+        return new MessageResolver(messageSource);
+    }
+
+    public ObjectMapper createObjectMapper() {
+        JacksonConfig jacksonConfig = new JacksonConfig();
+
+        Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
+        builder.modulesToInstall(
+                new JavaTimeModule(),
+                jacksonConfig.objectIdModule()
+        );
+
+        jacksonConfig.jacksonCustomizer().customize(builder);
+
+        return builder.build();
     }
 }

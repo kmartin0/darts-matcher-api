@@ -1,0 +1,279 @@
+{
+  "id": "${matchId}",
+  "version": null,
+  "broadcastVersion": 17,
+  "startDate": "${startDate}",
+  "endDate": "${endDate}",
+  "matchStatus": "CONCLUDED",
+  "matchType": "X01",
+  "players": [
+    {
+      "playerId": "${player1Id}",
+      "playerName": "Player 1",
+      "playerType": "HUMAN",
+      "resultType": "WIN",
+      "x01DartBotSettings": null,
+      "statistics": {
+        "resultStatistics": {
+          "setsWon": 1,
+          "legsWon": 3
+        },
+        "averageStats": {
+          "pointsThrown": 1503,
+          "dartsThrown": 37,
+          "average": 122,
+          "pointsThrownFirstNine": 1221,
+          "dartsThrownFirstNine": 27,
+          "averageFirstNine": 136
+        },
+        "checkoutStats": {
+          "checkoutHighest": 141,
+          "checkoutTonPlus": 2,
+          "checkoutPercentage": 50,
+          "checkoutsMissed": 3,
+          "checkoutsHit": 3
+        },
+        "scoreStatistics": {
+          "fortyPlus": 1,
+          "sixtyPlus": 0,
+          "eightyPlus": 0,
+          "tonPlus": 4,
+          "tonFortyPlus": 1,
+          "tonEighty": 5
+        }
+      }
+    }
+  ],
+  "matchSettings": {
+    "x01": 501,
+    "trackDoubles": true,
+    "bestOf": {
+      "sets": 1,
+      "legs": 3,
+      "bestOfType": "LEGS",
+      "clearByTwoSetsRule": {
+        "enabled": false,
+        "limit": 0
+      },
+      "clearByTwoLegsRule": {
+        "enabled": false,
+        "limit": 0
+      },
+      "clearByTwoLegsInFinalSetRule": {
+        "enabled": false,
+        "limit": 0
+      }
+    }
+  },
+  "sets": [
+    {
+      "setNumber": 1,
+      "set": {
+        "throwsFirst": "${player1Id}",
+        "result": {
+          "${player1Id}": "WIN"
+        },
+        "legs": [
+          {
+            "legNumber": 1,
+            "leg": {
+              "winner": "${player1Id}",
+              "throwsFirst": "${player1Id}",
+              "checkoutDartsUsed": 1,
+              "rounds": [
+                {
+                  "roundNumber": 1,
+                  "round": {
+                    "turns": {
+                      "${player1Id}": {
+                        "score": 180,
+                        "remaining": 321,
+                        "doublesMissed": 0
+                      }
+                    }
+                  }
+                },
+                {
+                  "roundNumber": 2,
+                  "round": {
+                    "turns": {
+                      "${player1Id}": {
+                        "score": 180,
+                        "remaining": 141,
+                        "doublesMissed": 0
+                      }
+                    }
+                  }
+                },
+                {
+                  "roundNumber": 3,
+                  "round": {
+                    "turns": {
+                      "${player1Id}": {
+                        "score": 101,
+                        "remaining": 40,
+                        "doublesMissed": 0
+                      }
+                    }
+                  }
+                },
+                {
+                  "roundNumber": 4,
+                  "round": {
+                    "turns": {
+                      "${player1Id}": {
+                        "score": 0,
+                        "remaining": 40,
+                        "doublesMissed": 3
+                      }
+                    }
+                  }
+                },
+                {
+                  "roundNumber": 5,
+                  "round": {
+                    "turns": {
+                      "${player1Id}": {
+                        "score": 40,
+                        "remaining": 0,
+                        "doublesMissed": 0
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "legNumber": 2,
+            "leg": {
+              "winner": "${player1Id}",
+              "throwsFirst": "${player1Id}",
+              "checkoutDartsUsed": 3,
+              "rounds": [
+                {
+                  "roundNumber": 1,
+                  "round": {
+                    "turns": {
+                      "${player1Id}": {
+                        "score": 180,
+                        "remaining": 321,
+                        "doublesMissed": 0
+                      }
+                    }
+                  }
+                },
+                {
+                  "roundNumber": 2,
+                  "round": {
+                    "turns": {
+                      "${player1Id}": {
+                        "score": 180,
+                        "remaining": 141,
+                        "doublesMissed": 0
+                      }
+                    }
+                  }
+                },
+                {
+                  "roundNumber": 3,
+                  "round": {
+                    "turns": {
+                      "${player1Id}": {
+                        "score": 0,
+                        "remaining": 141,
+                        "doublesMissed": 0
+                      }
+                    }
+                  }
+                },
+                {
+                  "roundNumber": 4,
+                  "round": {
+                    "turns": {
+                      "${player1Id}": {
+                        "score": 141,
+                        "remaining": 0,
+                        "doublesMissed": 0
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "legNumber": 3,
+            "leg": {
+              "winner": "${player1Id}",
+              "throwsFirst": "${player1Id}",
+              "checkoutDartsUsed": 3,
+              "rounds": [
+                {
+                  "roundNumber": 1,
+                  "round": {
+                    "turns": {
+                      "${player1Id}": {
+                        "score": 100,
+                        "remaining": 401,
+                        "doublesMissed": 0
+                      }
+                    }
+                  }
+                },
+                {
+                  "roundNumber": 2,
+                  "round": {
+                    "turns": {
+                      "${player1Id}": {
+                        "score": 120,
+                        "remaining": 281,
+                        "doublesMissed": 0
+                      }
+                    }
+                  }
+                },
+                {
+                  "roundNumber": 3,
+                  "round": {
+                    "turns": {
+                      "${player1Id}": {
+                        "score": 180,
+                        "remaining": 101,
+                        "doublesMissed": 0
+                      }
+                    }
+                  }
+                },
+                {
+                  "roundNumber": 4,
+                  "round": {
+                    "turns": {
+                      "${player1Id}": {
+                        "score": 101,
+                        "remaining": 0,
+                        "doublesMissed": 0
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "matchProgress": {
+    "currentSet": null,
+    "currentLeg": null,
+    "currentRound": null,
+    "currentThrower": null
+  },
+  "standings": {
+    "${player1Id}": {
+      "setsWon": 1,
+      "legsWonInCurrentSet": 3
+    }
+  }
+}

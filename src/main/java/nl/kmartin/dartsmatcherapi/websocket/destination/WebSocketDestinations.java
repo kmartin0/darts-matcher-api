@@ -1,5 +1,6 @@
-package nl.kmartin.dartsmatcherapi.websocket;
+package nl.kmartin.dartsmatcherapi.websocket.destination;
 
+import nl.kmartin.dartsmatcherapi.websocket.config.WebSocketConfig;
 import org.bson.types.ObjectId;
 
 /**

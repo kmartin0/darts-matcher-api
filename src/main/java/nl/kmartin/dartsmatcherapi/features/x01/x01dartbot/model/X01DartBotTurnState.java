@@ -1,6 +1,7 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.model;
 
 import lombok.Getter;
+import lombok.ToString;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01Turn;
 
 /**
@@ -9,6 +10,7 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01Turn;
  * Combines the fixed turn configuration with the progress accumulated while darts are played.
  */
 @Getter
+@ToString
 public class X01DartBotTurnState {
     private final int x01;
     private final int scoredBeforeTurn;

@@ -1,9 +1,11 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01averagestatistics.model;
 
 import jakarta.validation.constraints.PositiveOrZero;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * Stores average statistics for an X01 player.
@@ -12,7 +14,9 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
+@AllArgsConstructor
 public class X01AverageStatistics {
     public static final int ROUND_COUNT_FIRST_NINE = 3;
 

@@ -1,4 +1,4 @@
-package nl.kmartin.dartsmatcherapi.websocket;
+package nl.kmartin.dartsmatcherapi.websocket.config;
 
 import nl.kmartin.dartsmatcherapi.logging.MdcChannelInterceptor;
 import nl.kmartin.dartsmatcherapi.logging.MdcTaskDecorator;

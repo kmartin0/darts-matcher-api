@@ -1,9 +1,11 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01resultstatistics.model;
 
 import jakarta.validation.constraints.PositiveOrZero;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * Stores result statistics for an X01 player.
@@ -12,7 +14,9 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
+@AllArgsConstructor
 public class X01ResultStatistics {
     @PositiveOrZero
     private int setsWon;

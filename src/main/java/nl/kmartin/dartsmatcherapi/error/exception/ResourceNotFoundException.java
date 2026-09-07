@@ -1,6 +1,7 @@
 package nl.kmartin.dartsmatcherapi.error.exception;
 
 import lombok.Getter;
+import lombok.ToString;
 
 /**
  * Thrown when a requested resource cannot be found.
@@ -9,6 +10,7 @@ import lombok.Getter;
  * create an appropriate API error response.
  */
 @Getter
+@ToString(callSuper = true)
 public class ResourceNotFoundException extends RuntimeException {
     private final Class<?> resourceClass;
     private final Object identifier;
