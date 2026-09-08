@@ -12,15 +12,18 @@ import java.util.Map;
 /**
  * Represents the error response returned by the API.
  *
- * Contains the API error code, description, HTTP status code and optional
- * target-specific errors that clients can use to associate errors with fields.
+ * Contains:
+ * • {@code type} - the application error classification
+ * • {@code description} - the human-readable error description
+ * • {@code status} - the numeric status associated with the error
+ * • {@code targetErrors} - optional target-specific errors
  */
 @Getter
 @ToString
 public class ErrorResponse implements Serializable {
-    private final String error;
+    private final ApiErrorCode type;
     private final String description;
-    private final int code;
+    private final int status;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private final Map<String, String> targetErrors;
@@ -33,9 +36,9 @@ public class ErrorResponse implements Serializable {
      * @param targetErrors the target-specific errors
      */
     public ErrorResponse(ApiErrorCode apiErrorCode, String description, TargetError... targetErrors) {
-        this.code = apiErrorCode.getHttpStatus().value();
+        this.status = apiErrorCode.getHttpStatus().value();
         this.description = description;
-        this.error = apiErrorCode.name();
+        this.type = apiErrorCode;
         this.targetErrors = TargetErrorUtil.targetErrorsToMap(targetErrors);
     }
 
@@ -46,9 +49,9 @@ public class ErrorResponse implements Serializable {
      * @param description  the error description
      */
     public ErrorResponse(ApiErrorCode apiErrorCode, String description) {
-        this.code = apiErrorCode.getHttpStatus().value();
+        this.status = apiErrorCode.getHttpStatus().value();
         this.description = description;
-        this.error = apiErrorCode.name();
+        this.type = apiErrorCode;
         this.targetErrors = new HashMap<>();
     }
 }

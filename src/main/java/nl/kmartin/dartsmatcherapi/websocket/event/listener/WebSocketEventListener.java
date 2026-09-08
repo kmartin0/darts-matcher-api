@@ -63,8 +63,7 @@ public class WebSocketEventListener {
                 event.destination(),
                 event.error(),
                 event.description(),
-                event.error().getHttpStatus().value(),
-                TargetErrorUtil.targetErrorsToMap(event.targetErrors())
+                event.targetErrors()
         );
 
         sendToUser(WebSocketDestinations.ERROR_QUEUE, message, event.sessionId(), event.publishId());
