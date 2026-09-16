@@ -7,10 +7,12 @@ import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01Turn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01TurnAlreadyExistsException;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01TurnEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
 import org.bson.types.ObjectId;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface IX01LegRoundService {
 
@@ -57,12 +59,12 @@ public interface IX01LegRoundService {
     );
 
     /**
-     * Removes the most recently added turn from a round.
+     * Removes the most recently recorded turn from a round.
      *
      * @param legRound the round from which to remove the turn
-     * @return whether a turn was removed
+     * @return the removed turn entry, or empty when no turn exists
      */
-    boolean removeLastTurnFromRound(@NotNull @Valid X01LegRound legRound);
+    Optional<X01TurnEntry> removeLastTurnFromRound(@NotNull @Valid X01LegRound legRound);
 
     /**
      * Removes turns recorded after the player that won the leg.

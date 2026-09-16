@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundEntry;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01TurnEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
 
 import java.util.List;
@@ -52,10 +53,10 @@ public interface IX01LegProgressService {
     boolean isLegConcluded(@NotNull @Valid X01Leg leg);
 
     /**
-     * Removes the most recently recorded turn from a leg.
+     * Removes the most recently recorded turn from a leg and cleans up trailing empty rounds.
      *
      * @param leg the leg to update
-     * @return whether a turn was removed
+     * @return the removed turn entry, or empty when no turn exists
      */
-    boolean removeLastTurnFromLeg(@NotNull @Valid X01Leg leg);
+    Optional<X01TurnEntry> removeLastTurnFromLeg(@NotNull @Valid X01Leg leg);
 }

@@ -6,6 +6,7 @@ import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01LegEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundEntry;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01TurnEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
 import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01SetEntry;
 
@@ -72,11 +73,12 @@ public interface IX01MatchProgressService {
     );
 
     /**
-     * Removes the most recently recorded turn and any trailing empty match structure.
+     * Removes the most recently recorded turn from a match and cleans up trailing empty rounds, legs and sets.
      *
-     * @param match the match whose last turn should be removed
+     * @param match the match to update
+     * @return the removed turn entry, or empty when no turn exists
      */
-    void removeLastTurnFromMatch(@NotNull @Valid X01Match match);
+    Optional<X01TurnEntry> removeLastTurnFromMatch(@NotNull @Valid X01Match match);
 
     /**
      * Rebuilds the current match progress and creates missing structure when the match can continue.

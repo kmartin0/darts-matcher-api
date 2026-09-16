@@ -4,6 +4,7 @@ import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01Turn;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01TurnAlreadyExistsException;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01TurnEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,8 @@ import org.springframework.validation.annotation.Validated;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 /**
@@ -59,22 +62,25 @@ public class X01LegRoundServiceImpl implements IX01LegRoundService {
     }
 
     @Override
-    public boolean removeLastTurnFromRound(X01LegRound legRound) {
-        if (legRound.getTurns().isEmpty()) return false;
+    public Optional<X01TurnEntry> removeLastTurnFromRound(X01LegRound legRound) {
+        if (legRound.getTurns().isEmpty()) return Optional.empty();
 
         // Turns are stored in insertion order, so remove the final entry.
-        Iterator<ObjectId> turnsIterator = legRound.getTurns().keySet().iterator();
+        Iterator<Map.Entry<ObjectId, X01Turn>> turnsIterator = legRound.getTurns().entrySet().iterator();
 
         while (turnsIterator.hasNext()) {
-            turnsIterator.next();
+            Map.Entry<ObjectId, X01Turn> turnEntry = turnsIterator.next();
 
             if (!turnsIterator.hasNext()) {
+                // Capture the player and turn before removing the map entry.
+                X01TurnEntry removedTurn = new X01TurnEntry(turnEntry);
                 turnsIterator.remove();
-                return true;
+
+                return Optional.of(removedTurn);
             }
         }
 
-        return false;
+        return Optional.empty();
     }
 
     @Override

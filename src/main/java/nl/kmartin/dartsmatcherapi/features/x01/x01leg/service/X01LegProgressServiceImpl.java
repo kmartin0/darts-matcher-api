@@ -4,6 +4,7 @@ import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundEntry;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01TurnEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.service.IX01LegRoundService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
 import nl.kmartin.dartsmatcherapi.util.NumberUtils;
@@ -71,27 +72,28 @@ public class X01LegProgressServiceImpl implements IX01LegProgressService {
     }
 
     @Override
-    public boolean removeLastTurnFromLeg(X01Leg leg) {
-        if (leg.getRounds().isEmpty()) return false;
+    public Optional<X01TurnEntry> removeLastTurnFromLeg(X01Leg leg) {
+        if (leg.getRounds().isEmpty()) return Optional.empty();
 
+        // Traverse rounds from newest to oldest until a turn can be removed.
         Iterator<Integer> reverseRoundsIterator = leg.getRounds().descendingKeySet().iterator();
 
-        // Traverse backwards so the most recently recorded turn is removed first.
         while (reverseRoundsIterator.hasNext()) {
             X01LegRound round = leg.getRounds().get(reverseRoundsIterator.next());
-            boolean isTurnRemoved = legRoundService.removeLastTurnFromRound(round);
+            Optional<X01TurnEntry> removedTurn = legRoundService.removeLastTurnFromRound(round);
 
             // Remove rounds that become empty, including already-empty trailing rounds.
             if (round.getTurns().isEmpty()) {
                 reverseRoundsIterator.remove();
             }
 
-            if (isTurnRemoved) {
-                return true;
+            // Stop once an actual turn has been removed.
+            if (removedTurn.isPresent()) {
+                return removedTurn;
             }
         }
 
-        return false;
+        return Optional.empty();
     }
 
     /**

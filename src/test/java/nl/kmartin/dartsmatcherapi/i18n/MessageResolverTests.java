@@ -30,7 +30,7 @@ class MessageResolverTests {
     @Test
     void testGetMessageNoArgs_isCorrect() {
         Assertions.assertEquals(
-                "Cannot contain whitespaces.",
+                "Must not contain whitespace.",
                 messageResolver.getMessage("message.no.whitespace.allowed")
         );
     }

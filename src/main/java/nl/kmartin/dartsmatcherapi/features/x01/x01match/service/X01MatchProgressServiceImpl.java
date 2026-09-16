@@ -5,6 +5,7 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01LegEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.service.IX01LegProgressService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundEntry;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01TurnEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.service.IX01LegRoundService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01BestOf;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
@@ -112,40 +113,50 @@ public class X01MatchProgressServiceImpl implements IX01MatchProgressService {
     }
 
     @Override
-    public void removeLastTurnFromMatch(X01Match match) {
-        // Traverse sets in reverse so trailing empty rounds, legs and sets are cleaned up with the removed score.
+    public Optional<X01TurnEntry> removeLastTurnFromMatch(X01Match match) {
+        // Traverse sets from newest to oldest until a turn can be removed.
         Iterator<Integer> reverseSetsIterator = match.getSets().descendingKeySet().iterator();
 
         while (reverseSetsIterator.hasNext()) {
             X01Set set = match.getSets().get(reverseSetsIterator.next());
-            boolean scoreRemoved = setProgressService.removeLastTurnFromSet(set);
+            Optional<X01TurnEntry> removedTurn = setProgressService.removeLastTurnFromSet(set);
 
-            // Remove a set when deleting its final score also removed its final leg.
-            if (set.getLegs().isEmpty()) reverseSetsIterator.remove();
+            // Remove sets that become empty, including already-empty trailing sets.
+            if (set.getLegs().isEmpty()) {
+                reverseSetsIterator.remove();
+            }
 
-            // Stop once an actual score has been removed.
-            if (scoreRemoved) break;
+            // Stop once an actual turn has been removed.
+            if (removedTurn.isPresent()) {
+                return removedTurn;
+            }
         }
+
+        return Optional.empty();
     }
 
     @Override
     public void updateMatchProgress(X01Match match) {
         // Resolve or create the current set, leg and round.
         Optional<X01SetEntry> currentSetEntry = getCurrentSetOrCreate(match);
+
         Optional<X01LegEntry> currentLegEntry = currentSetEntry.flatMap(
                 setEntry -> getCurrentLegOrCreate(match, setEntry)
         );
+
         Optional<X01LegRoundEntry> currentRoundEntry = currentLegEntry.flatMap(
                 legEntry -> getCurrentLegRoundOrCreate(match, legEntry.leg())
         );
 
         // Determine whose turn it is from the current leg starter and scores already present in the round.
-        Optional<ObjectId> currentThrower = currentLegEntry.flatMap(legEntry ->
-                currentRoundEntry.map(roundEntry -> legRoundService.getCurrentThrowerInRound(
-                        roundEntry.round(),
-                        legEntry.leg().getThrowsFirst(),
-                        match.getPlayers()
-                ))
+        Optional<ObjectId> currentThrower = currentLegEntry.flatMap(
+                legEntry -> currentRoundEntry.map(
+                        roundEntry -> legRoundService.getCurrentThrowerInRound(
+                                roundEntry.round(),
+                                legEntry.leg().getThrowsFirst(),
+                                match.getPlayers()
+                        )
+                )
         );
 
         // Replace the stored progress with the newly resolved match position.

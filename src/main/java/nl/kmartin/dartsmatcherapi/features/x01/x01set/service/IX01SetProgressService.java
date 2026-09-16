@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01LegEntry;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01TurnEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01BestOf;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
 import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01Set;
@@ -56,10 +57,10 @@ public interface IX01SetProgressService {
     boolean isSetConcluded(@NotNull @Valid X01Set set);
 
     /**
-     * Removes the most recently recorded turn from a set.
+     * Removes the most recently recorded turn from a set and cleans up trailing empty rounds and legs.
      *
      * @param set the set to update
-     * @return whether a turn was removed
+     * @return the removed turn entry, or empty when no turn exists
      */
-    boolean removeLastTurnFromSet(@NotNull @Valid X01Set set);
+    Optional<X01TurnEntry> removeLastTurnFromSet(@NotNull @Valid X01Set set);
 }

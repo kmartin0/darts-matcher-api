@@ -15,6 +15,7 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegAlreadyWo
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01TurnAlreadyExistsException;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01TurnEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01TurnMutation;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.service.IX01LegRoundService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateMatchRequest;
@@ -200,11 +201,25 @@ public class X01MatchServiceImpl implements IX01MatchService {
 
     @Override
     @Transactional
-    public X01Match deleteLastTurn(ObjectId matchId) {
+    public X01Match deleteLastHumanTurn(ObjectId matchId) {
         X01Match match = getMatch(matchId);
 
-        // Remove the latest turn and any trailing empty match structure.
-        matchProgressService.removeLastTurnFromMatch(match);
+        // Leave the match unchanged when there is no human turn to undo.
+        if (!hasHumanTurn(match)) {
+            return match;
+        }
+
+        // Repeatedly delete the last turn from the match until a human turn has been deleted.
+        // Stop early if no turn remains or the removed turn's player cannot be found.
+        while (true) {
+            Optional<X01TurnEntry> removedTurn = matchProgressService.removeLastTurnFromMatch(match);
+            if (removedTurn.isEmpty()) break;
+
+            Optional<X01MatchPlayer> removedTurnPlayer = getPlayerById(match, removedTurn.get().playerId());
+            if (removedTurnPlayer.isEmpty()) break;
+
+            if (removedTurnPlayer.get().getPlayerType() != PlayerType.DART_BOT) break;
+        }
 
         // Rebuild and persist the match before processing any following Dart Bot turns.
         saveMatchAndProcessBotTurns(match, X01MatchMessageType.DELETE_LAST_TURN);
@@ -424,6 +439,23 @@ public class X01MatchServiceImpl implements IX01MatchService {
                 .stream()
                 .filter(player -> Objects.equals(player.getPlayerId(), playerId))
                 .findFirst();
+    }
+
+    /**
+     * Checks whether the match contains a human player turn anywhere in the match.
+     *
+     * @param match the match to inspect
+     * @return whether any recorded turn belongs to a human player
+     */
+    private boolean hasHumanTurn(X01Match match) {
+        return match.getSets().values().stream()
+                .flatMap(set -> set.getLegs().values().stream())
+                .flatMap(leg -> leg.getRounds().values().stream())
+                .flatMap(round -> round.getTurns().keySet().stream())
+                .anyMatch(playerId -> getPlayerById(match, playerId)
+                        .map(player -> player.getPlayerType() == PlayerType.HUMAN)
+                        .orElse(false)
+                );
     }
 
     /**

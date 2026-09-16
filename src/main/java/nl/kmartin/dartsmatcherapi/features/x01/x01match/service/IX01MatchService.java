@@ -78,7 +78,10 @@ public interface IX01MatchService {
     X01Match editTurn(@NotNull ObjectId matchId, @NotNull @Valid X01EditTurnRequest turnRequest);
 
     /**
-     * Deletes the last recorded turn and reprocesses the match.
+     * Deletes the last human turn and any following Dart Bot turns, then reprocesses the match.
+     *
+     * Leaves the match unchanged when no human turn exists.
+     * Deletion stops early if no turn remains or the removed turn's player cannot be found.
      *
      * @param matchId the match id
      * @return the updated match
@@ -86,7 +89,7 @@ public interface IX01MatchService {
      * @throws OptimisticLockingFailureException when the match was modified concurrently
      * @throws IllegalStateException             when Dart Bot processing encounters invalid match state
      */
-    X01Match deleteLastTurn(@NotNull ObjectId matchId);
+    X01Match deleteLastHumanTurn(@NotNull ObjectId matchId);
 
     /**
      * Deletes an X01 match.

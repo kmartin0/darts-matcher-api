@@ -113,7 +113,7 @@ public class X01MatchWebSocketController {
     }
 
     /**
-     * Deletes the last turn and publishes the updated match.
+     * Deletes the last human turn and any following Dart Bot turns and publishes the resulting match.
      *
      * @param matchId   the match id
      * @param publishId the optional client publish id
@@ -123,14 +123,14 @@ public class X01MatchWebSocketController {
      * @throws IllegalStateException             when Dart Bot processing encounters invalid match state
      */
     @MessageMapping(WebSocketDestinations.X01.DELETE_LAST_TURN)
-    public void deleteLastTurn(
+    public void deleteLastHumanTurn(
             @DestinationVariable ObjectId matchId,
             @Header(value = WebSocketHeaders.PUBLISH_ID, required = false) String publishId,
             @Header(SimpMessageHeaderAccessor.SESSION_ID_HEADER) String sessionId
     ) {
         webSocketEventPublisher.sendToUser(
                 X01MatchMessageType.DELETE_LAST_TURN,
-                matchService.deleteLastTurn(matchId),
+                matchService.deleteLastHumanTurn(matchId),
                 sessionId,
                 publishId
         );

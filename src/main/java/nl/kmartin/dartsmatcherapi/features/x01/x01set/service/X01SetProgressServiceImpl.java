@@ -5,6 +5,7 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01LegEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.service.IX01LegProgressService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.service.IX01LegService;
+import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01TurnEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01BestOf;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
 import nl.kmartin.dartsmatcherapi.features.x01.x01rules.service.IX01RulesService;
@@ -75,27 +76,28 @@ public class X01SetProgressServiceImpl implements IX01SetProgressService {
     }
 
     @Override
-    public boolean removeLastTurnFromSet(X01Set set) {
-        if (set.getLegs().isEmpty()) return false;
+    public Optional<X01TurnEntry> removeLastTurnFromSet(X01Set set) {
+        if (set.getLegs().isEmpty()) return Optional.empty();
 
         // Traverse legs from newest to oldest until a turn can be removed.
         Iterator<Integer> reverseLegsIterator = set.getLegs().descendingKeySet().iterator();
 
         while (reverseLegsIterator.hasNext()) {
             X01Leg leg = set.getLegs().get(reverseLegsIterator.next());
-            boolean isTurnRemoved = legProgressService.removeLastTurnFromLeg(leg);
+            Optional<X01TurnEntry> removedTurn = legProgressService.removeLastTurnFromLeg(leg);
 
-            // Remove an empty leg before continuing through earlier history.
+            // Remove legs that become empty, including already-empty trailing legs.
             if (leg.getRounds().isEmpty()) {
                 reverseLegsIterator.remove();
             }
 
-            if (isTurnRemoved) {
-                return true;
+            // Stop once an actual turn has been removed.
+            if (removedTurn.isPresent()) {
+                return removedTurn;
             }
         }
 
-        return false;
+        return Optional.empty();
     }
 
     /**

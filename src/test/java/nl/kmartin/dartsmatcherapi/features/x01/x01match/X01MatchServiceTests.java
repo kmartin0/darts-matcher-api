@@ -10,9 +10,9 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.repository.IX01MatchRepository;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.IX01MatchService;
 import org.bson.types.ObjectId;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -99,7 +99,7 @@ public class X01MatchServiceTests {
                         new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, null)),
                         new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, null)),
                         new X01ScenarioStep.EditTurn(new X01EditTurnRequest(120, 0, null, playerOneId, 1, 3, 2)),
-                        new X01ScenarioStep.DeleteLastTurn(),
+                        new X01ScenarioStep.DeleteLastHumanTurn(),
                         new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null)),
                         new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(101, 0, 3))
                 )
@@ -173,7 +173,7 @@ public class X01MatchServiceTests {
                         new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, null)),
                         new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, null)),
                         new X01ScenarioStep.EditTurn(new X01EditTurnRequest(120, 0, null, playerOneId, 1, 3, 2)),
-                        new X01ScenarioStep.DeleteLastTurn(),
+                        new X01ScenarioStep.DeleteLastHumanTurn(),
                         new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(120, 0, null)),
                         new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(140, 0, null)),
                         new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(140, 0, null)),
@@ -394,7 +394,7 @@ public class X01MatchServiceTests {
                         new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null)),
 
                         new X01ScenarioStep.EditTurn(new X01EditTurnRequest(120, 0, null, playerOneId, 1, 3, 2)),
-                        new X01ScenarioStep.DeleteLastTurn(),
+                        new X01ScenarioStep.DeleteLastHumanTurn(),
                         new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(80, 0, null)),
 
                         new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null)),
@@ -857,8 +857,8 @@ public class X01MatchServiceTests {
                     matchService.addTurn(matchId, addTurn.request());
                 } else if (step instanceof X01ScenarioStep.EditTurn editTurn) {
                     matchService.editTurn(matchId, editTurn.request());
-                } else if (step instanceof X01ScenarioStep.DeleteLastTurn) {
-                    matchService.deleteLastTurn(matchId);
+                } else if (step instanceof X01ScenarioStep.DeleteLastHumanTurn) {
+                    matchService.deleteLastHumanTurn(matchId);
                 }
             } catch (RuntimeException exception) {
                 throw new AssertionError(
@@ -877,7 +877,7 @@ public class X01MatchServiceTests {
         record EditTurn(X01EditTurnRequest request) implements X01ScenarioStep {
         }
 
-        record DeleteLastTurn() implements X01ScenarioStep {
+        record DeleteLastHumanTurn() implements X01ScenarioStep {
         }
     }
 }

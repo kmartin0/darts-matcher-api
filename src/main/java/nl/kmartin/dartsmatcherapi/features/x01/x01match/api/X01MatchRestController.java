@@ -121,7 +121,7 @@ public class X01MatchRestController {
     }
 
     /**
-     * Deletes the last turn from an X01 match.
+     * Deletes the last human turn and any following Dart Bot turns from an X01 match.
      *
      * @param matchId the match id
      * @return the updated match
@@ -131,10 +131,9 @@ public class X01MatchRestController {
      */
     @PostMapping(path = RestEndpoints.X01.MATCH_TURNS_DELETE_LAST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public X01Match deleteLastTurn(@PathVariable ObjectId matchId) {
-        return matchService.deleteLastTurn(matchId);
+    public X01Match deleteLastHumanTurn(@PathVariable ObjectId matchId) {
+        return matchService.deleteLastHumanTurn(matchId);
     }
-
     /**
      * Deletes an X01 match.
      *
