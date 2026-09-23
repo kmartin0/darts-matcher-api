@@ -1,42 +1,33 @@
 # syntax=docker/dockerfile:1
 
-#===================================================
-# === Stage 1: Build the Spring Boot application ===
-#===================================================
-# Use Maven with Amazon Corretto JDK 17.
-FROM maven:3.9.6-amazoncorretto-17 as build
+# Stage 1: Compile and build Spring Boot application
+FROM eclipse-temurin:17-jdk AS build
 
-# Set the app directory to /app
-WORKDIR /app
+# Set the working directory for the build stage
+WORKDIR /workspace/app
 
-# Copy Maven wrapper files and pom.xml.
+# Copy Maven wrapper, project configuration, and source code to the working directory
 COPY mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
-
-# Copy the source code
 COPY src src
 
-# Build the Spring Boot application's executable JAR.
-RUN mvn clean package -DskipTests
+# Build the Spring Boot application
+RUN chmod +x mvnw && ./mvnw clean package -DskipTests
 
-#========================================
-#=== Stage 2: Create the docker image ===
-#========================================
-# Use Amazon Corretto JDK 17 Alpine for the runtime.
-FROM amazoncorretto:17-alpine-jdk
 
-# Set the directory for temporary files.
+# Stage 2: Run Spring Boot application
+FROM eclipse-temurin:17-jre
+
+# Create a temporary volume used by Spring Boot
 VOLUME /tmp
 
-# Set the app directory to /app
+# Set the working directory for the runtime stage
 WORKDIR /app
 
-# Copy the built jar to /app and name it app.jar
-COPY --from=build /app/target/*.jar app.jar
+# Copy the built Spring Boot jar from the build stage
+COPY --from=build /workspace/app/target/*.jar app.jar
 
-# Expose the Spring Boot Application port (8080)
+# Expose the application port and start the Spring Boot application
 EXPOSE 8080
-
-# When the container start, this command runs to start the application ('java -jar /app/app.jar')
-ENTRYPOINT ["java","-jar","/app/app.jar"]
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
