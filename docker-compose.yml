@@ -6,9 +6,9 @@ services:
     build:
       context: .
     environment:
-      - SPRING_PROFILES_ACTIVE=dev
+      SPRING_PROFILES_ACTIVE: dev
       # The 'directConnection=true' option is specifically for when mongo replica set is hosted on localhost
       # and the Docker container is run on the same machine.
-      - DB_URI=mongodb://host.docker.internal:27017/darts-matcher?replicaSet=rs0&directConnection=true
+      DB_URI: mongodb://host.docker.internal:27017/darts-matcher?replicaSet=rs0&directConnection=true
     ports:
       - "8080:8080"

@@ -16,9 +16,10 @@ import java.util.List;
 @Configuration
 public class CorsConfig {
     private static final List<String> ALLOWED_ORIGIN_PATTERNS = List.of(
-            "http://localhost:4200",
+            "http://localhost:*",
+            "http://127.0.0.1:*",
+            "http://192.168.1.*:*",
             "https://jiangxy.github.io", // WebSocket debug tool: /websocket-debug-tool/
-            "http://192.168.1.*:4200",
             "https://dartsmatcher.kmartin.nl"
     );
 
