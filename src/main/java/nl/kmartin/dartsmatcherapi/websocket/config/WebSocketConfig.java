@@ -2,11 +2,15 @@ package nl.kmartin.dartsmatcherapi.websocket.config;
 
 import nl.kmartin.dartsmatcherapi.logging.MdcChannelInterceptor;
 import nl.kmartin.dartsmatcherapi.logging.MdcTaskDecorator;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.task.ThreadPoolTaskExecutorBuilder;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
@@ -41,21 +45,25 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public static final String USER_PREFIX = "/user";
     public static final String WEBSOCKET_ENDPOINT = "/darts-matcher-websocket";
 
+    private static final long HEARTBEAT_INTERVAL_MS = 5000;
+
     private final MdcChannelInterceptor mdcChannelInterceptor;
     private final WebSocketHandshakeInterceptor handshakeInterceptor;
     private final ThreadPoolTaskExecutorBuilder taskExecutorBuilder;
     private final MdcTaskDecorator mdcTaskDecorator;
+    private final TaskScheduler webSocketHeartbeatTaskScheduler;
 
     public WebSocketConfig(
             MdcChannelInterceptor mdcChannelInterceptor,
             WebSocketHandshakeInterceptor handshakeInterceptor,
             ThreadPoolTaskExecutorBuilder taskExecutorBuilder,
-            MdcTaskDecorator mdcTaskDecorator
-    ) {
+            MdcTaskDecorator mdcTaskDecorator,
+            @Qualifier("webSocketHeartbeatTaskScheduler") TaskScheduler webSocketHeartbeatTaskScheduler) {
         this.mdcChannelInterceptor = mdcChannelInterceptor;
         this.handshakeInterceptor = handshakeInterceptor;
         this.taskExecutorBuilder = taskExecutorBuilder;
         this.mdcTaskDecorator = mdcTaskDecorator;
+        this.webSocketHeartbeatTaskScheduler = webSocketHeartbeatTaskScheduler;
     }
 
     /**
@@ -67,7 +75,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void configureMessageBroker(MessageBrokerRegistry config) {
         config.setApplicationDestinationPrefixes(APP_PREFIX);
         config.setUserDestinationPrefix(USER_PREFIX);
-        config.enableSimpleBroker(BROADCAST_PREFIX, QUEUE_PREFIX);
+        config.enableSimpleBroker(BROADCAST_PREFIX, QUEUE_PREFIX)
+                .setTaskScheduler(webSocketHeartbeatTaskScheduler)
+                .setHeartbeatValue(new long[]{HEARTBEAT_INTERVAL_MS, HEARTBEAT_INTERVAL_MS});
     }
 
     /**
