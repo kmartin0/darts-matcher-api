@@ -11,12 +11,14 @@ import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
  * Handles internal WebSocket events and sends their corresponding messages to clients.
  *
- * Supports broadcasting messages to subscribers and sending responses or errors
- * to a specific WebSocket session.
+ * Broadcasts and successful responses are sent after commit when published within a transaction,
+ * or immediately when no transaction exists. Errors are sent immediately.
  */
 @Component
 public class WebSocketEventListener {
@@ -30,9 +32,12 @@ public class WebSocketEventListener {
     /**
      * Sends a WebSocket broadcast event to all subscribers of its destination.
      *
+     * Delivery is delayed until successful commit when a transaction is active.
+     * Events published without a transaction are delivered immediately.
+     *
      * @param event the WebSocket broadcast event
      */
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
     public void handleWebSocketBroadcastEvent(WebSocketBroadcastEvent<?, ?> event) {
         WebSocketMessage<?, ?> message = new WebSocketMessage<>(event.messageType(), event.payload());
 
@@ -40,11 +45,14 @@ public class WebSocketEventListener {
     }
 
     /**
-     * Sends a WebSocket message to the originating client session.
+     * Sends a successful WebSocket response to the originating client session.
+     *
+     * Delivery is delayed until successful commit when a transaction is active.
+     * Events published without a transaction are delivered immediately.
      *
      * @param event the WebSocket send-to-user event
      */
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
     public void handleWebSocketSendToUserEvent(WebSocketSendToUserEvent<?, ?> event) {
         WebSocketMessage<?, ?> message = new WebSocketMessage<>(event.messageType(), event.payload());
 
@@ -52,7 +60,7 @@ public class WebSocketEventListener {
     }
 
     /**
-     * Sends a WebSocket error message to the originating client session.
+     * Sends a WebSocket error message immediately, independently of transaction outcome.
      *
      * @param event the WebSocket error event
      */
