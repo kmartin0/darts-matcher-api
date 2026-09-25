@@ -22,4 +22,14 @@ public interface IX01MatchSetupService {
      * @return the reset match
      */
     X01Match resetMatch(@NotNull @Valid X01Match match);
+
+    /**
+     * Creates a new X01 match using the original match's settings and player order.
+     *
+     * Player configuration is preserved, with new player identities and empty statistics.
+     *
+     * @param match the original match
+     * @return the initialized rematch
+     */
+    X01Match initializeRematch(@NotNull @Valid X01Match match);
 }

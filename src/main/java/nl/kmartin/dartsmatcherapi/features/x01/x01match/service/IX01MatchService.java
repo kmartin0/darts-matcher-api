@@ -25,21 +25,40 @@ public interface IX01MatchService {
     X01Match createMatch(@NotNull @Valid X01CreateMatchRequest request);
 
     /**
+     * Returns the existing rematch or creates one using the original match's configuration.
+     *
+     * New rematches preserve settings, player identities and order, with fresh match state.
+     * Links the rematch to the original match and publishes the updated original.
+     * Missing rematches are replaced. The original match does not need to be concluded.
+     *
+     * @param matchId the original match id
+     * @return the existing or newly created rematch
+     * @throws ResourceNotFoundException         when the original match does not exist
+     * @throws OptimisticLockingFailureException when an affected match was modified concurrently
+     * @throws IllegalStateException             when Dart Bot processing encounters invalid match state
+     */
+    X01Match createRematch(@NotNull ObjectId matchId);
+
+    /**
      * Gets an X01 match by id.
+     *
+     * Clears any stale rematch reference, saving the correction and publishing an update.
      *
      * @param matchId the match id
      * @return the requested match
-     * @throws ResourceNotFoundException when the match does not exist
+     * @throws ResourceNotFoundException         when the match does not exist
+     * @throws OptimisticLockingFailureException when the match was modified concurrently during reference cleanup
      */
     X01Match getMatch(@NotNull ObjectId matchId);
 
     /**
      * Gets existing X01 matches for the supplied ids while preserving the requested order.
      *
-     * Missing matches are omitted from the result.
+     * Missing matches are omitted. Clears stale rematch references, saving and publishing affected matches.
      *
      * @param matchIds the match ids
      * @return the existing matches in requested order
+     * @throws OptimisticLockingFailureException when an affected match was modified concurrently during reference cleanup
      */
     List<X01Match> getMatches(@NotNull List<@NotNull ObjectId> matchIds);
 
@@ -80,7 +99,7 @@ public interface IX01MatchService {
     /**
      * Deletes the last human turn and any following Dart Bot turns, then reprocesses the match.
      *
-     * Leaves the match unchanged when no human turn exists.
+     * Leaves recorded turns unchanged when no human turn exists.
      * Deletion stops early if no turn remains or the removed turn's player cannot be found.
      *
      * @param matchId the match id
@@ -92,15 +111,21 @@ public interface IX01MatchService {
     X01Match deleteLastHumanTurn(@NotNull ObjectId matchId);
 
     /**
-     * Deletes an X01 match.
+     * Deletes an X01 match and clears references to it from other matches.
+     *
+     * Saves and publishes affected matches and publishes the deletion.
+     * Any rematch belonging to the deleted match is preserved.
      *
      * @param matchId the match id
-     * @throws ResourceNotFoundException when the match does not exist
+     * @throws ResourceNotFoundException         when the match does not exist
+     * @throws OptimisticLockingFailureException when an affected match was modified concurrently
      */
     void deleteMatch(@NotNull ObjectId matchId);
 
     /**
      * Resets an X01 match to its initial state and reprocesses it.
+     *
+     * Preserves match identity, configuration and any reference to an existing rematch.
      *
      * @param matchId the match id
      * @return the reset match

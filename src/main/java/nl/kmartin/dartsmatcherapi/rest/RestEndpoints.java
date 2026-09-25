@@ -31,5 +31,6 @@ public final class RestEndpoints {
         public static final String MATCH_TURNS = "/matches/x01/{matchId}/turns";
         public static final String MATCH_TURNS_EDIT = "/matches/x01/{matchId}/turns/edit";
         public static final String MATCH_TURNS_DELETE_LAST = "/matches/x01/{matchId}/turns/delete-last";
+        public static final String MATCH_REMATCH = "/matches/x01/{matchId}/rematch";
     }
 }

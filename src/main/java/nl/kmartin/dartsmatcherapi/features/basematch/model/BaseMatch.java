@@ -51,6 +51,8 @@ public abstract class BaseMatch<P extends MatchPlayer> {
     @NotNull
     private MatchStatus matchStatus;
 
+    private ObjectId rematchId;
+
     @NotNull
     @Size(min = MINIMUM_PLAYERS, max = MAXIMUM_PLAYERS)
     @NoDuplicateMatchPlayerName
@@ -69,7 +71,8 @@ public abstract class BaseMatch<P extends MatchPlayer> {
             Instant endDate,
             MatchStatus matchStatus,
             ArrayList<P> players,
-            MatchType matchType
+            MatchType matchType,
+            ObjectId rematchId
     ) {
         this.id = id;
         this.version = version;
@@ -79,5 +82,6 @@ public abstract class BaseMatch<P extends MatchPlayer> {
         this.matchStatus = matchStatus;
         this.players = players;
         this.matchType = matchType;
+        this.rematchId = rematchId;
     }
 }

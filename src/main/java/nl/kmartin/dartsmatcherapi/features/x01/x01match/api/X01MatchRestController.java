@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * Provides REST endpoints for creating, retrieving and updating X01 matches.
+ * Provides REST endpoints for creating, retrieving, updating and deleting X01 matches.
  */
 @RestController
 public class X01MatchRestController {
@@ -50,11 +50,27 @@ public class X01MatchRestController {
     }
 
     /**
+     * Returns the existing rematch or creates a new one.
+     *
+     * @param matchId the original match id
+     * @return the existing or newly created rematch
+     * @throws ResourceNotFoundException         when the original match does not exist
+     * @throws OptimisticLockingFailureException when an affected match was modified concurrently
+     * @throws IllegalStateException             when Dart Bot processing encounters invalid match state
+     */
+    @PostMapping(path = RestEndpoints.X01.MATCH_REMATCH)
+    @ResponseStatus(HttpStatus.OK)
+    public X01Match createRematch(@PathVariable ObjectId matchId) {
+        return matchService.createRematch(matchId);
+    }
+
+    /**
      * Gets an X01 match by id.
      *
      * @param matchId the match id
      * @return the requested match
-     * @throws ResourceNotFoundException when the match does not exist
+     * @throws ResourceNotFoundException         when the match does not exist
+     * @throws OptimisticLockingFailureException when the match was modified concurrently
      */
     @GetMapping(path = RestEndpoints.X01.MATCH, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
@@ -63,10 +79,11 @@ public class X01MatchRestController {
     }
 
     /**
-     * Gets multiple X01 matches by id.
+     * Gets existing X01 matches in the requested order, omitting missing matches.
      *
      * @param ids the match ids
-     * @return the matching x01 matches
+     * @return the existing matches in requested order
+     * @throws OptimisticLockingFailureException when an affected match was modified concurrently
      */
     @GetMapping(path = RestEndpoints.X01.MATCHES, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
@@ -134,11 +151,13 @@ public class X01MatchRestController {
     public X01Match deleteLastHumanTurn(@PathVariable ObjectId matchId) {
         return matchService.deleteLastHumanTurn(matchId);
     }
+
     /**
      * Deletes an X01 match.
      *
      * @param matchId the match id
-     * @throws ResourceNotFoundException when the match does not exist
+     * @throws ResourceNotFoundException         when the match does not exist
+     * @throws OptimisticLockingFailureException when an affected match was modified concurrently
      */
     @DeleteMapping(path = RestEndpoints.X01.MATCH)
     @ResponseStatus(HttpStatus.OK)

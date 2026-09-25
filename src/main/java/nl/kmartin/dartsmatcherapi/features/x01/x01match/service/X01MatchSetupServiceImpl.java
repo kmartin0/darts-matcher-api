@@ -38,7 +38,30 @@ public class X01MatchSetupServiceImpl implements IX01MatchSetupService {
                 null,
                 MatchStatus.IN_PLAY,
                 players,
+                null,
                 request.matchSettings(),
+                new TreeMap<>(),
+                new X01MatchProgress(),
+                new LinkedHashMap<>()
+        );
+    }
+
+    @Override
+    public X01Match initializeRematch(X01Match match) {
+        // Create fresh player state while preserving player identity, configuration and order.
+        ArrayList<X01MatchPlayer> players = createResetMatchPlayers(match.getPlayers());
+
+        // Initialize a new match without played sets, derived state or a rematch reference.
+        return new X01Match(
+                null,
+                null,
+                0,
+                Instant.now(),
+                null,
+                MatchStatus.IN_PLAY,
+                players,
+                null,
+                match.getMatchSettings(),
                 new TreeMap<>(),
                 new X01MatchProgress(),
                 new LinkedHashMap<>()
@@ -48,7 +71,7 @@ public class X01MatchSetupServiceImpl implements IX01MatchSetupService {
     @Override
     public X01Match resetMatch(X01Match match) {
         // Reset player state while preserving player identity and configuration.
-        ArrayList<X01MatchPlayer> players = resetMatchPlayers(match.getPlayers());
+        ArrayList<X01MatchPlayer> players = createResetMatchPlayers(match.getPlayers());
 
         // Recreate the starting match state while preserving persisted identity and configuration.
         return new X01Match(
@@ -59,6 +82,7 @@ public class X01MatchSetupServiceImpl implements IX01MatchSetupService {
                 null,
                 MatchStatus.IN_PLAY,
                 players,
+                match.getRematchId(),
                 match.getMatchSettings(),
                 new TreeMap<>(),
                 new X01MatchProgress(),
@@ -86,12 +110,12 @@ public class X01MatchSetupServiceImpl implements IX01MatchSetupService {
     }
 
     /**
-     * Recreates match players for a reset while preserving their identity and configuration.
+     * Creates fresh player state while preserving player identity, configuration and order.
      *
      * @param players the existing match players
-     * @return the reset match players
+     * @return the players with reset state
      */
-    private ArrayList<X01MatchPlayer> resetMatchPlayers(List<X01MatchPlayer> players) {
+    private ArrayList<X01MatchPlayer> createResetMatchPlayers(List<X01MatchPlayer> players) {
         return players.stream()
                 .map(player -> new X01MatchPlayer(
                         player.getPlayerId(),

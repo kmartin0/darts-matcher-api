@@ -46,7 +46,8 @@ public class X01MatchWebSocketController {
      *
      * @param matchId the match id
      * @return a message containing the current match
-     * @throws ResourceNotFoundException when the match does not exist
+     * @throws ResourceNotFoundException         when the match does not exist
+     * @throws OptimisticLockingFailureException when the match was modified concurrently
      */
     @SubscribeMapping(WebSocketDestinations.X01.MATCH)
     public WebSocketMessage<X01MatchMessageType, X01Match> subscribeX01Match(
@@ -55,6 +56,30 @@ public class X01MatchWebSocketController {
         return new WebSocketMessage<>(
                 X01MatchMessageType.PROCESS_MATCH,
                 matchService.getMatch(matchId)
+        );
+    }
+
+    /**
+     * Sends the existing or newly created rematch to the requesting client session.
+     *
+     * @param matchId   the original match id
+     * @param publishId the optional client publish id
+     * @param sessionId the WebSocket session id
+     * @throws ResourceNotFoundException         when the original match does not exist
+     * @throws OptimisticLockingFailureException when an affected match was modified concurrently
+     * @throws IllegalStateException             when Dart Bot processing encounters invalid match state
+     */
+    @MessageMapping(WebSocketDestinations.X01.REMATCH)
+    public void createRematch(
+            @DestinationVariable ObjectId matchId,
+            @Header(value = WebSocketHeaders.PUBLISH_ID, required = false) String publishId,
+            @Header(SimpMessageHeaderAccessor.SESSION_ID_HEADER) String sessionId
+    ) {
+        webSocketEventPublisher.sendToUser(
+                X01MatchMessageType.REMATCH,
+                matchService.createRematch(matchId),
+                sessionId,
+                publishId
         );
     }
 
@@ -137,12 +162,13 @@ public class X01MatchWebSocketController {
     }
 
     /**
-     * Deletes an X01 match.
+     * Deletes an X01 match and sends its id to the requesting client session.
      *
      * @param matchId   the match id
      * @param publishId the optional client publish id
      * @param sessionId the WebSocket session id
-     * @throws ResourceNotFoundException when the match does not exist
+     * @throws ResourceNotFoundException         when the match does not exist
+     * @throws OptimisticLockingFailureException when an affected match was modified concurrently
      */
     @MessageMapping(WebSocketDestinations.X01.DELETE_MATCH)
     public void deleteMatch(

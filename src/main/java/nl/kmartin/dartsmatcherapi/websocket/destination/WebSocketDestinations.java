@@ -29,6 +29,7 @@ public final class WebSocketDestinations {
         public static final String ADD_TURN = "/matches/x01/{matchId}/turns/add";
         public static final String EDIT_TURN = "/matches/x01/{matchId}/turns/edit";
         public static final String DELETE_LAST_TURN = "/matches/x01/{matchId}/turns/delete-last";
+        public static final String REMATCH = "/matches/x01/{matchId}/rematch";
     }
 
     /**

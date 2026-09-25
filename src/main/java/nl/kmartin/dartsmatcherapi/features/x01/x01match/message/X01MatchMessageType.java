@@ -11,4 +11,5 @@ public enum X01MatchMessageType {
     DELETE_LAST_TURN,
     DELETE_MATCH,
     RESET_MATCH,
+    REMATCH
 }

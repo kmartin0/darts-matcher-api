@@ -30,6 +30,8 @@ import java.util.stream.Collectors;
 
 /**
  * Represents an X01 match, including its settings, ordered sets, progress and standings.
+ * Stores match identity and versioning, lifecycle dates and status, participating players,
+ * the rematch reference (null when no rematch) and the version used for WebSocket broadcasts.
  */
 @Getter
 @Setter
@@ -64,12 +66,13 @@ public class X01Match extends BaseMatch<X01MatchPlayer> {
             Instant endDate,
             MatchStatus matchStatus,
             ArrayList<X01MatchPlayer> players,
+            ObjectId rematchId,
             X01MatchSettings matchSettings,
             NavigableMap<Integer, X01Set> sets,
             X01MatchProgress matchProgress,
             LinkedHashMap<ObjectId, X01StandingsEntry> standings
     ) {
-        super(id, version, broadcastVersion, startDate, endDate, matchStatus, players, MatchType.X01);
+        super(id, version, broadcastVersion, startDate, endDate, matchStatus, players, MatchType.X01, rematchId);
         this.matchSettings = matchSettings;
         this.sets = sets;
         this.matchProgress = matchProgress;
