@@ -21,6 +21,7 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01leground.service.IX01LegRoundS
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateMatchRequest;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateTurnRequest;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01EditTurnRequest;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.message.X01MatchMessage;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.message.X01MatchMessageType;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
@@ -273,7 +274,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
 
         // Delete the aggregate before publishing its removal to connected clients.
         matchRepository.deleteById(matchId);
-        broadcastMatchEvent(matchId, X01MatchMessageType.DELETE_MATCH, matchId);
+        broadcastMatchEvent(matchId, new X01MatchMessage.DeleteMatch(matchId));
     }
 
     @Override
@@ -552,30 +553,36 @@ public class X01MatchServiceImpl implements IX01MatchService {
      * @throws OptimisticLockingFailureException when the match was modified concurrently
      */
     private void saveMatch(X01Match match, X01MatchMessageType messageType) {
-        if (messageType == X01MatchMessageType.DELETE_MATCH) {
-            throw new IllegalArgumentException("Invalid event type for save operation: " + messageType);
-        }
+        X01MatchMessage<X01Match> message = switch (messageType) {
+            case PROCESS_MATCH -> new X01MatchMessage.ProcessMatch(match);
+            case ADD_HUMAN_TURN -> new X01MatchMessage.AddHumanTurn(match);
+            case ADD_BOT_TURN -> new X01MatchMessage.AddBotTurn(match);
+            case EDIT_TURN -> new X01MatchMessage.EditTurn(match);
+            case DELETE_LAST_TURN -> new X01MatchMessage.DeleteLastTurn(match);
+            case RESET_MATCH -> new X01MatchMessage.ResetMatch(match);
+            case REMATCH -> new X01MatchMessage.Rematch(match);
+            case DELETE_MATCH -> throw new IllegalArgumentException(
+                    "Invalid message type for save operation: " + messageType
+            );
+        };
 
         // Increment the version published to connected clients.
         match.setBroadcastVersion(match.getBroadcastVersion() + 1);
 
         matchRepository.save(match);
-        broadcastMatchEvent(match.getId(), messageType, match);
+        broadcastMatchEvent(match.getId(), message);
     }
 
     /**
-     * Publishes an X01 match event for broadcasting to match subscribers.
+     * Publishes an X01 match message for broadcasting to match subscribers.
      *
-     * @param matchId     the match id
-     * @param messageType the message type
-     * @param payload     the event payload
-     * @param <P>         the payload type
+     * @param matchId the match id
+     * @param message the message to broadcast
      */
-    private <P> void broadcastMatchEvent(ObjectId matchId, X01MatchMessageType messageType, P payload) {
+    private void broadcastMatchEvent(ObjectId matchId, X01MatchMessage<?> message) {
         webSocketEventPublisher.broadcast(
                 WebSocketDestinations.broadcast(WebSocketDestinations.X01.MATCH, matchId),
-                messageType,
-                payload
+                message
         );
     }
 

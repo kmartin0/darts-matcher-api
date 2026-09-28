@@ -5,6 +5,7 @@ import nl.kmartin.dartsmatcherapi.error.exception.InvalidArgumentsException;
 import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateTurnRequest;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01EditTurnRequest;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.message.X01MatchMessage;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.message.X01MatchMessageType;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.IX01MatchService;
@@ -50,13 +51,8 @@ public class X01MatchWebSocketController {
      * @throws OptimisticLockingFailureException when the match was modified concurrently
      */
     @SubscribeMapping(WebSocketDestinations.X01.MATCH)
-    public WebSocketMessage<X01MatchMessageType, X01Match> subscribeX01Match(
-            @DestinationVariable ObjectId matchId
-    ) {
-        return new WebSocketMessage<>(
-                X01MatchMessageType.PROCESS_MATCH,
-                matchService.getMatch(matchId)
-        );
+    public WebSocketMessage<X01MatchMessageType, X01Match> subscribeX01Match(@DestinationVariable ObjectId matchId) {
+        return new X01MatchMessage.ProcessMatch(matchService.getMatch(matchId));
     }
 
     /**
@@ -76,8 +72,7 @@ public class X01MatchWebSocketController {
             @Header(SimpMessageHeaderAccessor.SESSION_ID_HEADER) String sessionId
     ) {
         webSocketEventPublisher.sendToUser(
-                X01MatchMessageType.REMATCH,
-                matchService.createRematch(matchId),
+                new X01MatchMessage.Rematch(matchService.createRematch(matchId)),
                 sessionId,
                 publishId
         );
@@ -103,8 +98,7 @@ public class X01MatchWebSocketController {
             @Header(SimpMessageHeaderAccessor.SESSION_ID_HEADER) String sessionId
     ) {
         webSocketEventPublisher.sendToUser(
-                X01MatchMessageType.ADD_HUMAN_TURN,
-                matchService.addTurn(matchId, turnRequest),
+                new X01MatchMessage.AddHumanTurn(matchService.addTurn(matchId, turnRequest)),
                 sessionId,
                 publishId
         );
@@ -130,8 +124,7 @@ public class X01MatchWebSocketController {
             @Header(SimpMessageHeaderAccessor.SESSION_ID_HEADER) String sessionId
     ) {
         webSocketEventPublisher.sendToUser(
-                X01MatchMessageType.EDIT_TURN,
-                matchService.editTurn(matchId, turnRequest),
+                new X01MatchMessage.EditTurn(matchService.editTurn(matchId, turnRequest)),
                 sessionId,
                 publishId
         );
@@ -154,8 +147,7 @@ public class X01MatchWebSocketController {
             @Header(SimpMessageHeaderAccessor.SESSION_ID_HEADER) String sessionId
     ) {
         webSocketEventPublisher.sendToUser(
-                X01MatchMessageType.DELETE_LAST_TURN,
-                matchService.deleteLastHumanTurn(matchId),
+                new X01MatchMessage.DeleteLastTurn(matchService.deleteLastHumanTurn(matchId)),
                 sessionId,
                 publishId
         );
@@ -179,8 +171,7 @@ public class X01MatchWebSocketController {
         matchService.deleteMatch(matchId);
 
         webSocketEventPublisher.sendToUser(
-                X01MatchMessageType.DELETE_MATCH,
-                matchId,
+                new X01MatchMessage.DeleteMatch(matchId),
                 sessionId,
                 publishId
         );
@@ -203,8 +194,7 @@ public class X01MatchWebSocketController {
             @Header(SimpMessageHeaderAccessor.SESSION_ID_HEADER) String sessionId
     ) {
         webSocketEventPublisher.sendToUser(
-                X01MatchMessageType.RESET_MATCH,
-                matchService.resetMatch(matchId),
+                new X01MatchMessage.ResetMatch(matchService.resetMatch(matchId)),
                 sessionId,
                 publishId
         );
@@ -227,8 +217,7 @@ public class X01MatchWebSocketController {
             @Header(SimpMessageHeaderAccessor.SESSION_ID_HEADER) String sessionId
     ) {
         webSocketEventPublisher.sendToUser(
-                X01MatchMessageType.PROCESS_MATCH,
-                matchService.reprocessMatch(matchId),
+                new X01MatchMessage.ProcessMatch(matchService.reprocessMatch(matchId)),
                 sessionId,
                 publishId
         );

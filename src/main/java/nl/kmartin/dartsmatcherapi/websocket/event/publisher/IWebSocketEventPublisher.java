@@ -2,31 +2,37 @@ package nl.kmartin.dartsmatcherapi.websocket.event.publisher;
 
 import nl.kmartin.dartsmatcherapi.error.response.ApiErrorCode;
 import nl.kmartin.dartsmatcherapi.error.response.TargetError;
+import nl.kmartin.dartsmatcherapi.websocket.message.model.WebSocketMessage;
 
 public interface IWebSocketEventPublisher {
 
     /**
-     * Publishes an event for broadcasting a WebSocket message.
+     * Publishes an event for broadcasting a snapshot of a WebSocket message.
      *
      * @param destination the WebSocket destination
-     * @param messageType the WebSocket message type
-     * @param payload     the message payload
+     * @param message     the message to broadcast
      * @param <M>         the message type enum
      * @param <P>         the payload type
      */
-    <M extends Enum<M>, P> void broadcast(String destination, M messageType, P payload);
+    <M extends Enum<M>, P> void broadcast(
+            String destination,
+            WebSocketMessage<M, P> message
+    );
 
     /**
-     * Publishes an event for sending a WebSocket message to a specific client session.
+     * Publishes an event for sending a snapshot of a WebSocket message to a specific client session.
      *
-     * @param messageType the WebSocket message type
-     * @param payload     the message payload
-     * @param sessionId   the target WebSocket session ID
-     * @param publishId   the publish correlation ID
-     * @param <M>         the message type enum
-     * @param <P>         the payload type
+     * @param message   the message to send
+     * @param sessionId the target WebSocket session ID
+     * @param publishId the publish correlation ID, or null when not applicable
+     * @param <M>       the message type enum
+     * @param <P>       the payload type
      */
-    <M extends Enum<M>, P> void sendToUser(M messageType, P payload, String sessionId, String publishId);
+    <M extends Enum<M>, P> void sendToUser(
+            WebSocketMessage<M, P> message,
+            String sessionId,
+            String publishId
+    );
 
     /**
      * Publishes an event for sending a WebSocket error to a specific client session.

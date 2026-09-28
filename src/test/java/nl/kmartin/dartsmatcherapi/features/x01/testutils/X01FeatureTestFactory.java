@@ -223,7 +223,7 @@ public class X01FeatureTestFactory {
     }
 
     public IWebSocketEventPublisher createWebsocketEventPublisher() {
-        return new WebSocketEventPublisherImpl(eventPublisherMock);
+        return new WebSocketEventPublisherImpl(eventPublisherMock, createObjectMapper());
     }
 
     public MessageResolver createMessageResolver() {

@@ -1,13 +1,18 @@
 package nl.kmartin.dartsmatcherapi.websocket.message.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
- * Represents a WebSocket message containing a message type and payload.
+ * Defines a WebSocket message with a message type and payload.
  *
- * @param messageType the WebSocket message type
- * @param payload     the message payload
+ * @param <M> the message type enum
+ * @param <P> the payload type
  */
-public record WebSocketMessage<M, P>(
-        M messageType,
-        P payload
-) {
+public interface WebSocketMessage<M extends Enum<M>, P> {
+
+    @JsonProperty("messageType")
+    M messageType();
+
+    @JsonProperty("payload")
+    P payload();
 }

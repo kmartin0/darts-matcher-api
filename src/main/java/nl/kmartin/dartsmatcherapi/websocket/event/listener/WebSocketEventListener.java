@@ -30,7 +30,7 @@ public class WebSocketEventListener {
     }
 
     /**
-     * Sends a WebSocket broadcast event to all subscribers of its destination.
+     * Sends a captured WebSocket message to all subscribers of its destination.
      *
      * Delivery is delayed until successful commit when a transaction is active.
      * Events published without a transaction are delivered immediately.
@@ -38,14 +38,12 @@ public class WebSocketEventListener {
      * @param event the WebSocket broadcast event
      */
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
-    public void handleWebSocketBroadcastEvent(WebSocketBroadcastEvent<?, ?> event) {
-        WebSocketMessage<?, ?> message = new WebSocketMessage<>(event.messageType(), event.payload());
-
-        sendBroadcast(event.destination(), message);
+    public void handleWebSocketBroadcastEvent(WebSocketBroadcastEvent event) {
+        sendBroadcast(event.destination(), event.message());
     }
 
     /**
-     * Sends a successful WebSocket response to the originating client session.
+     * Sends a captured successful WebSocket response to the originating client session.
      *
      * Delivery is delayed until successful commit when a transaction is active.
      * Events published without a transaction are delivered immediately.
@@ -53,10 +51,8 @@ public class WebSocketEventListener {
      * @param event the WebSocket send-to-user event
      */
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
-    public void handleWebSocketSendToUserEvent(WebSocketSendToUserEvent<?, ?> event) {
-        WebSocketMessage<?, ?> message = new WebSocketMessage<>(event.messageType(), event.payload());
-
-        sendToUser(WebSocketDestinations.RESPONSE_QUEUE, message, event.sessionId(), event.publishId());
+    public void handleWebSocketSendToUserEvent(WebSocketSendToUserEvent event) {
+        sendToUser(WebSocketDestinations.RESPONSE_QUEUE, event.message(), event.sessionId(), event.publishId());
     }
 
     /**
@@ -82,7 +78,7 @@ public class WebSocketEventListener {
      * @param destination the destination to send to
      * @param message     the message to send
      */
-    private void sendBroadcast(String destination, Object message) {
+    private void sendBroadcast(String destination, WebSocketMessage<?, ?> message) {
         messagingTemplate.convertAndSend(destination, message);
     }
 

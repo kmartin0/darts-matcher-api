@@ -1,16 +1,16 @@
 package nl.kmartin.dartsmatcherapi.websocket.event.model;
 
+import nl.kmartin.dartsmatcherapi.websocket.message.model.WebSocketMessage;
+
 /**
  * Represents an internal WebSocket event sent to a specific client session.
  *
- * @param messageType the message type
- * @param payload     the message payload
- * @param sessionId   the target WebSocket session
- * @param publishId   the publish request identifier
+ * @param message   the WebSocket message captured by the publisher
+ * @param sessionId the target WebSocket session ID
+ * @param publishId the publish correlation ID, or null when not applicable
  */
-public record WebSocketSendToUserEvent<M, P>(
-        M messageType,
-        P payload,
+public record WebSocketSendToUserEvent(
+        WebSocketMessage<?, ?> message,
         String sessionId,
         String publishId
 ) {
