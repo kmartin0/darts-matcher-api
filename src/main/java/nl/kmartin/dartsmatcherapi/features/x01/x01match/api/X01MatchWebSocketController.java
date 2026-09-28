@@ -56,7 +56,7 @@ public class X01MatchWebSocketController {
     }
 
     /**
-     * Sends the existing or newly created rematch to the requesting client session.
+     * Creates or reuses a rematch and sends the original match to the requesting client session.
      *
      * @param matchId   the original match id
      * @param publishId the optional client publish id

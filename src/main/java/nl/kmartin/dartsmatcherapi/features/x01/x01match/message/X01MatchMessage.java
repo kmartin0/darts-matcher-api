@@ -114,10 +114,9 @@ public sealed interface X01MatchMessage<P>
     }
 
     /**
-     * Contains the original match with its rematch reference for broadcasts,
-     * or the existing or newly created rematch for direct responses.
+     * Contains the original match with its existing or newly created rematch reference.
      *
-     * @param payload the match appropriate to the response or broadcast
+     * @param payload the original match containing the rematch reference
      */
     record Rematch(X01Match payload) implements X01MatchMessage<X01Match> {
 

@@ -25,14 +25,14 @@ public interface IX01MatchService {
     X01Match createMatch(@NotNull @Valid X01CreateMatchRequest request);
 
     /**
-     * Returns the existing rematch or creates one using the original match's configuration.
+     * Creates a rematch unless an existing rematch is already referenced.
      *
      * New rematches preserve settings, player identities and order, with fresh match state.
-     * Links the rematch to the original match and publishes the updated original.
+     * Links a new rematch to the original match and publishes the updated original.
      * Missing rematches are replaced. The original match does not need to be concluded.
      *
      * @param matchId the original match id
-     * @return the existing or newly created rematch
+     * @return the original match containing the existing or newly created rematch reference
      * @throws ResourceNotFoundException         when the original match does not exist
      * @throws OptimisticLockingFailureException when an affected match was modified concurrently
      * @throws IllegalStateException             when Dart Bot processing encounters invalid match state

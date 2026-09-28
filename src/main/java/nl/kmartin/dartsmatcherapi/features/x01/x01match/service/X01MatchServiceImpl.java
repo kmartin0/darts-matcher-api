@@ -120,10 +120,11 @@ public class X01MatchServiceImpl implements IX01MatchService {
     public X01Match createRematch(ObjectId matchId) {
         X01Match matchToRematch = getMatch(matchId);
 
-        // Reuse the existing rematch when it can still be loaded.
+        // Preserve the existing rematch reference when its target still exists.
         if (matchToRematch.getRematchId() != null) {
             try {
-                return getMatch(matchToRematch.getRematchId());
+                checkMatchExists(matchToRematch.getRematchId());
+                return matchToRematch;
             } catch (ResourceNotFoundException e) {
                 // Replace the stale reference with a newly created rematch.
             }
@@ -137,7 +138,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
         matchToRematch.setRematchId(rematch.getId());
         saveMatch(matchToRematch, X01MatchMessageType.REMATCH);
 
-        return rematch;
+        return matchToRematch;
     }
 
     @Override

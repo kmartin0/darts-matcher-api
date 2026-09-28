@@ -50,10 +50,10 @@ public class X01MatchRestController {
     }
 
     /**
-     * Returns the existing rematch or creates a new one.
+     * Creates or reuses a rematch and returns the original match.
      *
      * @param matchId the original match id
-     * @return the existing or newly created rematch
+     * @return the original match containing the existing or newly created rematch reference
      * @throws ResourceNotFoundException         when the original match does not exist
      * @throws OptimisticLockingFailureException when an affected match was modified concurrently
      * @throws IllegalStateException             when Dart Bot processing encounters invalid match state
@@ -63,7 +63,6 @@ public class X01MatchRestController {
     public X01Match createRematch(@PathVariable ObjectId matchId) {
         return matchService.createRematch(matchId);
     }
-
     /**
      * Gets an X01 match by id.
      *
