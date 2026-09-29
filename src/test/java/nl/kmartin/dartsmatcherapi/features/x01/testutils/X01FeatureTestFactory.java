@@ -29,15 +29,20 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01leg.service.X01LegResultServic
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.service.X01LegServiceImpl;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.service.IX01LegRoundService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.service.X01LegRoundServiceImpl;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.mapper.X01MatchExceptionMapper;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.repository.IX01MatchRepository;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.IX01MatchProgressService;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.IX01MatchRematchService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.IX01MatchResultService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.IX01MatchService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.IX01MatchSetupService;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.IX01MatchTurnService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.X01MatchProgressServiceImpl;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.X01MatchRematchServiceImpl;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.X01MatchResultServiceImpl;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.X01MatchServiceImpl;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.X01MatchSetupServiceImpl;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.service.X01MatchTurnServiceImpl;
 import nl.kmartin.dartsmatcherapi.features.x01.x01resultstatistics.service.IX01ResultStatisticsService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01resultstatistics.service.X01ResultStatisticsServiceImpl;
 import nl.kmartin.dartsmatcherapi.features.x01.x01rules.service.IX01RulesService;
@@ -76,20 +81,20 @@ public class X01FeatureTestFactory {
         this.eventPublisherMock = eventPublisherMock;
     }
 
+    // Match
+
     public IX01MatchService createMatchService() {
         return new X01MatchServiceImpl(
                 matchRepositoryMock,
                 createMatchSetupService(),
+                createMatchTurnService(),
+                createMatchRematchService(),
                 createMatchResultService(),
                 createMatchProgressService(),
                 createStatisticsService(),
-                createSetProgressService(),
-                createLegService(),
-                createLegRoundService(),
-                createDartBotService(),
-                createWebsocketEventPublisher(),
+                createWebSocketEventPublisher(),
                 createStandingsService(),
-                createMessageResolver()
+                createMatchExceptionMapper()
         );
     }
 
@@ -97,8 +102,21 @@ public class X01FeatureTestFactory {
         return new X01MatchSetupServiceImpl();
     }
 
-    public IX01MatchResultService createMatchResultService() {
-        return new X01MatchResultServiceImpl(createSetResultService(), createStandingsService());
+    public IX01MatchTurnService createMatchTurnService() {
+        return new X01MatchTurnServiceImpl(
+                createMatchProgressService(),
+                createSetProgressService(),
+                createLegService(),
+                createLegRoundService(),
+                createDartBotService()
+        );
+    }
+
+    public IX01MatchRematchService createMatchRematchService() {
+        return new X01MatchRematchServiceImpl(
+                matchRepositoryMock,
+                createMatchSetupService()
+        );
     }
 
     public IX01MatchProgressService createMatchProgressService() {
@@ -111,17 +129,39 @@ public class X01FeatureTestFactory {
         );
     }
 
+    public IX01MatchResultService createMatchResultService() {
+        return new X01MatchResultServiceImpl(
+                createSetResultService(),
+                createStandingsService()
+        );
+    }
+
+    public X01MatchExceptionMapper createMatchExceptionMapper() {
+        return new X01MatchExceptionMapper(createMessageResolver());
+    }
+
+    // Set
+
     public IX01SetService createSetService() {
         return new X01SetServiceImpl();
     }
 
-    public IX01SetResultService createSetResultService() {
-        return new X01SetResultServiceImpl(createLegResultService(), createStandingsService());
+    public IX01SetProgressService createSetProgressService() {
+        return new X01SetProgressServiceImpl(
+                createLegService(),
+                createLegProgressService(),
+                createRulesService()
+        );
     }
 
-    public IX01SetProgressService createSetProgressService() {
-        return new X01SetProgressServiceImpl(createLegService(), createLegProgressService(), createRulesService());
+    public IX01SetResultService createSetResultService() {
+        return new X01SetResultServiceImpl(
+                createLegResultService(),
+                createStandingsService()
+        );
     }
+
+    // Leg and round
 
     public IX01LegService createLegService() {
         return new X01LegServiceImpl(
@@ -132,6 +172,10 @@ public class X01FeatureTestFactory {
         );
     }
 
+    public IX01LegProgressService createLegProgressService() {
+        return new X01LegProgressServiceImpl(createLegRoundService());
+    }
+
     public IX01LegResultService createLegResultService() {
         return new X01LegResultServiceImpl(
                 createLegRoundService(),
@@ -139,13 +183,11 @@ public class X01FeatureTestFactory {
         );
     }
 
-    public IX01LegProgressService createLegProgressService() {
-        return new X01LegProgressServiceImpl(createLegRoundService());
-    }
-
     public IX01LegRoundService createLegRoundService() {
         return new X01LegRoundServiceImpl();
     }
+
+    // Standings and statistics
 
     public IX01StandingsService createStandingsService() {
         return new X01StandingsServiceImpl(
@@ -180,6 +222,8 @@ public class X01FeatureTestFactory {
         return new X01AverageStatisticsServiceImpl();
     }
 
+    // Dart Bot
+
     public IX01DartBotService createDartBotService() {
         return new X01DartBotServiceImpl(
                 createDartBotThrowSimulator(),
@@ -192,21 +236,27 @@ public class X01FeatureTestFactory {
                 createDartboardService(),
                 createCheckoutService(),
                 createDartBotCheckoutPolicy(),
-                createDartBotAccuracyCalculator(),
+                createDartBotDeviationCalculator(),
                 createDartBotScoringStrategy()
         );
-    }
-
-    public IX01DartBotScoringStrategy createDartBotScoringStrategy() {
-        return new X01DartBotScoringStrategyImpl();
     }
 
     public IX01DartBotCheckoutPolicy createDartBotCheckoutPolicy() {
         return new X01DartBotCheckoutPolicyImpl(createCheckoutService());
     }
 
-    public IX01DartBotDeviationCalculator createDartBotAccuracyCalculator() {
+    public IX01DartBotDeviationCalculator createDartBotDeviationCalculator() {
         return new X01DartBotDeviationCalculatorImpl();
+    }
+
+    public IX01DartBotScoringStrategy createDartBotScoringStrategy() {
+        return new X01DartBotScoringStrategyImpl();
+    }
+
+    // Rules, checkouts and dartboard
+
+    public IX01RulesService createRulesService() {
+        return new X01RulesServiceImpl();
     }
 
     public IX01CheckoutService createCheckoutService() {
@@ -218,11 +268,9 @@ public class X01FeatureTestFactory {
         return new DartboardServiceImpl();
     }
 
-    public IX01RulesService createRulesService() {
-        return new X01RulesServiceImpl();
-    }
+    // Infrastructure
 
-    public IWebSocketEventPublisher createWebsocketEventPublisher() {
+    public IWebSocketEventPublisher createWebSocketEventPublisher() {
         return new WebSocketEventPublisherImpl(eventPublisherMock, createObjectMapper());
     }
 

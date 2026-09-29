@@ -47,8 +47,7 @@ public class X01MatchWebSocketController {
      *
      * @param matchId the match id
      * @return a message containing the current match
-     * @throws ResourceNotFoundException         when the match does not exist
-     * @throws OptimisticLockingFailureException when the match was modified concurrently
+     * @throws ResourceNotFoundException when the match does not exist
      */
     @SubscribeMapping(WebSocketDestinations.X01.MATCH)
     public WebSocketMessage<X01MatchMessageType, X01Match> subscribeX01Match(@DestinationVariable ObjectId matchId) {
@@ -201,7 +200,8 @@ public class X01MatchWebSocketController {
     }
 
     /**
-     * Reprocesses a match and publishes the rebuilt state.
+     * Rebuilds the match state, clears any stale rematch reference and processes pending Dart Bot turns.
+     * Sends the resulting match to the requesting client session.
      *
      * @param matchId   the match id
      * @param publishId the optional client publish id

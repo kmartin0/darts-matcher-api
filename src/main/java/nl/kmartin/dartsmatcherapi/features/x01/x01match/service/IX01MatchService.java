@@ -42,23 +42,19 @@ public interface IX01MatchService {
     /**
      * Gets an X01 match by id.
      *
-     * Clears any stale rematch reference, saving the correction and publishing an update.
-     *
      * @param matchId the match id
      * @return the requested match
-     * @throws ResourceNotFoundException         when the match does not exist
-     * @throws OptimisticLockingFailureException when the match was modified concurrently during reference cleanup
+     * @throws ResourceNotFoundException when the match does not exist
      */
     X01Match getMatch(@NotNull ObjectId matchId);
 
     /**
      * Gets existing X01 matches for the supplied ids while preserving the requested order.
      *
-     * Missing matches are omitted. Clears stale rematch references, saving and publishing affected matches.
+     * Missing matches are omitted.
      *
      * @param matchIds the match ids
      * @return the existing matches in requested order
-     * @throws OptimisticLockingFailureException when an affected match was modified concurrently during reference cleanup
      */
     List<X01Match> getMatches(@NotNull List<@NotNull ObjectId> matchIds);
 
@@ -125,7 +121,7 @@ public interface IX01MatchService {
     /**
      * Resets an X01 match to its initial state and reprocesses it.
      *
-     * Preserves match identity, configuration and any reference to an existing rematch.
+     * Preserves match identity, configuration and the rematch reference.
      *
      * @param matchId the match id
      * @return the reset match
@@ -136,7 +132,7 @@ public interface IX01MatchService {
     X01Match resetMatch(@NotNull ObjectId matchId);
 
     /**
-     * Reprocesses the derived state of an existing X01 match.
+     * Rebuilds the derived match state, clears any stale rematch reference and processes pending Dart Bot turns.
      *
      * @param matchId the match id
      * @return the reprocessed match

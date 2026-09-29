@@ -1,38 +1,19 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01match.service;
 
-import nl.kmartin.dartsmatcherapi.error.exception.InvalidArgumentsException;
 import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
-import nl.kmartin.dartsmatcherapi.error.response.ErrorTargets;
-import nl.kmartin.dartsmatcherapi.error.response.TargetError;
-import nl.kmartin.dartsmatcherapi.features.basematch.model.PlayerType;
 import nl.kmartin.dartsmatcherapi.features.x01.x01checkout.model.X01CheckoutInsufficientDartsException;
-import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.model.X01DartBotTurn;
-import nl.kmartin.dartsmatcherapi.features.x01.x01dartbot.service.IX01DartBotService;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01LegEntry;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leg.service.IX01LegService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegAlreadyWonException;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRound;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01TurnAlreadyExistsException;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01TurnEntry;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01TurnMutation;
-import nl.kmartin.dartsmatcherapi.features.x01.x01leground.service.IX01LegRoundService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateMatchRequest;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateTurnRequest;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01EditTurnRequest;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.mapper.X01MatchExceptionMapper;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.message.X01MatchMessage;
-import nl.kmartin.dartsmatcherapi.features.x01.x01match.message.X01MatchMessageType;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.message.X01MatchMessageFactory;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
-import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.repository.IX01MatchRepository;
-import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01Set;
-import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01SetEntry;
-import nl.kmartin.dartsmatcherapi.features.x01.x01set.service.IX01SetProgressService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01standings.service.IX01StandingsService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01statistics.service.IX01StatisticsService;
-import nl.kmartin.dartsmatcherapi.i18n.MessageKeys;
-import nl.kmartin.dartsmatcherapi.i18n.MessageResolver;
 import nl.kmartin.dartsmatcherapi.websocket.destination.WebSocketDestinations;
 import nl.kmartin.dartsmatcherapi.websocket.event.publisher.IWebSocketEventPublisher;
 import org.bson.types.ObjectId;
@@ -41,12 +22,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -54,117 +32,97 @@ import java.util.stream.Collectors;
  * Coordinates creation, retrieval and mutation of X01 matches.
  *
  * Applies turns and edits, rebuilds derived match state, processes Dart Bot turns, persists changes
- * and publishes match updates. Maintains rematch references during creation, retrieval and deletion.
+ * and publishes match updates. Maintains rematch references during creation, reprocessing and deletion.
  */
 @Service
 @Validated
 public class X01MatchServiceImpl implements IX01MatchService {
 
-    private static final int MAX_BOT_TURNS = 2;
+    /**
+     * Maximum consecutive bot turns while matches allow only one Dart Bot.
+     *
+     * Covers finishing a leg, winning the following leg and set with an opening
+     * checkout, then taking the opening turn of the next set.
+     */
+    private static final int MAX_BOT_TURNS = 3;
 
     private final IX01MatchRepository matchRepository;
     private final IX01MatchSetupService matchSetupService;
+    private final IX01MatchTurnService matchTurnService;
+    private final IX01MatchRematchService matchRematchService;
     private final IX01MatchResultService matchResultService;
     private final IX01MatchProgressService matchProgressService;
     private final IX01StatisticsService statisticsService;
-    private final IX01SetProgressService setProgressService;
-    private final IX01LegService legService;
-    private final IX01LegRoundService legRoundService;
-    private final IX01DartBotService dartBotService;
     private final IWebSocketEventPublisher webSocketEventPublisher;
     private final IX01StandingsService standingsService;
-    private final MessageResolver messageResolver;
+    private final X01MatchExceptionMapper matchExceptionMapper;
 
     public X01MatchServiceImpl(
             IX01MatchRepository matchRepository,
             IX01MatchSetupService matchSetupService,
+            IX01MatchTurnService matchTurnService,
+            IX01MatchRematchService matchRematchService,
             IX01MatchResultService matchResultService,
             IX01MatchProgressService matchProgressService,
             IX01StatisticsService statisticsService,
-            IX01SetProgressService setProgressService,
-            IX01LegService legService,
-            IX01LegRoundService legRoundService,
-            IX01DartBotService dartBotService,
             IWebSocketEventPublisher webSocketEventPublisher,
             IX01StandingsService standingsService,
-            MessageResolver messageResolver
+            X01MatchExceptionMapper matchExceptionMapper
     ) {
         this.matchRepository = matchRepository;
         this.matchSetupService = matchSetupService;
+        this.matchTurnService = matchTurnService;
+        this.matchRematchService = matchRematchService;
         this.matchResultService = matchResultService;
         this.matchProgressService = matchProgressService;
         this.statisticsService = statisticsService;
-        this.setProgressService = setProgressService;
-        this.legService = legService;
-        this.legRoundService = legRoundService;
-        this.dartBotService = dartBotService;
         this.webSocketEventPublisher = webSocketEventPublisher;
         this.standingsService = standingsService;
-        this.messageResolver = messageResolver;
+        this.matchExceptionMapper = matchExceptionMapper;
     }
 
     @Override
     @Transactional
     public X01Match createMatch(X01CreateMatchRequest request) {
-        // Initialize the complete match state from the creation request.
         X01Match match = matchSetupService.initializeNewMatch(request);
 
-        // Persist the initialized match and process any immediately scheduled Dart Bot turns.
-        saveMatchAndProcessBotTurns(match, X01MatchMessageType.PROCESS_MATCH);
-
-        return match;
+        return saveMatchAndProcessBotTurns(match, X01MatchMessage.ProcessMatch::new);
     }
 
     @Override
     @Transactional
     public X01Match createRematch(ObjectId matchId) {
         X01Match matchToRematch = getMatch(matchId);
+        X01Match rematch = matchRematchService.getOrCreateRematch(matchToRematch);
 
-        // Preserve the existing rematch reference when its target still exists.
-        if (matchToRematch.getRematchId() != null) {
-            try {
-                checkMatchExists(matchToRematch.getRematchId());
-                return matchToRematch;
-            } catch (ResourceNotFoundException e) {
-                // Replace the stale reference with a newly created rematch.
-            }
+        // Skip persistence when the rematch already exists.
+        if (matchToRematch.getRematchId() != null && Objects.equals(matchToRematch.getRematchId(), rematch.getId())) {
+            return matchToRematch;
         }
 
-        // Initialize and persist the rematch, including any initial Dart Bot turns.
-        X01Match rematch = matchSetupService.initializeRematch(matchToRematch);
-        saveMatchAndProcessBotTurns(rematch, X01MatchMessageType.PROCESS_MATCH);
-
-        // Link the original match to its rematch and broadcast the updated original.
+        // Persist the new rematch, then link the original match to it.
+        rematch = saveMatchAndProcessBotTurns(rematch, X01MatchMessage.ProcessMatch::new);
         matchToRematch.setRematchId(rematch.getId());
-        saveMatch(matchToRematch, X01MatchMessageType.REMATCH);
 
-        return matchToRematch;
+        return saveMatch(matchToRematch, X01MatchMessage.Rematch::new);
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public X01Match getMatch(ObjectId matchId) {
-        X01Match match = matchRepository.findById(matchId)
+        return matchRepository.findById(matchId)
                 .orElseThrow(() -> new ResourceNotFoundException(X01Match.class, matchId));
-
-        // Clear a stale rematch reference before returning the match.
-        clearStaleRematchReferences(List.of(match));
-
-        return match;
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<X01Match> getMatches(List<ObjectId> matchIds) {
         // Index the matches that currently exist so the requested order can be restored.
         Map<ObjectId, X01Match> matchMap = matchRepository.findAllById(matchIds)
                 .stream()
                 .collect(Collectors.toMap(X01Match::getId, Function.identity()));
 
-        // Clear stale rematch references before returning the matches.
-        clearStaleRematchReferences(matchMap.values());
-
-        // Preserve the supplied ID order while omitting matches that no longer exist.
+        // Preserve the supplied ID order while omitting matches that don't exist.
         return matchIds.stream()
                 .map(matchMap::get)
                 .filter(Objects::nonNull)
@@ -184,21 +142,13 @@ public class X01MatchServiceImpl implements IX01MatchService {
     public X01Match addTurn(ObjectId matchId, X01CreateTurnRequest turnRequest) {
         X01Match match = getMatch(matchId);
 
-        // Apply the submitted turn to the currently active round and thrower.
         try {
-            addTurnToCurrentPlayer(match, turnRequest.getScore(), turnRequest.getCheckoutDartsUsed(), turnRequest.getDoublesMissed());
-        } catch (X01TurnAlreadyExistsException e) {
-            throw mapTurnAlreadyExistsException();
-        } catch (X01CheckoutInsufficientDartsException e) {
-            throw mapCheckoutInsufficientDartsException(e);
-        } catch (X01LegAlreadyWonException e) {
-            throw mapLegAlreadyWonException();
+            matchTurnService.addTurnToCurrentThrower(match, turnRequest);
+        } catch (RuntimeException e) {
+            throw matchExceptionMapper.map(e);
         }
 
-        // Rebuild and persist the match before processing any following Dart Bot turns.
-        saveMatchAndProcessBotTurns(match, X01MatchMessageType.ADD_HUMAN_TURN);
-
-        return match;
+        return saveMatchAndProcessBotTurns(match, X01MatchMessage.AddHumanTurn::new);
     }
 
     @Override
@@ -206,35 +156,13 @@ public class X01MatchServiceImpl implements IX01MatchService {
     public X01Match editTurn(ObjectId matchId, X01EditTurnRequest turnRequest) {
         X01Match match = getMatch(matchId);
 
-        // Resolve the leg containing the turn being edited.
-        X01SetEntry setEntry = matchProgressService.getSetOrThrow(match, turnRequest.getSet());
-        X01LegEntry legEntry = setProgressService.getLegOrThrow(setEntry.set(), turnRequest.getLeg());
-
-        int x01 = match.getMatchSettings().getX01();
-        boolean trackDoubles = match.getMatchSettings().isTrackDoubles();
-
-        // Replace the turn and rebuild the leg state affected by the change.
         try {
-            legService.replaceTurn(new X01TurnMutation(
-                    x01,
-                    legEntry.leg(),
-                    turnRequest.getRound(),
-                    turnRequest.getScore(),
-                    turnRequest.getDoublesMissed(),
-                    turnRequest.getCheckoutDartsUsed(),
-                    turnRequest.getPlayerId(),
-                    trackDoubles
-            ));
-        } catch (X01CheckoutInsufficientDartsException e) {
-            throw mapCheckoutInsufficientDartsException(e);
-        } catch (X01LegAlreadyWonException e) {
-            throw mapLegAlreadyWonException();
+            matchTurnService.replaceTurn(match, turnRequest);
+        } catch (RuntimeException e) {
+            throw matchExceptionMapper.map(e);
         }
 
-        // Rebuild and persist the match before processing any following Dart Bot turns.
-        saveMatchAndProcessBotTurns(match, X01MatchMessageType.EDIT_TURN);
-
-        return match;
+        return saveMatchAndProcessBotTurns(match, X01MatchMessage.EditTurn::new);
     }
 
     @Override
@@ -242,27 +170,12 @@ public class X01MatchServiceImpl implements IX01MatchService {
     public X01Match deleteLastHumanTurn(ObjectId matchId) {
         X01Match match = getMatch(matchId);
 
-        // Leave the recorded turns unchanged when there is no human turn to undo.
-        if (!hasHumanTurn(match)) {
+        // Skip further processing when no turn was removed.
+        if (!matchTurnService.deleteLastHumanTurn(match)) {
             return match;
         }
 
-        // Repeatedly delete the last turn from the match until a human turn has been deleted.
-        // Stop early if no turn remains or the removed turn's player cannot be found.
-        while (true) {
-            Optional<X01TurnEntry> removedTurn = matchProgressService.removeLastTurnFromMatch(match);
-            if (removedTurn.isEmpty()) break;
-
-            Optional<X01MatchPlayer> removedTurnPlayer = getPlayerById(match, removedTurn.get().playerId());
-            if (removedTurnPlayer.isEmpty()) break;
-
-            if (removedTurnPlayer.get().getPlayerType() != PlayerType.DART_BOT) break;
-        }
-
-        // Rebuild and persist the match before processing any following Dart Bot turns.
-        saveMatchAndProcessBotTurns(match, X01MatchMessageType.DELETE_LAST_TURN);
-
-        return match;
+        return saveMatchAndProcessBotTurns(match, X01MatchMessage.DeleteLastTurn::new);
     }
 
     @Override
@@ -270,11 +183,10 @@ public class X01MatchServiceImpl implements IX01MatchService {
     public void deleteMatch(ObjectId matchId) {
         checkMatchExists(matchId);
 
-        // Clear references from matches that identify this match as their rematch.
         clearRematchReferencesToMatch(matchId);
 
-        // Delete the aggregate before publishing its removal to connected clients.
         matchRepository.deleteById(matchId);
+
         broadcastMatchEvent(matchId, new X01MatchMessage.DeleteMatch(matchId));
     }
 
@@ -282,14 +194,9 @@ public class X01MatchServiceImpl implements IX01MatchService {
     @Transactional
     public X01Match resetMatch(ObjectId matchId) {
         X01Match match = getMatch(matchId);
-
-        // Create the reset match state while preserving its identity, configuration and rematch reference.
         X01Match resetMatch = matchSetupService.resetMatch(match);
 
-        // Persist the reset state and process any immediately scheduled Dart Bot turns.
-        saveMatchAndProcessBotTurns(resetMatch, X01MatchMessageType.RESET_MATCH);
-
-        return resetMatch;
+        return saveMatchAndProcessBotTurns(resetMatch, X01MatchMessage.ResetMatch::new);
     }
 
     @Override
@@ -297,233 +204,81 @@ public class X01MatchServiceImpl implements IX01MatchService {
     public X01Match reprocessMatch(ObjectId matchId) {
         X01Match match = getMatch(matchId);
 
-        // Rebuild calculated state from the recorded history and persist the normalized aggregate.
-        saveMatchAndProcessBotTurns(match, X01MatchMessageType.PROCESS_MATCH);
+        matchRematchService.validateAndUpdateRematchId(match);
 
-        return match;
+        return saveMatchAndProcessBotTurns(match, X01MatchMessage.ProcessMatch::new);
     }
 
     /**
-     * Clears rematch references to the specified match, saving and publishing the affected matches.
+     * Clears rematch references to the specified match, saving and publishing each affected match.
      *
      * @param matchId the referenced match id
-     * @throws OptimisticLockingFailureException when an affected match was modified concurrently
      */
     private void clearRematchReferencesToMatch(ObjectId matchId) {
-        matchRepository.findAllByRematchId(matchId).forEach(this::clearRematchIdAndSave);
+        matchRematchService.clearRematchReferencesToMatch(matchId)
+                .forEach(match -> saveMatch(match, X01MatchMessage.ProcessMatch::new));
     }
 
     /**
-     * Clears references to missing rematches from the supplied matches.
+     * Rebuilds, saves and publishes the match, then processes any following Dart Bot turns.
      *
-     * Updates the supplied match objects in place, saving and publishing only affected matches.
-     *
-     * @param matches the matches to check for stale rematch references
-     * @throws OptimisticLockingFailureException when an affected match was modified concurrently
-     */
-    private void clearStaleRematchReferences(Collection<X01Match> matches) {
-        // Collect the distinct rematch IDs that need an existence check.
-        Set<ObjectId> rematchIds = matches.stream()
-                .map(X01Match::getRematchId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-
-        if (rematchIds.isEmpty()) {
-            return;
-        }
-
-        // Get the IDs of rematches that still exist.
-        Set<ObjectId> existingRematchIds = matchRepository.findExistingIds(rematchIds)
-                .stream()
-                .map(IX01MatchRepository.MatchIdProjection::getId)
-                .collect(Collectors.toSet());
-
-        // Clear references to missing rematches, saving and broadcasting each affected match.
-        matches.stream()
-                .filter(match -> match.getRematchId() != null)
-                .filter(match -> !existingRematchIds.contains(match.getRematchId()))
-                .forEach(this::clearRematchIdAndSave);
-    }
-
-    /**
-     * Clears a match's rematch id, persists the match and publishes the change.
-     *
-     * @param match the match to clear the rematch id from
+     * @param match          the match to update and save
+     * @param messageFactory creates the message for the triggering operation
+     * @return the saved match after bot processing
      * @throws OptimisticLockingFailureException when the match was modified concurrently
+     * @throws IllegalStateException             when bot processing encounters invalid match state or exceeds the turn limit
      */
-    private void clearRematchIdAndSave(X01Match match) {
-        match.setRematchId(null);
-        saveMatch(match, X01MatchMessageType.PROCESS_MATCH);
+    private X01Match saveMatchAndProcessBotTurns(X01Match match, X01MatchMessageFactory messageFactory) {
+        X01Match savedMatch = updateAndSaveMatch(match, messageFactory);
+        return processBotTurns(savedMatch);
     }
 
     /**
-     * Rebuilds and saves a match, then processes consecutive Dart Bot turns.
+     * Processes automated Dart Bot turns while the current thrower is a Dart Bot.
      *
-     * Saves and publishes updated state after the triggering operation and each Dart Bot turn.
+     * Rebuilds, saves and publishes the match after each turn.
+     * Turn validation and missing-resource exceptions during automated turn processing indicate
+     * invalid internal state rather than invalid user input, so they are wrapped in IllegalStateException.
      *
-     * @param match       the match to update and save
-     * @param messageType the message type for the triggering operation
-     * @throws X01TurnAlreadyExistsException         when the current thrower already has a turn in the active round
-     * @throws X01LegAlreadyWonException             when another player's turn is applied after the leg has been won
-     * @throws X01CheckoutInsufficientDartsException when the checkout requires more darts than were used
-     * @throws ResourceNotFoundException             when the active set, leg or round cannot be resolved
-     * @throws OptimisticLockingFailureException     when the match was modified concurrently
-     * @throws IllegalStateException                 when more than the allowed number of consecutive Dart Bot turns is reached,
-     *                                               or when the current Dart Bot state cannot be resolved
+     * @param match the match whose derived state is up to date
+     * @return the saved match after bot processing, or the supplied match when no bot turn is needed
+     * @throws OptimisticLockingFailureException when the match was modified concurrently
+     * @throws IllegalStateException             when bot processing encounters invalid match state or exceeds the turn limit
      */
-    private void saveMatchAndProcessBotTurns(X01Match match, X01MatchMessageType messageType) {
-        // Process and persist the triggering match state before checking whether a bot should throw.
-        updateAndSaveMatch(match, messageType);
+    private X01Match processBotTurns(X01Match match) {
+        X01Match savedMatch = match;
 
-        int botTurnsProcessed = 0;
+        try {
+            for (int botTurn = 0; botTurn < MAX_BOT_TURNS; botTurn++) {
+                if (!matchTurnService.addDartBotTurnToCurrentThrower(savedMatch)) {
+                    return savedMatch;
+                }
 
-        // Continue until control passes to a human player or the match concludes.
-        while (isCurrentThrowerDartBot(match)) {
-            if (botTurnsProcessed >= MAX_BOT_TURNS) {
-                throw new IllegalStateException(
-                        "Invalid match state: three bot turns in a row are not allowed (matchId=" + match.getId() + ")"
-                );
+                savedMatch = updateAndSaveMatch(savedMatch, X01MatchMessage.AddBotTurn::new);
             }
-
-            // Generate and apply the Dart Bot turn before rebuilding and publishing the resulting state.
-            X01DartBotTurn dartBotTurn = createDartBotTurnForCurrentPlayer(match);
-            addTurnToCurrentPlayer(match, dartBotTurn.score(), dartBotTurn.checkoutDartsUsed(), dartBotTurn.doublesMissed());
-            updateAndSaveMatch(match, X01MatchMessageType.ADD_BOT_TURN);
-
-            botTurnsProcessed++;
+        } catch (X01TurnAlreadyExistsException | X01LegAlreadyWonException | X01CheckoutInsufficientDartsException |
+                 ResourceNotFoundException e) {
+            throw new IllegalStateException("Dart Bot processing failed (matchId=" + savedMatch.getId() + ")", e);
         }
-    }
 
-    /**
-     * Applies turn values to the current thrower in the active round.
-     *
-     * @param match             the match to update
-     * @param score             the points scored in the turn
-     * @param checkoutDartsUsed the number of darts used for the checkout
-     * @param doublesMissed     the number of doubles missed
-     * @throws X01TurnAlreadyExistsException         when the current thrower already has a turn in the active round
-     * @throws X01LegAlreadyWonException             when another player's turn is applied after the leg has been won
-     * @throws X01CheckoutInsufficientDartsException when the checkout requires more darts than were used
-     * @throws ResourceNotFoundException             when the active set, leg or round cannot be resolved
-     */
-    private void addTurnToCurrentPlayer(X01Match match, int score, Integer checkoutDartsUsed, Integer doublesMissed) {
-        // Resolve or create the active set, leg and round.
-        X01SetEntry currentSetEntry = matchProgressService.getCurrentSetOrCreate(match)
-                .orElseThrow(() -> new ResourceNotFoundException(X01Set.class, null));
+        if (matchProgressService.isCurrentThrowerDartBot(savedMatch)) {
+            throw new IllegalStateException("Dart Bot turn limit exceeded (matchId=" + savedMatch.getId() + ")");
+        }
 
-        X01LegEntry currentLegEntry = matchProgressService.getCurrentLegOrCreate(match, currentSetEntry)
-                .orElseThrow(() -> new ResourceNotFoundException(X01Leg.class, null));
-
-        X01LegRoundEntry currentRoundEntry = matchProgressService.getCurrentLegRoundOrCreate(match, currentLegEntry.leg())
-                .orElseThrow(() -> new ResourceNotFoundException(X01LegRound.class, null));
-
-        // Determine the current thrower from the turns already recorded in the active round.
-        ObjectId currentThrower = legRoundService.getCurrentThrowerInRound(
-                currentRoundEntry.round(),
-                currentLegEntry.leg().getThrowsFirst(),
-                match.getPlayers()
-        );
-
-        int x01 = match.getMatchSettings().getX01();
-        boolean trackDoubles = match.getMatchSettings().isTrackDoubles();
-
-        // Apply the turn and rebuild the affected leg state.
-        legService.applyTurn(new X01TurnMutation(
-                x01,
-                currentLegEntry.leg(),
-                currentRoundEntry.roundNumber(),
-                score,
-                doublesMissed,
-                checkoutDartsUsed,
-                currentThrower,
-                trackDoubles
-        ));
-    }
-
-    /**
-     * Creates a Dart Bot turn for the current configured Dart Bot player and active leg.
-     *
-     * @param match the match containing the current Dart Bot turn state
-     * @return the generated Dart Bot turn
-     * @throws IllegalStateException when the current thrower is not a configured Dart Bot or the current leg cannot be resolved
-     */
-    private X01DartBotTurn createDartBotTurnForCurrentPlayer(X01Match match) {
-        ObjectId currentThrower = match.getMatchProgress().getCurrentThrower();
-
-        X01MatchPlayer dartBotPlayer = getPlayerById(match, currentThrower)
-                .filter(player ->
-                        player.getPlayerType() == PlayerType.DART_BOT && player.getX01DartBotSettings() != null
-                )
-                .orElseThrow(() -> new IllegalStateException("Current thrower is not a configured Dart Bot"));
-
-        X01LegEntry currentLegEntry = matchProgressService.getCurrentLeg(match)
-                .orElseThrow(() -> new IllegalStateException("Unable to resolve the current leg for Dart Bot turn creation"));
-
-        return dartBotService.createDartBotTurn(
-                dartBotPlayer,
-                currentLegEntry.leg(),
-                match.getMatchSettings().getX01(),
-                match.getMatchSettings().isTrackDoubles()
-        );
-    }
-
-    /**
-     * Determines whether the current thrower is a Dart Bot.
-     *
-     * @param match the match to inspect
-     * @return true when the current thrower is a Dart Bot
-     */
-    private boolean isCurrentThrowerDartBot(X01Match match) {
-        ObjectId currentThrower = match.getMatchProgress().getCurrentThrower();
-        if (currentThrower == null) return false;
-
-        return getPlayerById(match, currentThrower)
-                .map(player -> player.getPlayerType() == PlayerType.DART_BOT)
-                .orElse(false);
-    }
-
-    /**
-     * Checks whether the match contains a human player turn anywhere in the match.
-     *
-     * @param match the match to inspect
-     * @return whether any recorded turn belongs to a human player
-     */
-    private boolean hasHumanTurn(X01Match match) {
-        return match.getSets().values().stream()
-                .flatMap(set -> set.getLegs().values().stream())
-                .flatMap(leg -> leg.getRounds().values().stream())
-                .flatMap(round -> round.getTurns().keySet().stream())
-                .anyMatch(playerId -> getPlayerById(match, playerId)
-                        .map(player -> player.getPlayerType() == PlayerType.HUMAN)
-                        .orElse(false)
-                );
-    }
-
-    /**
-     * Finds a match player by id.
-     *
-     * @param match    the match containing the players
-     * @param playerId the player id
-     * @return the matching player, or empty when the player is not found
-     */
-    private Optional<X01MatchPlayer> getPlayerById(X01Match match, ObjectId playerId) {
-        return match.getPlayers()
-                .stream()
-                .filter(player -> Objects.equals(player.getPlayerId(), playerId))
-                .findFirst();
+        return savedMatch;
     }
 
     /**
      * Rebuilds, saves and publishes the current match state.
      *
-     * @param match       the match to update and save
-     * @param messageType the message type to publish
-     * @throws IllegalArgumentException          when the message type is DELETE_MATCH
+     * @param match          the match to update and save
+     * @param messageFactory creates the message from the saved match
+     * @return the saved match
      * @throws OptimisticLockingFailureException when the match was modified concurrently
      */
-    private void updateAndSaveMatch(X01Match match, X01MatchMessageType messageType) {
+    private X01Match updateAndSaveMatch(X01Match match, X01MatchMessageFactory messageFactory) {
         updateMatch(match);
-        saveMatch(match, messageType);
+        return saveMatch(match, messageFactory);
     }
 
     /**
@@ -548,30 +303,16 @@ public class X01MatchServiceImpl implements IX01MatchService {
     /**
      * Increments the broadcast version, saves and publishes the match without rebuilding derived state.
      *
-     * @param match       the match to save
-     * @param messageType the message type to publish
-     * @throws IllegalArgumentException          when the message type is DELETE_MATCH
+     * @param match          the match to save
+     * @param messageFactory creates the message from the saved match
+     * @return the saved match
      * @throws OptimisticLockingFailureException when the match was modified concurrently
      */
-    private void saveMatch(X01Match match, X01MatchMessageType messageType) {
-        X01MatchMessage<X01Match> message = switch (messageType) {
-            case PROCESS_MATCH -> new X01MatchMessage.ProcessMatch(match);
-            case ADD_HUMAN_TURN -> new X01MatchMessage.AddHumanTurn(match);
-            case ADD_BOT_TURN -> new X01MatchMessage.AddBotTurn(match);
-            case EDIT_TURN -> new X01MatchMessage.EditTurn(match);
-            case DELETE_LAST_TURN -> new X01MatchMessage.DeleteLastTurn(match);
-            case RESET_MATCH -> new X01MatchMessage.ResetMatch(match);
-            case REMATCH -> new X01MatchMessage.Rematch(match);
-            case DELETE_MATCH -> throw new IllegalArgumentException(
-                    "Invalid message type for save operation: " + messageType
-            );
-        };
-
-        // Increment the version published to connected clients.
+    private X01Match saveMatch(X01Match match, X01MatchMessageFactory messageFactory) {
         match.setBroadcastVersion(match.getBroadcastVersion() + 1);
-
-        matchRepository.save(match);
-        broadcastMatchEvent(match.getId(), message);
+        X01Match saved = matchRepository.save(match);
+        broadcastMatchEvent(saved.getId(), messageFactory.apply(saved));
+        return saved;
     }
 
     /**
@@ -584,53 +325,6 @@ public class X01MatchServiceImpl implements IX01MatchService {
         webSocketEventPublisher.broadcast(
                 WebSocketDestinations.broadcast(WebSocketDestinations.X01.MATCH, matchId),
                 message
-        );
-    }
-
-    /**
-     * Maps an existing-turn domain error to the corresponding request-field error.
-     *
-     * @return the mapped invalid-arguments exception
-     */
-    private InvalidArgumentsException mapTurnAlreadyExistsException() {
-        return new InvalidArgumentsException(
-                new TargetError(
-                        ErrorTargets.SCORE,
-                        messageResolver.getMessage(MessageKeys.MESSAGE_X01_TURN_ALREADY_EXISTS)
-                )
-        );
-    }
-
-    /**
-     * Maps an already-won leg error to the corresponding request-field error.
-     *
-     * @return the mapped invalid-arguments exception
-     */
-    private InvalidArgumentsException mapLegAlreadyWonException() {
-        return new InvalidArgumentsException(
-                new TargetError(
-                        ErrorTargets.SCORE,
-                        messageResolver.getMessage(MessageKeys.MESSAGE_LEG_ALREADY_WON)
-                )
-        );
-    }
-
-    /**
-     * Maps an insufficient checkout dart count to the corresponding request-field error.
-     *
-     * @param exception the checkout validation exception
-     * @return the mapped invalid-arguments exception
-     */
-    private InvalidArgumentsException mapCheckoutInsufficientDartsException(X01CheckoutInsufficientDartsException exception) {
-        return new InvalidArgumentsException(
-                new TargetError(
-                        ErrorTargets.CHECKOUT_DARTS_USED,
-                        messageResolver.getMessage(
-                                MessageKeys.MESSAGE_IMPOSSIBLE_CHECKOUT_MIN_DARTS,
-                                exception.getScore(),
-                                exception.getDartsUsed()
-                        )
-                )
         );
     }
 }

@@ -63,13 +63,13 @@ public class X01MatchRestController {
     public X01Match createRematch(@PathVariable ObjectId matchId) {
         return matchService.createRematch(matchId);
     }
+
     /**
      * Gets an X01 match by id.
      *
      * @param matchId the match id
      * @return the requested match
-     * @throws ResourceNotFoundException         when the match does not exist
-     * @throws OptimisticLockingFailureException when the match was modified concurrently
+     * @throws ResourceNotFoundException when the match does not exist
      */
     @GetMapping(path = RestEndpoints.X01.MATCH, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
@@ -82,7 +82,6 @@ public class X01MatchRestController {
      *
      * @param ids the match ids
      * @return the existing matches in requested order
-     * @throws OptimisticLockingFailureException when an affected match was modified concurrently
      */
     @GetMapping(path = RestEndpoints.X01.MATCHES, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
@@ -180,7 +179,7 @@ public class X01MatchRestController {
     }
 
     /**
-     * Reprocesses all derived state of an X01 match.
+     * Rebuilds the match state, clears any stale rematch reference and processes pending Dart Bot turns.
      *
      * @param matchId the match id
      * @return the reprocessed match

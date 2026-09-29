@@ -1,6 +1,7 @@
 package nl.kmartin.dartsmatcherapi.features.x01.x01match.service;
 
 import nl.kmartin.dartsmatcherapi.error.exception.ResourceNotFoundException;
+import nl.kmartin.dartsmatcherapi.features.basematch.model.PlayerType;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01LegEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leg.service.IX01LegProgressService;
@@ -9,6 +10,7 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01TurnEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.service.IX01LegRoundService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01BestOf;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchProgress;
 import nl.kmartin.dartsmatcherapi.features.x01.x01rules.service.IX01RulesService;
 import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01Set;
@@ -166,6 +168,23 @@ public class X01MatchProgressServiceImpl implements IX01MatchProgressService {
                 currentRoundEntry.map(X01LegRoundEntry::roundNumber).orElse(null),
                 currentThrower.orElse(null)
         ));
+    }
+
+    @Override
+    public Optional<X01MatchPlayer> getCurrentThrower(X01Match match) {
+        ObjectId currentThrowerId = match.getMatchProgress().getCurrentThrower();
+        if (currentThrowerId == null) {
+            return Optional.empty();
+        }
+
+        return match.getPlayerById(currentThrowerId);
+    }
+
+    @Override
+    public boolean isCurrentThrowerDartBot(X01Match match) {
+        return getCurrentThrower(match)
+                .map(player -> player.getPlayerType() == PlayerType.DART_BOT)
+                .orElse(false);
     }
 
     /**

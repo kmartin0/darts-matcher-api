@@ -17,6 +17,8 @@ import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Base model containing the state shared by all match types.
@@ -33,6 +35,7 @@ import java.util.ArrayList;
 public abstract class BaseMatch<P extends MatchPlayer> {
     public static final int MINIMUM_PLAYERS = 1;
     public static final int MAXIMUM_PLAYERS = 4;
+    public static final int MAXIMUM_DART_BOTS = 1;
 
     @MongoId
     private ObjectId id;
@@ -83,5 +86,17 @@ public abstract class BaseMatch<P extends MatchPlayer> {
         this.players = players;
         this.matchType = matchType;
         this.rematchId = rematchId;
+    }
+
+    /**
+     * Finds a match player by id.
+     *
+     * @param playerId the player id
+     * @return the matching player, or empty when not found
+     */
+    public Optional<P> getPlayerById(ObjectId playerId) {
+        return players.stream()
+                .filter(player -> Objects.equals(player.getPlayerId(), playerId))
+                .findFirst();
     }
 }

@@ -8,6 +8,7 @@ import nl.kmartin.dartsmatcherapi.features.x01.x01leg.model.X01LegEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01LegRoundEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01leground.model.X01TurnEntry;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01Match;
+import nl.kmartin.dartsmatcherapi.features.x01.x01match.model.X01MatchPlayer;
 import nl.kmartin.dartsmatcherapi.features.x01.x01set.model.X01SetEntry;
 
 import java.util.Optional;
@@ -86,4 +87,20 @@ public interface IX01MatchProgressService {
      * @param match the match whose progress should be rebuilt
      */
     void updateMatchProgress(@NotNull @Valid X01Match match);
+
+    /**
+     * Gets the player referenced by the current match progress.
+     *
+     * @param match the match to inspect
+     * @return the current thrower, or empty when no thrower is assigned or the referenced player cannot be found
+     */
+    Optional<X01MatchPlayer> getCurrentThrower(@NotNull @Valid X01Match match);
+
+    /**
+     * Determines whether the current thrower is a Dart Bot.
+     *
+     * @param match the match to inspect
+     * @return true when the current thrower resolves to a Dart Bot player
+     */
+    boolean isCurrentThrowerDartBot(@NotNull @Valid X01Match match);
 }

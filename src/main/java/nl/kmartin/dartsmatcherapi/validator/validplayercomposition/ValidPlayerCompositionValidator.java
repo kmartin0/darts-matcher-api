@@ -2,6 +2,7 @@ package nl.kmartin.dartsmatcherapi.validator.validplayercomposition;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import nl.kmartin.dartsmatcherapi.features.basematch.model.BaseMatch;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.MatchPlayer;
 import nl.kmartin.dartsmatcherapi.features.basematch.model.PlayerType;
 import nl.kmartin.dartsmatcherapi.features.x01.x01match.dto.X01CreateMatchRequest;
@@ -43,7 +44,7 @@ public class ValidPlayerCompositionValidator implements ConstraintValidator<Vali
                 .count();
 
         // A match can contain at most one dart bot.
-        if (botCount > 1) {
+        if (botCount > BaseMatch.MAXIMUM_DART_BOTS) {
             ConstraintViolationsHelper.addViolation(context, MessageKeys.MESSAGE_TOO_MANY_BOTS);
             return false;
         }
