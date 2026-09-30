@@ -69,8 +69,8 @@ public class X01MatchTurnServiceImpl implements IX01MatchTurnService {
         X01DartBotTurn turn = dartBotTurn.get();
         addTurnToCurrentThrower(match, new X01CreateTurnRequest(
                 turn.score(),
-                turn.checkoutDartsUsed(),
-                turn.doublesMissed()
+                turn.doublesMissed(),
+                turn.checkoutDartsUsed()
         ));
 
         return true;
