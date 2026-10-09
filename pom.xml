@@ -11,8 +11,8 @@
     <groupId>nl.kmartin</groupId>
     <artifactId>darts-matcher-api</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>darts-matcher-api</name>
-    <description>darts-matcher-api</description>
+    <name>Darts Matcher API</name>
+    <description>REST API for the Darts Matcher platform</description>
     <url/>
     <licenses>
         <license/>
