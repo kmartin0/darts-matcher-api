@@ -48,16 +48,21 @@ public class DartboardServiceImpl implements IDartboardService {
     }
 
     /**
-     * Determines where a polar coordinate lies on the dartboard.
+     * Resolves the dart hit at the supplied polar coordinate.
      *
-     * @param polarCoordinate the polar coordinate
-     * @return the resulting dart
+     * Bull hits use the bull section regardless of their angle.
+     *
+     * @param polarCoordinate the position of the dart
+     * @return the section and scoring area hit
      */
     private Dart getScorePolar(PolarCoordinate polarCoordinate) {
-        DartboardSection section = getSection(polarCoordinate.getThetaNormalized());
         DartboardSectionArea sectionArea = getSectionArea(polarCoordinate.r());
 
-        // Return the score multiplied by the section area multiplier.
+        DartboardSection section = switch (sectionArea) {
+            case SINGLE_BULL, DOUBLE_BULL -> DartboardSection.BULL;
+            default -> getSection(polarCoordinate.getThetaNormalized());
+        };
+
         return new Dart(section, sectionArea);
     }
 
