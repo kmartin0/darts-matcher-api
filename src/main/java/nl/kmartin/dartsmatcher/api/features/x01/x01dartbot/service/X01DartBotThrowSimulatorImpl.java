@@ -104,7 +104,7 @@ public class X01DartBotThrowSimulatorImpl implements IX01DartBotThrowSimulator {
      */
     private List<DartThrow> throwAtCheckout(X01Checkout checkout, X01DartBotTurnSnapshot dartBotTurnSnapshot) {
         // Calculate the dart count after completing the suggested checkout sequence.
-        int dartsUsedAfterCheckout = dartBotTurnSnapshot.dartsUsedInLeg() + checkout.minDarts();
+        int dartsUsedAfterCheckout = dartBotTurnSnapshot.dartsUsedInLeg() + checkout.suggested().size();
 
         // Complete the checkout once doing so reaches the bot's target dart count.
         boolean hasToCheckout = dartBotCheckoutPolicy.isTargetNumOfDartsReached(
