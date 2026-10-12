@@ -98,7 +98,11 @@ public class X01DartBotThrowSimulatorImpl implements IX01DartBotThrowSimulator {
     /**
      * Simulates dart throws while the bot is aiming for a checkout.
      *
-     * @param checkout        the checkout sequence to follow
+     * Falls back to the intended target when a simulated result would prevent
+     * finishing within the target dart count. The fallback remains subject
+     * to the checkout policy.
+     *
+     * @param checkout            the checkout sequence to follow
      * @param dartBotTurnSnapshot the current dart bot turn snapshot
      * @return the generated checkout throws
      */
@@ -125,6 +129,12 @@ public class X01DartBotThrowSimulatorImpl implements IX01DartBotThrowSimulator {
 
         // Replace a result that violates the checkout policy with a miss.
         Dart result = validateResult(dartThrow.result(), dartBotTurnSnapshot);
+
+        // Fall back to the intended target if the result prevents finishing within the dart budget.
+        if (!canFinishWithinTarget(result, dartBotTurnSnapshot)) {
+            System.out.println("CANNOT FINISH WITHIN THE TARGET");
+            result = validateResult(dartThrow.target(), dartBotTurnSnapshot);
+        }
 
         return List.of(new DartThrow(dartThrow.target(), result));
     }
@@ -174,7 +184,7 @@ public class X01DartBotThrowSimulatorImpl implements IX01DartBotThrowSimulator {
     /**
      * Validates a dart result against the bot's checkout policy.
      *
-     * @param result          the dart result to validate
+     * @param result              the dart result to validate
      * @param dartBotTurnSnapshot the current dart bot turn snapshot
      * @return the original result when valid, otherwise a missed dart
      */
@@ -184,5 +194,30 @@ public class X01DartBotThrowSimulatorImpl implements IX01DartBotThrowSimulator {
         }
 
         return result;
+    }
+
+    /**
+     * Checks whether the bot can finish within its target dart count after a throw.
+     *
+     * Uses the suggested checkout route's length because that is the route
+     * the bot follows. The supplied throw consumes one dart, including a miss.
+     *
+     * @param result              the validated dart result
+     * @param dartBotTurnSnapshot the current dart bot turn snapshot
+     * @return whether the throw completes the leg or leaves a suggested checkout
+     * that fits within the remaining target dart budget
+     */
+    private boolean canFinishWithinTarget(Dart result, X01DartBotTurnSnapshot dartBotTurnSnapshot) {
+        int remainingAfterThrow = dartBotTurnSnapshot.remainingPoints() - result.getScore();
+
+        if (remainingAfterThrow == 0) {
+            return true;
+        }
+
+        int dartsAvailable = dartBotTurnSnapshot.targetNumOfDarts() - dartBotTurnSnapshot.dartsUsedInLeg() - 1;
+
+        return checkoutService.getCheckout(remainingAfterThrow)
+                .map(checkout -> checkout.suggested().size() <= dartsAvailable)
+                .orElse(false);
     }
 }
