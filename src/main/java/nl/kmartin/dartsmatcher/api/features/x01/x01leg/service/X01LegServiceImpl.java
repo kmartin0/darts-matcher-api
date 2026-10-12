@@ -179,12 +179,14 @@ public class X01LegServiceImpl implements IX01LegService {
     }
 
     /**
-     * Determines whether all turns following an edited turn remain legal.
+     * Checks whether the player's following turns remain legal from the supplied remaining score.
      *
-     * @param turnMutation the edit being evaluated
-     * @param remaining    the remaining score after the edited turn
+     * For validation, the supplied mutation's checkout dart count overrides
+     * the leg's recorded checkout dart count.
+     *
+     * @param turnMutation the turn context identifying the leg, player and starting round
+     * @param remaining the remaining score before processing the following turns
      * @return whether all following turns remain legal
-     * @throws X01CheckoutInsufficientDartsException when the checkout requires more darts than were used
      */
     private boolean areFollowingTurnsLegal(X01TurnMutation turnMutation, int remaining) {
         NavigableMap<Integer, X01LegRound> roundsAfterTurn = turnMutation.leg()
