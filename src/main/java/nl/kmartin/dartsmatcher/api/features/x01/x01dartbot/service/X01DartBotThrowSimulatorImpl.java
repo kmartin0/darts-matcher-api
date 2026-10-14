@@ -2,6 +2,7 @@ package nl.kmartin.dartsmatcher.api.features.x01.x01dartbot.service;
 
 import nl.kmartin.dartsmatcher.api.features.dartboard.model.Dart;
 import nl.kmartin.dartsmatcher.api.features.dartboard.model.DartThrow;
+import nl.kmartin.dartsmatcher.api.features.dartboard.model.DartboardSection;
 import nl.kmartin.dartsmatcher.api.features.dartboard.model.DartboardSectionArea;
 import nl.kmartin.dartsmatcher.api.features.dartboard.service.IDartboardService;
 import nl.kmartin.dartsmatcher.api.features.x01.x01checkout.model.X01Checkout;
@@ -16,9 +17,12 @@ import java.util.Optional;
 /**
  * Simulates scoring and checkout throws for the X01 dart bot.
  *
- * Determines whether the bot should score or attempt a checkout, selects the appropriate target,
- * applies the bot's calculated throw deviation, and validates the resulting dart against the
- * bot's checkout policy.
+ * Selects a scoring or checkout target, applies calibrated Gaussian offsets,
+ * and validates simulated results against the bot's checkout policy.
+ *
+ * Checkout routes use guaranteed hits once their projected finishing count reaches
+ * the target dart count. Earlier checkout attempts fall back to their intended
+ * target when a simulated result leaves a suggested route beyond the dart budget.
  */
 @Service
 @Validated
@@ -58,8 +62,8 @@ public class X01DartBotThrowSimulatorImpl implements IX01DartBotThrowSimulator {
     /**
      * Creates a scoring throw for the dart bot.
      *
-     * The scoring target is based on the bot's target average and the deviation
-     * is calibrated using its current performance.
+     * The scoring target is based on the bot's target average. Standard deviation
+     * is calibrated using its current performance after the first dart.
      *
      * @param dartBotTurnSnapshot the current dart bot turn snapshot
      * @return the generated scoring throw
@@ -67,8 +71,7 @@ public class X01DartBotThrowSimulatorImpl implements IX01DartBotThrowSimulator {
     private DartThrow createScoringDartThrow(X01DartBotTurnSnapshot dartBotTurnSnapshot) {
         // Simulate a throw at a scoring target.
         DartThrow dartThrow = throwAtTarget(
-                dartBotTurnSnapshot.targetOneDartAvg(),
-                dartBotTurnSnapshot.currentOneDartAvg(),
+                dartBotTurnSnapshot,
                 dartBotScoringStrategy.createScoringTarget(dartBotTurnSnapshot.targetOneDartAvg())
         );
 
@@ -79,64 +82,77 @@ public class X01DartBotThrowSimulatorImpl implements IX01DartBotThrowSimulator {
     }
 
     /**
-     * Creates the next checkout throw or throws for the dart bot.
+     * Selects scoring, a guaranteed finish or a simulated checkout throw.
      *
-     * @param dartBotTurnSnapshot the current dart bot turn snapshot
-     * @return the generated checkout or fallback scoring throws
+     * @param snapshot the current dart bot turn snapshot
+     * @return the generated throws
      */
-    private List<DartThrow> createCheckoutDartThrows(X01DartBotTurnSnapshot dartBotTurnSnapshot) {
-        Optional<X01Checkout> checkout = checkoutService.getCheckout(dartBotTurnSnapshot.remainingPoints());
+    private List<DartThrow> createCheckoutDartThrows(X01DartBotTurnSnapshot snapshot) {
+        Optional<X01Checkout> checkout = checkoutService.getCheckout(snapshot.remainingPoints());
 
-        // Fall back to scoring when no checkout sequence is configured.
         if (checkout.isEmpty()) {
-            return List.of(createScoringDartThrow(dartBotTurnSnapshot));
+            return List.of(createScoringDartThrow(snapshot));
         }
 
-        return throwAtCheckout(checkout.get(), dartBotTurnSnapshot);
+        if (shouldFinishOnBull(snapshot)) {
+            Dart bull = new Dart(DartboardSection.BULL, DartboardSectionArea.DOUBLE_BULL);
+            return List.of(new DartThrow(bull, bull));
+        }
+
+        if (shouldGuaranteeCheckout(checkout.get(), snapshot)) {
+            return createGuaranteedCheckoutThrows(checkout.get(), snapshot.dartsLeftInTurn());
+        }
+
+        return List.of(throwAtCheckout(checkout.get(), snapshot));
     }
 
     /**
-     * Simulates dart throws while the bot is aiming for a checkout.
+     * Checks whether a bull finish reaches or exceeds the target dart count.
      *
-     * Falls back to the intended target when a simulated result would prevent
-     * finishing within the target dart count. The fallback remains subject
-     * to the checkout policy.
-     *
-     * @param checkout            the checkout sequence to follow
-     * @param dartBotTurnSnapshot the current dart bot turn snapshot
-     * @return the generated checkout throws
+     * @param snapshot the current dart bot turn snapshot
+     * @return whether to guarantee a one-dart finish from 50
      */
-    private List<DartThrow> throwAtCheckout(X01Checkout checkout, X01DartBotTurnSnapshot dartBotTurnSnapshot) {
-        // Calculate the dart count after completing the suggested checkout sequence.
-        int dartsUsedAfterCheckout = dartBotTurnSnapshot.dartsUsedInLeg() + checkout.suggested().size();
+    private boolean shouldFinishOnBull(X01DartBotTurnSnapshot snapshot) {
+        return snapshot.remainingPoints() == 50
+                && dartBotCheckoutPolicy.isTargetNumOfDartsReached(
+                snapshot.dartsUsedInLeg() + 1,
+                snapshot.targetNumOfDarts()
+        );
+    }
 
-        // Complete the checkout once doing so reaches the bot's target dart count.
-        boolean hasToCheckout = dartBotCheckoutPolicy.isTargetNumOfDartsReached(
+    /**
+     * Checks whether the suggested route reaches or exceeds the target dart count.
+     *
+     * @param checkout the checkout sequence to follow
+     * @param snapshot the current dart bot turn snapshot
+     * @return whether to guarantee the checkout route
+     */
+    private boolean shouldGuaranteeCheckout(X01Checkout checkout, X01DartBotTurnSnapshot snapshot) {
+        int dartsUsedAfterCheckout = snapshot.dartsUsedInLeg() + checkout.suggested().size();
+
+        return dartBotCheckoutPolicy.isTargetNumOfDartsReached(
                 dartsUsedAfterCheckout,
-                dartBotTurnSnapshot.targetNumOfDarts()
+                snapshot.targetNumOfDarts()
         );
+    }
 
-        if (hasToCheckout) {
-            return createGuaranteedCheckoutThrows(checkout, dartBotTurnSnapshot.dartsLeftInTurn());
+    /**
+     * Simulates one checkout dart, falling back to the intended target if the validated
+     * result leaves no suggested route within the dart budget. The fallback is also validated.
+     *
+     * @param checkout the checkout sequence to follow
+     * @param snapshot the current dart bot turn snapshot
+     * @return the generated checkout throw
+     */
+    private DartThrow throwAtCheckout(X01Checkout checkout, X01DartBotTurnSnapshot snapshot) {
+        DartThrow dartThrow = throwAtTarget(snapshot, checkout.suggested().get(0));
+        Dart result = validateResult(dartThrow.result(), snapshot);
+
+        if (!canFinishWithinTarget(result, snapshot)) {
+            result = validateResult(dartThrow.target(), snapshot);
         }
 
-        // Otherwise, simulate a single throw at the first target in the checkout sequence.
-        DartThrow dartThrow = throwAtTarget(
-                dartBotTurnSnapshot.targetOneDartAvg(),
-                dartBotTurnSnapshot.currentOneDartAvg(),
-                checkout.suggested().get(0)
-        );
-
-        // Replace a result that violates the checkout policy with a miss.
-        Dart result = validateResult(dartThrow.result(), dartBotTurnSnapshot);
-
-        // Fall back to the intended target if the result prevents finishing within the dart budget.
-        if (!canFinishWithinTarget(result, dartBotTurnSnapshot)) {
-            System.out.println("CANNOT FINISH WITHIN THE TARGET");
-            result = validateResult(dartThrow.target(), dartBotTurnSnapshot);
-        }
-
-        return List.of(new DartThrow(dartThrow.target(), result));
+        return new DartThrow(dartThrow.target(), result);
     }
 
     /**
@@ -163,22 +179,35 @@ public class X01DartBotThrowSimulatorImpl implements IX01DartBotThrowSimulator {
     }
 
     /**
-     * Simulates a dart throw at the given target.
+     * Simulates a throw at the target without validating the checkout policy.
      *
-     * @param targetOneDartAvg  the target one-dart average
-     * @param currentOneDartAvg the current one-dart average
-     * @param target            the dartboard target
-     * @return the target and resulting dart
+     * @param snapshot the current dart bot turn snapshot
+     * @param target   the dartboard target
+     * @return the target and simulated result
      */
-    private DartThrow throwAtTarget(double targetOneDartAvg, double currentOneDartAvg, Dart target) {
-        // Generate the radial and angular deviation for the simulated throw.
-        double offsetR = dartBotDeviationCalculator.createOffsetR(targetOneDartAvg, currentOneDartAvg);
-        double offsetTheta = dartBotDeviationCalculator.createOffsetTheta(targetOneDartAvg, currentOneDartAvg);
-
-        // Apply the deviation to determine where the dart actually lands.
-        Dart result = dartboardService.getScore(target, offsetR, offsetTheta);
+    private DartThrow throwAtTarget(X01DartBotTurnSnapshot snapshot, Dart target) {
+        double standardDeviation = getStandardDeviation(snapshot);
+        double offsetX = dartBotDeviationCalculator.createOffset(standardDeviation);
+        double offsetY = dartBotDeviationCalculator.createOffset(standardDeviation);
+        Dart result = dartboardService.getScore(target, offsetX, offsetY);
 
         return new DartThrow(target, result);
+    }
+
+    /**
+     * Uses baseline standard deviation before the first dart and calibrated values thereafter.
+     *
+     * @param snapshot the current dart bot turn snapshot
+     * @return the standard deviation per axis in millimeters
+     */
+    private double getStandardDeviation(X01DartBotTurnSnapshot snapshot) {
+        if (snapshot.dartsUsedInLeg() == 0) {
+            return dartBotDeviationCalculator.getStandardDeviation(snapshot.targetOneDartAvg());
+        }
+
+        return dartBotDeviationCalculator.getCalibratedStandardDeviation(
+                snapshot.targetOneDartAvg(), snapshot.currentOneDartAvg()
+        );
     }
 
     /**
@@ -197,15 +226,15 @@ public class X01DartBotThrowSimulatorImpl implements IX01DartBotThrowSimulator {
     }
 
     /**
-     * Checks whether the bot can finish within its target dart count after a throw.
+     * Checks whether a validated throw completes the leg or leaves a suggested
+     * checkout route within the remaining target dart budget.
      *
-     * Uses the suggested checkout route's length because that is the route
-     * the bot follows. The supplied throw consumes one dart, including a miss.
+     * The supplied throw consumes one dart, including a miss. This check uses
+     * the suggested route length without accounting for the one-dart bull exception.
      *
      * @param result              the validated dart result
      * @param dartBotTurnSnapshot the current dart bot turn snapshot
-     * @return whether the throw completes the leg or leaves a suggested checkout
-     * that fits within the remaining target dart budget
+     * @return whether the leg is complete or the suggested route fits the budget
      */
     private boolean canFinishWithinTarget(Dart result, X01DartBotTurnSnapshot dartBotTurnSnapshot) {
         int remainingAfterThrow = dartBotTurnSnapshot.remainingPoints() - result.getScore();

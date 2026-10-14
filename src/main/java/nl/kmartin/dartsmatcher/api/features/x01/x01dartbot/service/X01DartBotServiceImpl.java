@@ -25,7 +25,7 @@ import java.util.List;
 @Service
 @Validated
 public class X01DartBotServiceImpl implements IX01DartBotService {
-    private static final double TARGET_DART_COUNT_VARIANCE = 0.05;
+    public static final double TARGET_DART_COUNT_VARIANCE = 0.05;
 
     private final IX01DartBotThrowSimulator dartBotThrowSimulator;
     private final IX01LegResultService legResultService;

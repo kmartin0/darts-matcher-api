@@ -7,15 +7,14 @@ import nl.kmartin.dartsmatcher.api.features.dartboard.model.Dart;
 public interface IDartboardService {
 
     /**
-     * Calculates where a dart lands when throwing at a target with a given deviation.
+     * Calculates where a dart lands after applying Cartesian offsets to its aiming point.
      *
-     * The target starts at the center of its scoring area. Setting both offsets to 0 results
-     * in a throw at the center of the requested target.
+     * Zero offsets leave the dart at the requested target's aiming point.
      *
-     * @param target      the dartboard target
-     * @param offsetR     radial deviation in millimeters
-     * @param offsetTheta angular deviation in radians
+     * @param target  the dartboard target
+     * @param offsetX the horizontal displacement in millimeters
+     * @param offsetY the vertical displacement in millimeters
      * @return the resulting dart
      */
-    Dart getScore(@NotNull @Valid Dart target, double offsetR, double offsetTheta);
+    Dart getScore(@NotNull @Valid Dart target, double offsetX, double offsetY);
 }
