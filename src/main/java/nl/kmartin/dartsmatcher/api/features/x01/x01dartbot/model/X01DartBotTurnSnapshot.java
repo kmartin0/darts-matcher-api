@@ -1,5 +1,7 @@
 package nl.kmartin.dartsmatcher.api.features.x01.x01dartbot.model;
 
+import nl.kmartin.dartsmatcher.api.features.x01.x01match.model.X01MatchFormat;
+
 /**
  * Provides the current read-only values used while simulating the next dart bot throw.
  *
@@ -9,6 +11,8 @@ package nl.kmartin.dartsmatcher.api.features.x01.x01dartbot.model;
  * @param currentOneDartAvg the bot's current one-dart average
  * @param targetNumOfDarts  the target number of darts for completing the leg
  * @param targetOneDartAvg  the bot's target one-dart average
+ * @param opened           whether scoring is enabled
+ * @param format           the opening and checkout format of the match
  */
 public record X01DartBotTurnSnapshot(
         int remainingPoints,
@@ -16,7 +20,9 @@ public record X01DartBotTurnSnapshot(
         int dartsLeftInTurn,
         double currentOneDartAvg,
         int targetNumOfDarts,
-        double targetOneDartAvg
+        double targetOneDartAvg,
+        boolean opened,
+        X01MatchFormat format
 ) {
 
     /**
@@ -31,7 +37,9 @@ public record X01DartBotTurnSnapshot(
                 dartBotTurnState.getDartsLeftInTurn(),
                 dartBotTurnState.getCurrentOneDartAvg(),
                 dartBotTurnState.getTargetNumOfDarts(),
-                dartBotTurnState.getTargetOneDartAvg()
+                dartBotTurnState.getTargetOneDartAvg(),
+                dartBotTurnState.isOpened(),
+                dartBotTurnState.getFormat()
         );
     }
 }

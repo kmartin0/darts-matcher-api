@@ -37,16 +37,16 @@ public class X01DartBotDeviationCalculatorImpl implements IX01DartBotDeviationCa
             Map.entry(6.00, 125.0),
             Map.entry(8.00, 100.0),
             Map.entry(11.00, 80.0),
-            Map.entry(14.00, 70.0),
+            Map.entry(13.00, 70.0),
             Map.entry(16.00, 60.0),
             Map.entry(20.00, 50.0),
             Map.entry(25.00, 40.0),
             Map.entry(28.00, 35.0),
-            Map.entry(32.00, 30.0),
+            Map.entry(33.00, 30.0),
             Map.entry(38.00, 25.0),
             Map.entry(46.00, 20.0),
-            Map.entry(50.00, 18.0),
-            Map.entry(57.00, 16.0),
+            Map.entry(51.00, 18.0),
+            Map.entry(56.00, 16.0),
             Map.entry(64.00, 14.0),
             Map.entry(73.00, 12.0),
             Map.entry(84.00, 10.0),
@@ -54,12 +54,9 @@ public class X01DartBotDeviationCalculatorImpl implements IX01DartBotDeviationCa
             Map.entry(98.00, 8.0),
             Map.entry(106.00, 7.0),
             Map.entry(115.00, 6.0),
-            Map.entry(125.00, 5.0),
+            Map.entry(126.00, 5.0),
             Map.entry(138.00, 4.0),
-            Map.entry(145.00, 3.5),
-            Map.entry(153.00, 3.0),
-            Map.entry(165.00, 2.0),
-            Map.entry(167.00, 0.0)
+            Map.entry(150.00, 0.0)
     ));
 
     private final PiecewiseLinearInterpolator standardDeviationInterpolator =

@@ -163,8 +163,7 @@ public class X01MatchTurnServiceImpl implements IX01MatchTurnService {
                     return dartBotService.createDartBotTurn(
                             dartBotPlayer,
                             currentLegEntry.leg(),
-                            match.getMatchSettings().getX01(),
-                            match.getMatchSettings().isTrackDoubles()
+                            match.getMatchSettings()
                     );
                 });
     }

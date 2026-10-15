@@ -24,17 +24,21 @@ import java.util.TreeMap;
  *
  * Measured averages are rounded upward to whole numbers. When keys coincide,
  * the smallest standard deviation is retained. Results vary between runs.
+ *
+ * Entries at and above {@link #ZERO_DEVIATION_AVERAGE} are replaced with a
+ * zero-deviation endpoint to enforce perfect accuracy at the configured threshold.
  */
 @SuppressWarnings("NewClassNamingConvention")
 @Disabled("Manual utility for generating the standard deviation curve")
 public class X01DartBotStdDevCurveGenerator {
     private static final int X01 = 501;
+    private static final int ZERO_DEVIATION_AVERAGE = 150;
     private static final int LEGS_PER_STANDARD_DEVIATION = 10000;
     private static final int MAX_DARTS_PER_LEG = 10000;
 
     // Standard deviations in millimeters sampled to generate the calibration curve.
     private static final double[] STANDARD_DEVIATIONS = {
-            0, 1, 2, 3, 3.5, 4, 5, 6, 7, 8, 9, 10,
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
             12, 14, 16, 18, 20, 25, 30, 35, 40, 50, 60, 70, 80,
             100, 125, 150, 200
     };
@@ -72,6 +76,10 @@ public class X01DartBotStdDevCurveGenerator {
 
             System.out.printf(Locale.ROOT, "%-12.1f %-14.2f%n", standardDeviation, average);
         }
+
+        // Replace measured entries at and above the cutoff with a zero-deviation endpoint.
+        standardDeviationCurve.tailMap((double) ZERO_DEVIATION_AVERAGE, true).clear();
+        standardDeviationCurve.put((double) ZERO_DEVIATION_AVERAGE, 0.0);
 
         printStandardDeviationCurve(standardDeviationCurve);
     }

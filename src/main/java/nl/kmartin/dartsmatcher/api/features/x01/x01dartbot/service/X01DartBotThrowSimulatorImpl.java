@@ -15,10 +15,12 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Simulates scoring and checkout throws for the X01 dart bot.
+ * Simulates opening, scoring and checkout throws for the X01 dart bot.
  *
- * Selects a scoring or checkout target, applies calibrated Gaussian offsets,
- * and validates simulated results against the bot's checkout policy.
+ * Selects targets according to the match format and opening state.
+ * Opening attempts use baseline Gaussian accuracy and guarantee double twenty
+ * once the opening-miss allowance is reached. Scoring and checkout attempts
+ * use performance-calibrated accuracy and checkout-policy validation.
  *
  * Checkout routes use guaranteed hits once their projected finishing count reaches
  * the target dart count. Earlier checkout attempts fall back to their intended
@@ -27,6 +29,10 @@ import java.util.Optional;
 @Service
 @Validated
 public class X01DartBotThrowSimulatorImpl implements IX01DartBotThrowSimulator {
+    /**
+     * Maximum fraction of the current target dart count allowed for failed opening attempts.
+     */
+    private static final double OPENING_MISS_ALLOWANCE_FACTOR = 0.10;
 
     private final IDartboardService dartboardService;
     private final IX01CheckoutService checkoutService;
@@ -49,14 +55,48 @@ public class X01DartBotThrowSimulatorImpl implements IX01DartBotThrowSimulator {
     }
 
     @Override
-    public List<DartThrow> getNextDartThrows(X01DartBotTurnSnapshot dartBotTurnSnapshot) {
-        // Use the checkout strategy when the remaining score can be checked out.
-        boolean isRemainingCheckout = checkoutService.isScoreCheckout(dartBotTurnSnapshot.remainingPoints());
+    public List<DartThrow> getNextDartThrows(X01DartBotTurnSnapshot snapshot) {
+        return switch (snapshot.format()) {
+            case SIDO -> createScoringOrCheckoutThrows(snapshot);
+            case DIDO -> snapshot.opened()
+                    ? createScoringOrCheckoutThrows(snapshot)
+                    : List.of(createOpeningDartThrow(snapshot));
+        };
+    }
 
-        // Otherwise, generate a regular scoring throw.
+    /**
+     * Selects checkout throws when the remaining score has a checkout route,
+     * otherwise generates a regular scoring throw.
+     *
+     * @param snapshot the current dart bot turn snapshot
+     * @return the generated throws
+     */
+    private List<DartThrow> createScoringOrCheckoutThrows(X01DartBotTurnSnapshot snapshot) {
+        boolean isRemainingCheckout = checkoutService.isScoreCheckout(snapshot.remainingPoints());
+
         return isRemainingCheckout
-                ? createCheckoutDartThrows(dartBotTurnSnapshot)
-                : List.of(createScoringDartThrow(dartBotTurnSnapshot));
+                ? createCheckoutDartThrows(snapshot)
+                : List.of(createScoringDartThrow(snapshot));
+    }
+
+    /**
+     * Simulates an opening attempt at double twenty using baseline accuracy.
+     *
+     * Guarantees the target once opening misses reach the allowance,
+     * rounded down to a whole number of darts.
+     *
+     * @param snapshot the current dart bot turn snapshot
+     * @return the generated opening throw
+     */
+    private DartThrow createOpeningDartThrow(X01DartBotTurnSnapshot snapshot) {
+        Dart target = dartBotScoringStrategy.createDoubleInTarget();
+        int maximumOpeningMisses = (int) Math.floor(snapshot.targetNumOfDarts() * OPENING_MISS_ALLOWANCE_FACTOR);
+
+        if (snapshot.dartsUsedInLeg() >= maximumOpeningMisses) {
+            return new DartThrow(target, target);
+        }
+
+        return throwAtTarget(snapshot, target);
     }
 
     /**
@@ -195,13 +235,14 @@ public class X01DartBotThrowSimulatorImpl implements IX01DartBotThrowSimulator {
     }
 
     /**
-     * Uses baseline standard deviation before the first dart and calibrated values thereafter.
+     * Uses baseline accuracy while unopened and before the first dart.
+     * Once opened, calibrates accuracy using all darts thrown, including opening misses.
      *
      * @param snapshot the current dart bot turn snapshot
      * @return the standard deviation per axis in millimeters
      */
     private double getStandardDeviation(X01DartBotTurnSnapshot snapshot) {
-        if (snapshot.dartsUsedInLeg() == 0) {
+        if (!snapshot.opened() || snapshot.dartsUsedInLeg() == 0) {
             return dartBotDeviationCalculator.getStandardDeviation(snapshot.targetOneDartAvg());
         }
 

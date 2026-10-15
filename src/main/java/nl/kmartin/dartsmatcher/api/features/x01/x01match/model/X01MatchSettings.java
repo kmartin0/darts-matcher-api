@@ -32,4 +32,7 @@ public class X01MatchSettings {
     @NotNull
     @Valid
     private X01BestOf bestOf;
+
+    @NotNull
+    private X01MatchFormat format;
 }

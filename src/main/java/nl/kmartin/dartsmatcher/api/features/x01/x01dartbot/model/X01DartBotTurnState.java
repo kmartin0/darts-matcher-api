@@ -3,6 +3,7 @@ package nl.kmartin.dartsmatcher.api.features.x01.x01dartbot.model;
 import lombok.Getter;
 import lombok.ToString;
 import nl.kmartin.dartsmatcher.api.features.x01.x01leground.model.X01Turn;
+import nl.kmartin.dartsmatcher.api.features.x01.x01match.model.X01MatchFormat;
 
 /**
  * Stores the state used while playing a dart bot's turn in an X01 leg.
@@ -18,6 +19,7 @@ public class X01DartBotTurnState {
     private final int targetNumOfDarts;
     private final double targetOneDartAvg;
     private final boolean trackDoubles;
+    private final X01MatchFormat format;
 
     private int scoreInTurn;
     private int dartsUsedInTurn;
@@ -29,7 +31,8 @@ public class X01DartBotTurnState {
             int dartsUsedBeforeTurn,
             int targetNumOfDarts,
             double targetOneDartAvg,
-            boolean trackDoubles
+            boolean trackDoubles,
+            X01MatchFormat format
     ) {
         this.x01 = x01;
         this.scoredBeforeTurn = scoredBeforeTurn;
@@ -37,6 +40,7 @@ public class X01DartBotTurnState {
         this.targetNumOfDarts = targetNumOfDarts;
         this.targetOneDartAvg = targetOneDartAvg;
         this.trackDoubles = trackDoubles;
+        this.format = format;
     }
 
     /**
@@ -109,5 +113,17 @@ public class X01DartBotTurnState {
      */
     public void addDoubleMiss() {
         doublesMissedInTurn = doublesMissedInTurn == null ? 1 : doublesMissedInTurn + 1;
+    }
+
+    /**
+     * Determines whether scoring is enabled for the match format.
+     *
+     * @return whether no opening double is required or the bot has already scored
+     */
+    public boolean isOpened() {
+        return switch (format) {
+            case SIDO -> true;
+            case DIDO -> getScoredInLeg() > 0;
+        };
     }
 }

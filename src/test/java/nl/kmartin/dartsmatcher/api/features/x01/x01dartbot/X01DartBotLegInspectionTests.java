@@ -8,8 +8,13 @@ import nl.kmartin.dartsmatcher.api.features.x01.x01dartbot.service.X01DartBotSer
 import nl.kmartin.dartsmatcher.api.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcher.api.features.x01.x01leground.model.X01LegRound;
 import nl.kmartin.dartsmatcher.api.features.x01.x01leground.model.X01Turn;
+import nl.kmartin.dartsmatcher.api.features.x01.x01match.model.X01BestOf;
+import nl.kmartin.dartsmatcher.api.features.x01.x01match.model.X01BestOfType;
+import nl.kmartin.dartsmatcher.api.features.x01.x01match.model.X01ClearByTwoRule;
 import nl.kmartin.dartsmatcher.api.features.x01.x01match.model.X01DartBotSettings;
+import nl.kmartin.dartsmatcher.api.features.x01.x01match.model.X01MatchFormat;
 import nl.kmartin.dartsmatcher.api.features.x01.x01match.model.X01MatchPlayer;
+import nl.kmartin.dartsmatcher.api.features.x01.x01match.model.X01MatchSettings;
 import nl.kmartin.dartsmatcher.api.features.x01.x01match.repository.IX01MatchRepository;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Assertions;
@@ -36,6 +41,7 @@ public class X01DartBotLegInspectionTests {
     private static final int LEGS_TO_PRINT = 5;
     private static final int MAX_DARTS_PER_LEG = 10000;
     private static final boolean TRACK_DOUBLES = true;
+    private static final X01MatchFormat FORMAT = X01MatchFormat.SIDO;
 
     @Mock
     private IX01MatchRepository matchRepository;
@@ -44,14 +50,27 @@ public class X01DartBotLegInspectionTests {
     private ApplicationEventPublisher eventPublisher;
 
     private IX01DartBotService dartBotService;
+    private X01MatchSettings matchSettings;
 
     /**
-     * Creates the bot service with mocked repository and event dependencies.
+     * Creates the bot service with mocked dependencies and configures the match settings.
      */
     @BeforeEach
     void setUp() {
         X01FeatureTestFactory factory = new X01FeatureTestFactory(matchRepository, eventPublisher);
         dartBotService = factory.createDartBotService();
+
+        matchSettings = new X01MatchSettings(
+                X01,
+                TRACK_DOUBLES,
+                new X01BestOf(
+                        1, 1, X01BestOfType.LEGS,
+                        new X01ClearByTwoRule(false, 0),
+                        new X01ClearByTwoRule(false, 0),
+                        new X01ClearByTwoRule(false, 0)
+                ),
+                FORMAT
+        );
     }
 
     /**
@@ -79,7 +98,7 @@ public class X01DartBotLegInspectionTests {
         int round = 1;
 
         while (remaining != 0) {
-            X01DartBotTurn turn = dartBotService.createDartBotTurn(player, leg, X01, TRACK_DOUBLES);
+            X01DartBotTurn turn = dartBotService.createDartBotTurn(player, leg, matchSettings);
 
             remaining -= turn.score();
             dartsUsed += getDartsUsed(turn);

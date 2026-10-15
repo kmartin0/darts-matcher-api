@@ -14,6 +14,8 @@ import java.util.Map;
  *
  * Scoring targets are selected using weighted treble probabilities, with Treble 20
  * always selected when the target one-dart average reaches the configured threshold.
+ *
+ * Double in target is always D20.
  */
 @Service
 @Validated
@@ -37,6 +39,11 @@ public class X01DartBotScoringStrategyImpl implements IX01DartBotScoringStrategy
         // Select a weighted treble target for lower playing strengths.
         DartboardSection selectedTreble = selectRandomTreble();
         return new Dart(selectedTreble, DartboardSectionArea.TRIPLE);
+    }
+
+    @Override
+    public Dart createDoubleInTarget() {
+        return new Dart(DartboardSection.TWENTY, DartboardSectionArea.DOUBLE);
     }
 
     /**

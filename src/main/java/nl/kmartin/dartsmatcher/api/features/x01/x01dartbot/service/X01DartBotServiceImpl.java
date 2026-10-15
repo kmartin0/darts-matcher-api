@@ -8,7 +8,9 @@ import nl.kmartin.dartsmatcher.api.features.x01.x01dartbot.model.X01DartBotTurnS
 import nl.kmartin.dartsmatcher.api.features.x01.x01dartbot.model.X01DartBotTurnState;
 import nl.kmartin.dartsmatcher.api.features.x01.x01leg.model.X01Leg;
 import nl.kmartin.dartsmatcher.api.features.x01.x01leg.service.IX01LegResultService;
+import nl.kmartin.dartsmatcher.api.features.x01.x01match.model.X01MatchFormat;
 import nl.kmartin.dartsmatcher.api.features.x01.x01match.model.X01MatchPlayer;
+import nl.kmartin.dartsmatcher.api.features.x01.x01match.model.X01MatchSettings;
 import nl.kmartin.dartsmatcher.api.util.NumberUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -39,9 +41,11 @@ public class X01DartBotServiceImpl implements IX01DartBotService {
     }
 
     @Override
-    public X01DartBotTurn createDartBotTurn(X01MatchPlayer dartBotPlayer, X01Leg leg, int x01, boolean trackDoubles) {
+    public X01DartBotTurn createDartBotTurn(X01MatchPlayer dartBotPlayer, X01Leg leg, X01MatchSettings matchSettings) {
+        boolean doubleIn = matchSettings.getFormat() == X01MatchFormat.DIDO;
+
         // Build the current turn state and play the bot's turn by mutating that state.
-        X01DartBotTurnState dartBotTurnState = createDartBotTurnState(dartBotPlayer, leg, x01, trackDoubles);
+        X01DartBotTurnState dartBotTurnState = createDartBotTurnState(dartBotPlayer, leg, matchSettings);
         playTurn(dartBotTurnState);
 
         // Record checkout dart usage only when this turn completed the leg.
@@ -62,11 +66,12 @@ public class X01DartBotServiceImpl implements IX01DartBotService {
      *
      * @param dartBotPlayer the dart bot player
      * @param leg           the leg containing the bot's previous turns
-     * @param x01           the starting score for the leg
-     * @param trackDoubles  whether missed doubles are tracked
+     * @param matchSettings the match settings defining the starting score, double tracking and format
      * @return the state used to simulate the dart bot's turn
      */
-    private X01DartBotTurnState createDartBotTurnState(X01MatchPlayer dartBotPlayer, X01Leg leg, int x01, boolean trackDoubles) {
+    private X01DartBotTurnState createDartBotTurnState(X01MatchPlayer dartBotPlayer, X01Leg leg, X01MatchSettings matchSettings) {
+        int x01 = matchSettings.getX01();
+
         // Calculate the points and darts accumulated before the current turn.
         int scoredBeforeTurn = x01 - legResultService.getRemainingForPlayer(leg, dartBotPlayer.getPlayerId(), x01);
         int dartsUsedBeforeTurn = legResultService.calculateDartsUsed(leg, dartBotPlayer.getPlayerId());
@@ -82,7 +87,8 @@ public class X01DartBotServiceImpl implements IX01DartBotService {
                 dartsUsedBeforeTurn,
                 targetNumOfDarts,
                 targetOneDartAvg,
-                trackDoubles
+                matchSettings.isTrackDoubles(),
+                matchSettings.getFormat()
         );
     }
 
@@ -128,19 +134,28 @@ public class X01DartBotServiceImpl implements IX01DartBotService {
     }
 
     /**
-     * Applies a simulated dart throw by mutating the current dart bot turn state.
+     * Applies a simulated dart throw to the current turn state.
      *
-     * Updates the turn score, dart count, and missed doubles where applicable.
+     * Opening attempts consume a dart but only score when a double is hit.
+     * Missed opening doubles are excluded from checkout double tracking.
      *
      * @param dartBotTurnState the dart bot turn state to mutate
      * @param dartThrow        the simulated dart throw
      */
     private void applyDartThrow(X01DartBotTurnState dartBotTurnState, DartThrow dartThrow) {
-        // Update the score and dart count for the current turn.
-        dartBotTurnState.addScore(dartThrow.result().getScore());
         dartBotTurnState.useDart();
 
-        // Track missed doubles only when double tracking is enabled.
+        if (!dartBotTurnState.isOpened()) {
+            if (!dartThrow.result().area().isDouble()) {
+                return;
+            }
+
+            dartBotTurnState.addScore(dartThrow.result().getScore());
+            return;
+        }
+
+        dartBotTurnState.addScore(dartThrow.result().getScore());
+
         if (dartBotTurnState.isTrackDoubles() && isDoubleMiss(dartThrow)) {
             dartBotTurnState.addDoubleMiss();
         }

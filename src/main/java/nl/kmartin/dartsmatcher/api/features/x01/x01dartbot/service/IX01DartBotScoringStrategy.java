@@ -12,4 +12,11 @@ public interface IX01DartBotScoringStrategy {
      * @return the dartboard target used for scoring
      */
     Dart createScoringTarget(@Positive double targetOneDartAvg);
+
+    /**
+     * Creates the target used to open a double-in leg.
+     *
+     * @return the opening double target
+     */
+    Dart createDoubleInTarget();
 }

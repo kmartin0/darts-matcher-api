@@ -8,6 +8,7 @@ import nl.kmartin.dartsmatcher.api.features.x01.x01match.model.X01BestOfType;
 import nl.kmartin.dartsmatcher.api.features.x01.x01match.model.X01ClearByTwoRule;
 import nl.kmartin.dartsmatcher.api.features.x01.x01match.model.X01DartBotSettings;
 import nl.kmartin.dartsmatcher.api.features.x01.x01match.model.X01Match;
+import nl.kmartin.dartsmatcher.api.features.x01.x01match.model.X01MatchFormat;
 import nl.kmartin.dartsmatcher.api.features.x01.x01match.model.X01MatchSettings;
 import org.bson.types.ObjectId;
 import org.springframework.core.io.ClassPathResource;
@@ -38,7 +39,8 @@ public class X01MatchServiceTestData {
                                 new X01ClearByTwoRule(false, 0),
                                 new X01ClearByTwoRule(false, 0),
                                 new X01ClearByTwoRule(false, 0)
-                        )
+                        ),
+                        X01MatchFormat.SIDO
                 ),
                 List.of(
                         new X01CreateMatchRequest.Player("Player 1", PlayerType.HUMAN, null)
@@ -74,7 +76,8 @@ public class X01MatchServiceTestData {
                                 new X01ClearByTwoRule(false, 0),
                                 new X01ClearByTwoRule(false, 0),
                                 new X01ClearByTwoRule(false, 0)
-                        )
+                        ),
+                        X01MatchFormat.SIDO
                 ),
                 List.of(
                         new X01CreateMatchRequest.Player("Player 1", PlayerType.HUMAN, null),
@@ -113,7 +116,8 @@ public class X01MatchServiceTestData {
                                 new X01ClearByTwoRule(true, 2),
                                 new X01ClearByTwoRule(true, 2),
                                 new X01ClearByTwoRule(true, 2)
-                        )
+                        ),
+                        X01MatchFormat.SIDO
                 ),
                 List.of(
                         new X01CreateMatchRequest.Player("Player 1", PlayerType.HUMAN, null),
@@ -155,7 +159,8 @@ public class X01MatchServiceTestData {
                                 new X01ClearByTwoRule(false, 0),
                                 new X01ClearByTwoRule(false, 0),
                                 new X01ClearByTwoRule(false, 0)
-                        )
+                        ),
+                        X01MatchFormat.SIDO
                 ),
                 List.of(
                         new X01CreateMatchRequest.Player("Player 1", PlayerType.HUMAN, null),
@@ -200,7 +205,8 @@ public class X01MatchServiceTestData {
                                 new X01ClearByTwoRule(false, 0),
                                 new X01ClearByTwoRule(false, 0),
                                 new X01ClearByTwoRule(false, 0)
-                        )
+                        ),
+                        X01MatchFormat.SIDO
                 ),
                 List.of(
                         new X01CreateMatchRequest.Player("Player 1", PlayerType.HUMAN, null),
@@ -239,7 +245,8 @@ public class X01MatchServiceTestData {
                                 new X01ClearByTwoRule(false, 0),
                                 new X01ClearByTwoRule(false, 0),
                                 new X01ClearByTwoRule(false, 0)
-                        )
+                        ),
+                        X01MatchFormat.SIDO
                 ),
                 List.of(
                         new X01CreateMatchRequest.Player("Player 1", PlayerType.HUMAN, null),
@@ -322,7 +329,8 @@ public class X01MatchServiceTestData {
                                 new X01ClearByTwoRule(false, 0),
                                 new X01ClearByTwoRule(false, 0),
                                 new X01ClearByTwoRule(false, 0)
-                        )
+                        ),
+                        X01MatchFormat.SIDO
                 ),
                 List.of(
                         new X01CreateMatchRequest.Player("Player 1", PlayerType.HUMAN, null),
