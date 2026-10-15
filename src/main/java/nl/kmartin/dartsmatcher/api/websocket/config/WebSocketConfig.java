@@ -29,7 +29,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
  * STOMP subscribe destination (publish responses):         /user/queue/responses
  * STOMP subscribe destination (publish errors):            /user/queue/errors
  * STOMP publish destination:                               /app/x01/matches/67dd4a0746cdab5415620e01/turn/add
- * STOMP message content (add turn):                        {"score": 60, "checkoutDartsUsed": null, "doublesMissed": null}
+ * STOMP message content (add turn):                        {"score": 60, "checkoutDoublesMissed": null, "openingDoublesMissed": null, "checkoutDartsUsed": null}
  * =
  * WebSocket Debug Tool: https://jiangxy.github.io/websocket-debug-tool/
  */

@@ -26,7 +26,11 @@ public class X01CreateTurnRequest {
 
     @PositiveOrZero
     @Max(X01Turn.MAXIMUM_DARTS_PER_TURN)
-    private Integer doublesMissed;
+    private Integer checkoutDoublesMissed;
+
+    @PositiveOrZero
+    @Max(X01Turn.MAXIMUM_DARTS_PER_TURN)
+    private Integer openingDoublesMissed;
 
     @Positive
     @Max(X01Turn.MAXIMUM_DARTS_PER_TURN)

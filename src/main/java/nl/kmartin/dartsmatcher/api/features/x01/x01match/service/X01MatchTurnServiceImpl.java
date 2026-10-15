@@ -69,7 +69,8 @@ public class X01MatchTurnServiceImpl implements IX01MatchTurnService {
         X01DartBotTurn turn = dartBotTurn.get();
         addTurnToCurrentThrower(match, new X01CreateTurnRequest(
                 turn.score(),
-                turn.doublesMissed(),
+                turn.checkoutDoublesMissed(),
+                turn.openingDoublesMissed(),
                 turn.checkoutDartsUsed()
         ));
 
@@ -137,10 +138,12 @@ public class X01MatchTurnServiceImpl implements IX01MatchTurnService {
                 currentLegEntry.leg(),
                 currentRoundEntry.roundNumber(),
                 turnRequest.getScore(),
-                turnRequest.getDoublesMissed(),
+                turnRequest.getCheckoutDoublesMissed(),
+                turnRequest.getOpeningDoublesMissed(),
                 turnRequest.getCheckoutDartsUsed(),
                 currentThrower,
-                match.getMatchSettings().isTrackDoubles()
+                match.getMatchSettings().isTrackDoubles(),
+                match.getMatchSettings().getFormat()
         );
     }
 
@@ -185,10 +188,12 @@ public class X01MatchTurnServiceImpl implements IX01MatchTurnService {
                 legEntry.leg(),
                 turnRequest.getRound(),
                 turnRequest.getScore(),
-                turnRequest.getDoublesMissed(),
+                turnRequest.getCheckoutDoublesMissed(),
+                turnRequest.getOpeningDoublesMissed(),
                 turnRequest.getCheckoutDartsUsed(),
                 turnRequest.getPlayerId(),
-                match.getMatchSettings().isTrackDoubles()
+                match.getMatchSettings().isTrackDoubles(),
+                match.getMatchSettings().getFormat()
         );
     }
 

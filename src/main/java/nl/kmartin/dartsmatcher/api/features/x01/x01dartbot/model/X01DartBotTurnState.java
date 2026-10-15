@@ -23,7 +23,8 @@ public class X01DartBotTurnState {
 
     private int scoreInTurn;
     private int dartsUsedInTurn;
-    private Integer doublesMissedInTurn;
+    private Integer checkoutDoublesMissedInTurn;
+    private Integer openingDoublesMissedInTurn;
 
     public X01DartBotTurnState(
             int x01,
@@ -109,10 +110,17 @@ public class X01DartBotTurnState {
     }
 
     /**
-     * Records a missed double in the current turn.
+     * Records a missed checkout double in the current turn.
      */
-    public void addDoubleMiss() {
-        doublesMissedInTurn = doublesMissedInTurn == null ? 1 : doublesMissedInTurn + 1;
+    public void addCheckoutDoubleMiss() {
+        checkoutDoublesMissedInTurn = checkoutDoublesMissedInTurn == null ? 1 : checkoutDoublesMissedInTurn + 1;
+    }
+
+    /**
+     * Records a missed opening double in the current turn.
+     */
+    public void addOpeningDoubleMiss() {
+        openingDoublesMissedInTurn = openingDoublesMissedInTurn == null ? 1 : openingDoublesMissedInTurn + 1;
     }
 
     /**

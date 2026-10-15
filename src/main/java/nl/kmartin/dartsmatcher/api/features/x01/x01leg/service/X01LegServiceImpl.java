@@ -175,7 +175,14 @@ public class X01LegServiceImpl implements IX01LegService {
             remaining = remainingBeforeTurn;
         }
 
-        return new X01Turn(score, remaining, turnMutation.doublesMissed(), turnMutation.trackDoubles());
+        return new X01Turn(
+                score,
+                remaining,
+                turnMutation.checkoutDoublesMissed(),
+                turnMutation.openingDoublesMissed(),
+                turnMutation.trackDoubles(),
+                turnMutation.format()
+        );
     }
 
     /**
@@ -185,7 +192,7 @@ public class X01LegServiceImpl implements IX01LegService {
      * the leg's recorded checkout dart count.
      *
      * @param turnMutation the turn context identifying the leg, player and starting round
-     * @param remaining the remaining score before processing the following turns
+     * @param remaining    the remaining score before processing the following turns
      * @return whether all following turns remain legal
      */
     private boolean areFollowingTurnsLegal(X01TurnMutation turnMutation, int remaining) {

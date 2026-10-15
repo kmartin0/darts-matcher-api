@@ -68,8 +68,8 @@ public class X01CheckoutStatisticsServiceImpl implements IX01CheckoutStatisticsS
      * @param playerTurn          the current turn
      */
     private void updateCheckoutsMissed(X01CheckoutStatistics playerCheckoutStats, X01Turn playerTurn) {
-        int doublesMissed = playerTurn.getDoublesMissed() != null
-                ? playerTurn.getDoublesMissed()
+        int doublesMissed = playerTurn.getCheckoutDoublesMissed() != null
+                ? playerTurn.getCheckoutDoublesMissed()
                 : 0;
 
         int checkoutsMissed = playerCheckoutStats.getCheckoutsMissed() != null

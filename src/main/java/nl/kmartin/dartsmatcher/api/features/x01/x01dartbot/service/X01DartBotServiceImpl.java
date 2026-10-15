@@ -56,7 +56,8 @@ public class X01DartBotServiceImpl implements IX01DartBotService {
         // Convert the completed turn state into the generated dart bot turn.
         return new X01DartBotTurn(
                 dartBotTurnState.getScoreInTurn(),
-                dartBotTurnState.getDoublesMissedInTurn(),
+                dartBotTurnState.getCheckoutDoublesMissedInTurn(),
+                dartBotTurnState.getOpeningDoublesMissedInTurn(),
                 checkoutDartsUsed
         );
     }
@@ -137,7 +138,7 @@ public class X01DartBotServiceImpl implements IX01DartBotService {
      * Applies a simulated dart throw to the current turn state.
      *
      * Opening attempts consume a dart but only score when a double is hit.
-     * Missed opening doubles are excluded from checkout double tracking.
+     * Opening and checkout misses are recorded separately when double tracking is enabled.
      *
      * @param dartBotTurnState the dart bot turn state to mutate
      * @param dartThrow        the simulated dart throw
@@ -147,6 +148,9 @@ public class X01DartBotServiceImpl implements IX01DartBotService {
 
         if (!dartBotTurnState.isOpened()) {
             if (!dartThrow.result().area().isDouble()) {
+                if (dartBotTurnState.isTrackDoubles()) {
+                    dartBotTurnState.addOpeningDoubleMiss();
+                }
                 return;
             }
 
@@ -157,7 +161,7 @@ public class X01DartBotServiceImpl implements IX01DartBotService {
         dartBotTurnState.addScore(dartThrow.result().getScore());
 
         if (dartBotTurnState.isTrackDoubles() && isDoubleMiss(dartThrow)) {
-            dartBotTurnState.addDoubleMiss();
+            dartBotTurnState.addCheckoutDoubleMiss();
         }
     }
 

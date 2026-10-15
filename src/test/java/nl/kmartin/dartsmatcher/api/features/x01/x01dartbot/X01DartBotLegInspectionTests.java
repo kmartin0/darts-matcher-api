@@ -124,7 +124,7 @@ public class X01DartBotLegInspectionTests {
             Assertions.fail("Remaining went below zero: remaining=" + remaining + ", round=" + round);
         }
 
-        X01Turn turn = new X01Turn(dartBotTurn.score(), remaining, dartBotTurn.doublesMissed());
+        X01Turn turn = new X01Turn(dartBotTurn.score(), remaining, dartBotTurn.checkoutDoublesMissed(), dartBotTurn.openingDoublesMissed());
         LinkedHashMap<ObjectId, X01Turn> playerTurns = new LinkedHashMap<>();
         playerTurns.put(dartBotId, turn);
 
@@ -149,18 +149,25 @@ public class X01DartBotLegInspectionTests {
 
         System.out.printf("%n===== Leg %d | Target avg: %d =====%n", leg, TARGET_AVG);
         System.out.printf("Lower target: %d | Target: %d | Upper target: %d%n%n", lower, target, upper);
-        System.out.printf("%-7s %-8s %-11s %-8s %-12s %-8s%n",
-                "Round", "Score", "Remaining", "Darts", "Dbl missed", "Avg");
+        System.out.printf("%-7s %-8s %-11s %-8s %-10s %-10s %-8s%n",
+                "Round", "Score", "Remaining", "Darts", "CO missed", "DI missed", "Avg");
     }
 
     /**
-     * Prints a turn with cumulative darts used and the running three-dart average.
+     * Prints a turn with cumulative darts used, checkout and opening misses,
+     * and the running three-dart average.
      */
     private void printTurn(int round, X01DartBotTurn turn, int remaining, int dartsUsed) {
-        String doublesMissed = turn.doublesMissed() == null ? "-" : turn.doublesMissed().toString();
+        String checkoutDoublesMissed = turn.checkoutDoublesMissed() == null
+                ? "-"
+                : turn.checkoutDoublesMissed().toString();
+        String openingDoublesMissed = turn.openingDoublesMissed() == null
+                ? "-"
+                : turn.openingDoublesMissed().toString();
         double average = (X01 - remaining) * 3.0 / dartsUsed;
 
-        System.out.printf(Locale.ROOT, "%-7d %-8d %-11d %-8d %-12s %-8.2f%n",
-                round, turn.score(), remaining, dartsUsed, doublesMissed, average);
+        System.out.printf(Locale.ROOT, "%-7d %-8d %-11d %-8d %-10s %-10s %-8.2f%n",
+                round, turn.score(), remaining, dartsUsed,
+                checkoutDoublesMissed, openingDoublesMissed, average);
     }
 }
