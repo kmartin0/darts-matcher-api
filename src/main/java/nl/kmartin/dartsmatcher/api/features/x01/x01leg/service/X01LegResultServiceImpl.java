@@ -144,7 +144,8 @@ public class X01LegResultServiceImpl implements IX01LegResultService {
     }
 
     /**
-     * Recalculates and normalizes the remaining scores for all recorded players across a leg.
+     * Recalculates and normalizes remaining scores for all recorded players across a leg,
+     * clearing tracked opening misses on turns played after the player opened.
      *
      * @param leg the leg to update
      * @param x01 the starting score for the leg
@@ -165,10 +166,27 @@ public class X01LegResultServiceImpl implements IX01LegResultService {
                     remainingAfter = previousRemaining;
                 }
 
+                clearOpeningMissesAfterOpening(turn, previousRemaining, x01);
+
                 turn.setRemaining(remainingAfter);
                 remainingMap.put(playerId, remainingAfter);
             });
         });
+    }
+
+    /**
+     * Clears tracked opening misses when the player had already opened before the turn.
+     *
+     * Preserves misses on the opening turn itself and leaves untracked values null.
+     *
+     * @param turn                the turn to update
+     * @param remainingBeforeTurn the player's remaining score before the turn
+     * @param x01                 the starting score for the leg
+     */
+    private void clearOpeningMissesAfterOpening(X01Turn turn, int remainingBeforeTurn, int x01) {
+        if (remainingBeforeTurn != x01 && turn.getOpeningDoublesMissed() != null) {
+            turn.setOpeningDoublesMissed(0);
+        }
     }
 
     /**
