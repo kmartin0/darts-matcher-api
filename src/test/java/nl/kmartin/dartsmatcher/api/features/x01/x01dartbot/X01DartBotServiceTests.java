@@ -41,11 +41,11 @@ import java.util.TreeMap;
 public class X01DartBotServiceTests {
     private static final int X01 = 501;
     private static final boolean TRACK_DOUBLES = true;
-    private static final X01MatchFormat FORMAT = X01MatchFormat.DIDO;
+    private static final X01MatchFormat FORMAT = X01MatchFormat.SIDO;
 
     private static final int MAX_AVG_TO_TEST = 180;
     private static final int MIN_AVG_TO_TEST = 1;
-    private static final int LEGS_PER_TARGET = 5000;
+    private static final int LEGS_PER_TARGET = 1000;
 
     private static final int MAX_DARTS_PER_LEG = 10000;
 

@@ -1,4 +1,4 @@
-package nl.kmartin.dartsmatcher;
+package nl.kmartin.dartsmatcher.api;
 
 import org.junit.jupiter.api.Test;
 

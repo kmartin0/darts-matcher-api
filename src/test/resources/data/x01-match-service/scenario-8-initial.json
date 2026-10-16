@@ -33,6 +33,7 @@
           "checkoutsMissed": 0,
           "checkoutsHit": 1
         },
+        "doubleInStats": null,
         "scoreStatistics": {
           "fortyPlus": 0,
           "sixtyPlus": 0,
@@ -69,6 +70,7 @@
           "checkoutsMissed": 0,
           "checkoutsHit": 0
         },
+        "doubleInStats": null,
         "scoreStatistics": {
           "fortyPlus": 0,
           "sixtyPlus": 0,
@@ -83,6 +85,7 @@
   "matchSettings": {
     "x01": 501,
     "trackDoubles": true,
+    "format": "SIDO",
     "bestOf": {
       "sets": 1,
       "legs": 1,
@@ -125,12 +128,14 @@
                       "68bd4c7e8f2a31d6c9047a10": {
                         "score": 180,
                         "remaining": 321,
-                        "doublesMissed": 0
+                        "checkoutDoublesMissed": 0,
+                        "openingDoublesMissed": null
                       },
                       "68bd4c7e8f2a31d6c9047a11": {
                         "score": 100,
                         "remaining": 401,
-                        "doublesMissed": 0
+                        "checkoutDoublesMissed": 0,
+                        "openingDoublesMissed": null
                       }
                     }
                   }
@@ -142,12 +147,14 @@
                       "68bd4c7e8f2a31d6c9047a10": {
                         "score": 180,
                         "remaining": 141,
-                        "doublesMissed": 0
+                        "checkoutDoublesMissed": 0,
+                        "openingDoublesMissed": null
                       },
                       "68bd4c7e8f2a31d6c9047a11": {
                         "score": 100,
                         "remaining": 301,
-                        "doublesMissed": 0
+                        "checkoutDoublesMissed": 0,
+                        "openingDoublesMissed": null
                       }
                     }
                   }
@@ -159,7 +166,8 @@
                       "68bd4c7e8f2a31d6c9047a10": {
                         "score": 141,
                         "remaining": 0,
-                        "doublesMissed": 0
+                        "checkoutDoublesMissed": 0,
+                        "openingDoublesMissed": null
                       }
                     }
                   }

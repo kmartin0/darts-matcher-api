@@ -801,6 +801,75 @@ public class X01MatchServiceTests {
         assertThat(match.getMatchProgress().getCurrentThrower()).isEqualTo(playerOneId);
     }
 
+    /**
+     * ===== Scenario 13 =====
+     * Match configuration:
+     * - 501
+     * - DIDO
+     * - Best of 1 leg
+     * - 2 human players
+     * - Clear-by-two disabled
+     * - Track doubles enabled
+     *
+     * Stresses:
+     * - Failed opening attempts without scoring
+     * - Opening after misses within the same turn
+     * - Successful openings counted once per player
+     * - Opening hits counted for the losing player
+     * - Opening and checkout misses tracked separately
+     */
+    @Test
+    void scenarioThirteen() {
+        X01CreateMatchRequest createMatchRequest = testData.getScenarioThirteenCreateMatchRequest();
+        X01Match match = matchService.createMatch(createMatchRequest);
+
+        ObjectId playerOneId = match.getPlayers().get(0).getPlayerId();
+        ObjectId playerTwoId = match.getPlayers().get(1).getPlayerId();
+
+        runScenario(
+                match.getId(),
+                List.of(
+                        // Round 1: Player 1 misses all opening attempts; Player 2 opens on dart 3.
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(0, 0, 3, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(40, 0, 2, null)),
+
+                        // Round 2: Player 1 misses once, then scores D20 and T20.
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, 1, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, 0, null)),
+
+                        // Round 3: both players are already open.
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, 0, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, 0, null)),
+
+                        // Round 4: both players leave 41.
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, 0, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, 0, null)),
+
+                        // Round 5: both players miss checkout doubles.
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(0, 3, 0, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(0, 2, 0, null)),
+
+                        // Round 6: Player 1 checks out and wins the match.
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(41, 0, 0, 2))
+                )
+        );
+
+        Assertions.assertNotNull(match.getStartDate());
+        Assertions.assertNotNull(match.getEndDate());
+
+        X01Match expectedMatch = testData.getScenarioThirteenExpectedResult(
+                match.getId(),
+                playerOneId,
+                playerTwoId,
+                match.getStartDate(),
+                match.getEndDate()
+        );
+
+        assertThat(match)
+                .usingRecursiveComparison()
+                .isEqualTo(expectedMatch);
+    }
+
     // ===== Helpers =====
     private void configureMatchRepository() {
         matches.clear();

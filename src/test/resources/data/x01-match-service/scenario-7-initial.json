@@ -33,6 +33,7 @@
           "checkoutsMissed": 99,
           "checkoutsHit": 99
         },
+        "doubleInStats": null,
         "scoreStatistics": {
           "fortyPlus": 99,
           "sixtyPlus": 99,
@@ -47,6 +48,7 @@
   "matchSettings": {
     "x01": 501,
     "trackDoubles": false,
+    "format": "SIDO",
     "bestOf": {
       "sets": 1,
       "legs": 2,
@@ -88,7 +90,8 @@
                       "6a9e6f1b9b153cef071f49c6": {
                         "score": 180,
                         "remaining": 999,
-                        "doublesMissed": null
+                        "checkoutDoublesMissed": null,
+                        "openingDoublesMissed": null
                       }
                     }
                   }
@@ -100,7 +103,8 @@
                       "6a9e6f1b9b153cef071f49c6": {
                         "score": 180,
                         "remaining": 999,
-                        "doublesMissed": null
+                        "checkoutDoublesMissed": null,
+                        "openingDoublesMissed": null
                       }
                     }
                   }
@@ -112,7 +116,8 @@
                       "6a9e6f1b9b153cef071f49c6": {
                         "score": 141,
                         "remaining": 999,
-                        "doublesMissed": null
+                        "checkoutDoublesMissed": null,
+                        "openingDoublesMissed": null
                       }
                     }
                   }
@@ -124,7 +129,8 @@
                       "6a9e6f1b9b153cef071f49c6": {
                         "score": 60,
                         "remaining": -60,
-                        "doublesMissed": null
+                        "checkoutDoublesMissed": null,
+                        "openingDoublesMissed": null
                       }
                     }
                   }
@@ -146,7 +152,8 @@
                       "6a9e6f1b9b153cef071f49c6": {
                         "score": 180,
                         "remaining": 321,
-                        "doublesMissed": null
+                        "checkoutDoublesMissed": null,
+                        "openingDoublesMissed": null
                       }
                     }
                   }
@@ -158,7 +165,8 @@
                       "6a9e6f1b9b153cef071f49c6": {
                         "score": 180,
                         "remaining": 141,
-                        "doublesMissed": null
+                        "checkoutDoublesMissed": null,
+                        "openingDoublesMissed": null
                       }
                     }
                   }
@@ -170,7 +178,8 @@
                       "6a9e6f1b9b153cef071f49c6": {
                         "score": 180,
                         "remaining": -39,
-                        "doublesMissed": null
+                        "checkoutDoublesMissed": null,
+                        "openingDoublesMissed": null
                       }
                     }
                   }
@@ -182,7 +191,8 @@
                       "6a9e6f1b9b153cef071f49c6": {
                         "score": 65,
                         "remaining": -104,
-                        "doublesMissed": null
+                        "checkoutDoublesMissed": null,
+                        "openingDoublesMissed": null
                       }
                     }
                   }

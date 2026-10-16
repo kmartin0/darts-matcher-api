@@ -33,6 +33,7 @@
           "checkoutsMissed": null,
           "checkoutsHit": 0
         },
+        "doubleInStats": null,
         "scoreStatistics": {
           "fortyPlus": 0,
           "sixtyPlus": 0,
@@ -69,6 +70,7 @@
           "checkoutsMissed": null,
           "checkoutsHit": 0
         },
+        "doubleInStats": null,
         "scoreStatistics": {
           "fortyPlus": 0,
           "sixtyPlus": 0,
@@ -83,6 +85,7 @@
   "matchSettings": {
     "x01": 501,
     "trackDoubles": true,
+    "format": "SIDO",
     "bestOf": {
       "sets": 1,
       "legs": 1,

@@ -33,6 +33,7 @@
           "checkoutsMissed": null,
           "checkoutsHit": 2
         },
+        "doubleInStats": null,
         "scoreStatistics": {
           "fortyPlus": 0,
           "sixtyPlus": 0,
@@ -69,6 +70,7 @@
           "checkoutsMissed": null,
           "checkoutsHit": 2
         },
+        "doubleInStats": null,
         "scoreStatistics": {
           "fortyPlus": 0,
           "sixtyPlus": 0,
@@ -83,6 +85,7 @@
   "matchSettings": {
     "x01": 501,
     "trackDoubles": false,
+    "format": "SIDO",
     "bestOf": {
       "sets": 1,
       "legs": 4,
@@ -125,12 +128,14 @@
                       "${player1Id}": {
                         "score": 180,
                         "remaining": 321,
-                        "doublesMissed": null
+                        "checkoutDoublesMissed": null,
+                        "openingDoublesMissed": null
                       },
                       "${player2Id}": {
                         "score": 100,
                         "remaining": 401,
-                        "doublesMissed": null
+                        "checkoutDoublesMissed": null,
+                        "openingDoublesMissed": null
                       }
                     }
                   }
@@ -142,12 +147,14 @@
                       "${player1Id}": {
                         "score": 180,
                         "remaining": 141,
-                        "doublesMissed": null
+                        "checkoutDoublesMissed": null,
+                        "openingDoublesMissed": null
                       },
                       "${player2Id}": {
                         "score": 100,
                         "remaining": 301,
-                        "doublesMissed": null
+                        "checkoutDoublesMissed": null,
+                        "openingDoublesMissed": null
                       }
                     }
                   }
@@ -159,7 +166,8 @@
                       "${player1Id}": {
                         "score": 141,
                         "remaining": 0,
-                        "doublesMissed": null
+                        "checkoutDoublesMissed": null,
+                        "openingDoublesMissed": null
                       }
                     }
                   }
@@ -181,12 +189,14 @@
                       "${player2Id}": {
                         "score": 180,
                         "remaining": 321,
-                        "doublesMissed": null
+                        "checkoutDoublesMissed": null,
+                        "openingDoublesMissed": null
                       },
                       "${player1Id}": {
                         "score": 100,
                         "remaining": 401,
-                        "doublesMissed": null
+                        "checkoutDoublesMissed": null,
+                        "openingDoublesMissed": null
                       }
                     }
                   }
@@ -198,12 +208,14 @@
                       "${player2Id}": {
                         "score": 180,
                         "remaining": 141,
-                        "doublesMissed": null
+                        "checkoutDoublesMissed": null,
+                        "openingDoublesMissed": null
                       },
                       "${player1Id}": {
                         "score": 100,
                         "remaining": 301,
-                        "doublesMissed": null
+                        "checkoutDoublesMissed": null,
+                        "openingDoublesMissed": null
                       }
                     }
                   }
@@ -215,7 +227,8 @@
                       "${player2Id}": {
                         "score": 141,
                         "remaining": 0,
-                        "doublesMissed": null
+                        "checkoutDoublesMissed": null,
+                        "openingDoublesMissed": null
                       }
                     }
                   }
@@ -237,12 +250,14 @@
                       "${player1Id}": {
                         "score": 100,
                         "remaining": 401,
-                        "doublesMissed": null
+                        "checkoutDoublesMissed": null,
+                        "openingDoublesMissed": null
                       },
                       "${player2Id}": {
                         "score": 180,
                         "remaining": 321,
-                        "doublesMissed": null
+                        "checkoutDoublesMissed": null,
+                        "openingDoublesMissed": null
                       }
                     }
                   }
@@ -254,12 +269,14 @@
                       "${player1Id}": {
                         "score": 100,
                         "remaining": 301,
-                        "doublesMissed": null
+                        "checkoutDoublesMissed": null,
+                        "openingDoublesMissed": null
                       },
                       "${player2Id}": {
                         "score": 180,
                         "remaining": 141,
-                        "doublesMissed": null
+                        "checkoutDoublesMissed": null,
+                        "openingDoublesMissed": null
                       }
                     }
                   }
@@ -271,12 +288,14 @@
                       "${player1Id}": {
                         "score": 100,
                         "remaining": 201,
-                        "doublesMissed": null
+                        "checkoutDoublesMissed": null,
+                        "openingDoublesMissed": null
                       },
                       "${player2Id}": {
                         "score": 141,
                         "remaining": 0,
-                        "doublesMissed": null
+                        "checkoutDoublesMissed": null,
+                        "openingDoublesMissed": null
                       }
                     }
                   }
@@ -298,12 +317,14 @@
                       "${player2Id}": {
                         "score": 100,
                         "remaining": 401,
-                        "doublesMissed": null
+                        "checkoutDoublesMissed": null,
+                        "openingDoublesMissed": null
                       },
                       "${player1Id}": {
                         "score": 180,
                         "remaining": 321,
-                        "doublesMissed": null
+                        "checkoutDoublesMissed": null,
+                        "openingDoublesMissed": null
                       }
                     }
                   }
@@ -315,12 +336,14 @@
                       "${player2Id}": {
                         "score": 100,
                         "remaining": 301,
-                        "doublesMissed": null
+                        "checkoutDoublesMissed": null,
+                        "openingDoublesMissed": null
                       },
                       "${player1Id}": {
                         "score": 180,
                         "remaining": 141,
-                        "doublesMissed": null
+                        "checkoutDoublesMissed": null,
+                        "openingDoublesMissed": null
                       }
                     }
                   }
@@ -332,12 +355,14 @@
                       "${player2Id}": {
                         "score": 100,
                         "remaining": 201,
-                        "doublesMissed": null
+                        "checkoutDoublesMissed": null,
+                        "openingDoublesMissed": null
                       },
                       "${player1Id}": {
                         "score": 141,
                         "remaining": 0,
-                        "doublesMissed": null
+                        "checkoutDoublesMissed": null,
+                        "openingDoublesMissed": null
                       }
                     }
                   }

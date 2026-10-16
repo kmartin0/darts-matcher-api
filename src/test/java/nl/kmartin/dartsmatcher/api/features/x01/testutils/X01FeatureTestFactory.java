@@ -21,6 +21,8 @@ import nl.kmartin.dartsmatcher.api.features.x01.x01dartbot.service.X01DartBotDev
 import nl.kmartin.dartsmatcher.api.features.x01.x01dartbot.service.X01DartBotScoringStrategyImpl;
 import nl.kmartin.dartsmatcher.api.features.x01.x01dartbot.service.X01DartBotServiceImpl;
 import nl.kmartin.dartsmatcher.api.features.x01.x01dartbot.service.X01DartBotThrowSimulatorImpl;
+import nl.kmartin.dartsmatcher.api.features.x01.x01doubleinstatistics.service.IX01DoubleInStatisticsService;
+import nl.kmartin.dartsmatcher.api.features.x01.x01doubleinstatistics.service.X01DoubleInStatisticsServiceImpl;
 import nl.kmartin.dartsmatcher.api.features.x01.x01leg.service.IX01LegProgressService;
 import nl.kmartin.dartsmatcher.api.features.x01.x01leg.service.IX01LegResultService;
 import nl.kmartin.dartsmatcher.api.features.x01.x01leg.service.IX01LegService;
@@ -202,6 +204,7 @@ public class X01FeatureTestFactory {
                 createScoreStatisticsService(),
                 createCheckoutStatisticsService(),
                 createAverageStatisticsService(),
+                createDoubleInStatisticsService(),
                 createLegService()
         );
     }
@@ -216,6 +219,10 @@ public class X01FeatureTestFactory {
 
     public IX01CheckoutStatisticsService createCheckoutStatisticsService() {
         return new X01CheckoutStatisticsServiceImpl();
+    }
+
+    public IX01DoubleInStatisticsService createDoubleInStatisticsService() {
+        return new X01DoubleInStatisticsServiceImpl();
     }
 
     public IX01AverageStatisticsService createAverageStatisticsService() {

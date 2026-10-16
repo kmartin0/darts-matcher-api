@@ -339,6 +339,46 @@ public class X01MatchServiceTestData {
         );
     }
 
+    // ===== Scenario 13 =====
+    public X01CreateMatchRequest getScenarioThirteenCreateMatchRequest() {
+        return new X01CreateMatchRequest(
+                new X01MatchSettings(
+                        501,
+                        true,
+                        new X01BestOf(
+                                1,
+                                1,
+                                X01BestOfType.LEGS,
+                                new X01ClearByTwoRule(false, 0),
+                                new X01ClearByTwoRule(false, 0),
+                                new X01ClearByTwoRule(false, 0)
+                        ),
+                        X01MatchFormat.DIDO
+                ),
+                List.of(
+                        new X01CreateMatchRequest.Player("Player 1", PlayerType.HUMAN, null),
+                        new X01CreateMatchRequest.Player("Player 2", PlayerType.HUMAN, null)
+                )
+        );
+    }
+
+    public X01Match getScenarioThirteenExpectedResult(
+            ObjectId matchId,
+            ObjectId playerOneId,
+            ObjectId playerTwoId,
+            Instant startDate,
+            Instant endDate
+    ) {
+        return readExpectedMatch(
+                "data/x01-match-service/scenario-13-expected.json",
+                new Placeholder("${matchId}", matchId.toHexString()),
+                new Placeholder("${player1Id}", playerOneId.toHexString()),
+                new Placeholder("${player2Id}", playerTwoId.toHexString()),
+                new Placeholder("${startDate}", startDate.toString()),
+                new Placeholder("${endDate}", endDate.toString())
+        );
+    }
+
     // ===== Helpers =====
     private X01Match readExpectedMatch(String path, Placeholder... placeholders) {
         try {

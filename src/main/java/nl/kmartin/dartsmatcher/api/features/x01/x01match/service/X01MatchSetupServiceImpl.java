@@ -3,6 +3,7 @@ package nl.kmartin.dartsmatcher.api.features.x01.x01match.service;
 import nl.kmartin.dartsmatcher.api.features.basematch.model.MatchStatus;
 import nl.kmartin.dartsmatcher.api.features.x01.x01match.dto.X01CreateMatchRequest;
 import nl.kmartin.dartsmatcher.api.features.x01.x01match.model.X01Match;
+import nl.kmartin.dartsmatcher.api.features.x01.x01match.model.X01MatchFormat;
 import nl.kmartin.dartsmatcher.api.features.x01.x01match.model.X01MatchPlayer;
 import nl.kmartin.dartsmatcher.api.features.x01.x01match.model.X01MatchProgress;
 import nl.kmartin.dartsmatcher.api.features.x01.x01statistics.model.X01Statistics;
@@ -27,7 +28,7 @@ public class X01MatchSetupServiceImpl implements IX01MatchSetupService {
     @Override
     public X01Match initializeNewMatch(X01CreateMatchRequest request) {
         // Create fresh match players from the requested player configuration.
-        ArrayList<X01MatchPlayer> players = createMatchPlayers(request.players());
+        ArrayList<X01MatchPlayer> players = createMatchPlayers(request.players(), request.matchSettings().getFormat());
 
         // Initialize the match without played sets or derived match state.
         return new X01Match(
@@ -49,7 +50,7 @@ public class X01MatchSetupServiceImpl implements IX01MatchSetupService {
     @Override
     public X01Match initializeRematch(X01Match match) {
         // Create fresh player state while preserving player identity, configuration and order.
-        ArrayList<X01MatchPlayer> players = createResetMatchPlayers(match.getPlayers());
+        ArrayList<X01MatchPlayer> players = createResetMatchPlayers(match.getPlayers(), match.getMatchSettings().getFormat());
 
         // Initialize a new match without played sets, derived state or a rematch reference.
         return new X01Match(
@@ -71,7 +72,7 @@ public class X01MatchSetupServiceImpl implements IX01MatchSetupService {
     @Override
     public X01Match resetMatch(X01Match match) {
         // Reset player state while preserving player identity and configuration.
-        ArrayList<X01MatchPlayer> players = createResetMatchPlayers(match.getPlayers());
+        ArrayList<X01MatchPlayer> players = createResetMatchPlayers(match.getPlayers(), match.getMatchSettings().getFormat());
 
         // Recreate the starting match state while preserving persisted identity and configuration.
         return new X01Match(
@@ -93,10 +94,11 @@ public class X01MatchSetupServiceImpl implements IX01MatchSetupService {
     /**
      * Maps requested players to newly initialized X01 match players.
      *
-     * @param players the requested players
+     * @param players     the requested players
+     * @param matchFormat the match format
      * @return the initialized match players
      */
-    private ArrayList<X01MatchPlayer> createMatchPlayers(List<X01CreateMatchRequest.Player> players) {
+    private ArrayList<X01MatchPlayer> createMatchPlayers(List<X01CreateMatchRequest.Player> players, X01MatchFormat matchFormat) {
         return players.stream()
                 .map(player -> new X01MatchPlayer(
                         new ObjectId(),
@@ -104,7 +106,7 @@ public class X01MatchSetupServiceImpl implements IX01MatchSetupService {
                         player.playerType(),
                         null,
                         player.x01DartBotSettings(),
-                        new X01Statistics()
+                        new X01Statistics(matchFormat)
                 ))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
@@ -112,10 +114,11 @@ public class X01MatchSetupServiceImpl implements IX01MatchSetupService {
     /**
      * Creates fresh player state while preserving player identity, configuration and order.
      *
-     * @param players the existing match players
+     * @param players     the existing match players
+     * @param matchFormat the match format
      * @return the players with reset state
      */
-    private ArrayList<X01MatchPlayer> createResetMatchPlayers(List<X01MatchPlayer> players) {
+    private ArrayList<X01MatchPlayer> createResetMatchPlayers(List<X01MatchPlayer> players, X01MatchFormat matchFormat) {
         return players.stream()
                 .map(player -> new X01MatchPlayer(
                         player.getPlayerId(),
@@ -123,7 +126,7 @@ public class X01MatchSetupServiceImpl implements IX01MatchSetupService {
                         player.getPlayerType(),
                         null,
                         player.getX01DartBotSettings(),
-                        new X01Statistics()
+                        new X01Statistics(matchFormat)
                 ))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
