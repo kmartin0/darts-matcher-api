@@ -87,11 +87,13 @@ public class X01CheckoutStatisticsServiceImpl implements IX01CheckoutStatisticsS
     private void updateCheckoutPercentage(X01CheckoutStatistics playerCheckoutStats) {
         int checkoutAttempts = playerCheckoutStats.getCheckoutsHit() + playerCheckoutStats.getCheckoutsMissed();
 
-        int checkoutPercentage = NumberUtils.calcPercentage(
-                playerCheckoutStats.getCheckoutsHit(),
-                checkoutAttempts
-        );
+        if (checkoutAttempts == 0) {
+            playerCheckoutStats.setCheckoutPercentage(null);
+            return;
+        }
 
-        playerCheckoutStats.setCheckoutPercentage(checkoutPercentage);
+        playerCheckoutStats.setCheckoutPercentage(
+                NumberUtils.calcPercentage(playerCheckoutStats.getCheckoutsHit(), checkoutAttempts)
+        );
     }
 }
