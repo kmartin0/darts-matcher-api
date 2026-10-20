@@ -2,6 +2,8 @@ package nl.kmartin.dartsmatcher.api.features.x01.x01match.service;
 
 import nl.kmartin.dartsmatcher.api.features.basematch.model.MatchStatus;
 import nl.kmartin.dartsmatcher.api.features.x01.x01match.dto.X01CreateMatchRequest;
+import nl.kmartin.dartsmatcher.api.features.x01.x01match.model.X01BestOf;
+import nl.kmartin.dartsmatcher.api.features.x01.x01match.model.X01BestOfType;
 import nl.kmartin.dartsmatcher.api.features.x01.x01match.model.X01Match;
 import nl.kmartin.dartsmatcher.api.features.x01.x01match.model.X01MatchFormat;
 import nl.kmartin.dartsmatcher.api.features.x01.x01match.model.X01MatchPlayer;
@@ -29,6 +31,13 @@ public class X01MatchSetupServiceImpl implements IX01MatchSetupService {
     public X01Match initializeNewMatch(X01CreateMatchRequest request) {
         // Create fresh match players from the requested player configuration.
         ArrayList<X01MatchPlayer> players = createMatchPlayers(request.players(), request.matchSettings().getFormat());
+
+        // Normalize best of sets to 1, when best of type is legs.
+        X01BestOf bestOfSettings = request.matchSettings().getBestOf();
+        if (bestOfSettings.getBestOfType() == X01BestOfType.LEGS) {
+            bestOfSettings.setSets(1);
+            bestOfSettings.getClearByTwoSetsRule().setEnabled(false);
+        }
 
         // Initialize the match without played sets or derived match state.
         return new X01Match(
