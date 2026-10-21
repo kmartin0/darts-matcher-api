@@ -27,3 +27,12 @@ Backend API for Darts Matcher which manages X01 dart matches, scoring, statistic
 - JUnit and Testcontainers integration tests using MongoDB.
 - Structured application and WebSocket logging.
 - Docker support using a multi-stage build.
+
+## API Documentation
+
+API documentation is available in `docs/`.
+
+- [Shared types, objects and errors](docs/collection.md).
+- Documentation files include REST requests, WebSocket commands, validation, responses and broadcasts.
+- [WebSocket connection](docs/websocket-connection.md).
+- [WebSocket subscriptions](docs/websocket-subscriptions.md).
