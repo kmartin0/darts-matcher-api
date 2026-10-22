@@ -33,9 +33,10 @@ Object definitions are in the collection documentation.
 
 Produces `application/json` with an `ErrorResponse` body.
 
-| Status                      | Type                   | Cause                                                                  |
-|-----------------------------|------------------------|------------------------------------------------------------------------|
-| `400 Bad Request`           | `INVALID_ARGUMENTS`    | The `ids` query parameter is missing. `targetErrors` identifies `ids`. |
-| `400 Bad Request`           | `MESSAGE_NOT_READABLE` | One or more IDs cannot be converted to an `ObjectId`.                  |
-| `500 Internal Server Error` | `INTERNAL`             | An unexpected error occurs while retrieving the matches.               |
-| `503 Service Unavailable`   | `UNAVAILABLE`          | The database is unavailable.                                           |
+| Status                      | Type                   | Cause                                                                        |
+|-----------------------------|------------------------|------------------------------------------------------------------------------|
+| `400 Bad Request`           | `INVALID_ARGUMENTS`    | The `ids` query parameter is missing. `targetErrors` identifies `ids`.       |
+| `400 Bad Request`           | `MESSAGE_NOT_READABLE` | One or more IDs cannot be converted to an `ObjectId`.                        |
+| `406 Not Acceptable`        | `NOT_ACCEPTABLE`       | The `Accept` header requests a response format the operation cannot produce. |
+| `500 Internal Server Error` | `INTERNAL`             | An unexpected error occurs while retrieving the matches.                     |
+| `503 Service Unavailable`   | `UNAVAILABLE`          | The database is unavailable.                                                 |

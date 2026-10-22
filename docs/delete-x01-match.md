@@ -25,11 +25,11 @@ Object definitions are in [collection.md](collection.md).
 
 ### Success response
 
-| Detail   | Value    |
-|----------|----------|
-| Status   | `200 OK` |
-| Produces | None     |
-| Body     | None     |
+| Detail   | Value            |
+|----------|------------------|
+| Status   | `204 No Content` |
+| Produces | None             |
+| Body     | None             |
 
 ### Error responses
 

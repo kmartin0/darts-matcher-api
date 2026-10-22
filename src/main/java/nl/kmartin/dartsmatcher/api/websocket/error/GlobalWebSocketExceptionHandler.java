@@ -67,9 +67,8 @@ public class GlobalWebSocketExceptionHandler {
     ) {
         ArrayList<TargetError> errors = TargetErrorUtil.extractFieldErrors(e);
 
-        publishError(
+        publishInvalidArgumentsError(
                 e,
-                ApiErrorCode.INVALID_ARGUMENTS,
                 messageResolver.getMessage(MessageKeys.EXCEPTION_INVALID_ARGUMENTS),
                 stompHeaderAccessor,
                 errors.toArray(new TargetError[0])
@@ -87,9 +86,8 @@ public class GlobalWebSocketExceptionHandler {
             InvalidArgumentsException e,
             StompHeaderAccessor stompHeaderAccessor
     ) {
-        publishError(
+        publishInvalidArgumentsError(
                 e,
-                ApiErrorCode.INVALID_ARGUMENTS,
                 messageResolver.getMessage(MessageKeys.EXCEPTION_INVALID_ARGUMENTS),
                 stompHeaderAccessor,
                 e.getErrors().toArray(new TargetError[0])
@@ -250,17 +248,41 @@ public class GlobalWebSocketExceptionHandler {
     }
 
     /**
-     * Logs an exception and publishes a WebSocket error event for the originating session.
+     * Logs an exception and publishes a WebSocket error event without target-specific errors.
      *
      * @param exception           the exception that occurred
      * @param apiErrorCode        the API error code
      * @param description         the human-readable error description
      * @param stompHeaderAccessor accessor for the incoming STOMP message
-     * @param targetErrors        the target-specific errors
      */
     private void publishError(
             Exception exception,
             ApiErrorCode apiErrorCode,
+            String description,
+            StompHeaderAccessor stompHeaderAccessor
+    ) {
+        logger.error(exception.getClass().getSimpleName(), exception);
+
+        webSocketEventPublisher.sendError(
+                stompHeaderAccessor.getDestination(),
+                apiErrorCode,
+                description,
+                new TargetError[0],
+                stompHeaderAccessor.getSessionId(),
+                stompHeaderAccessor.getFirstNativeHeader(WebSocketHeaders.PUBLISH_ID)
+        );
+    }
+
+    /**
+     * Logs an exception and publishes an invalid-arguments error event for the originating session.
+     *
+     * @param exception           the exception that occurred
+     * @param description         the human-readable error description
+     * @param stompHeaderAccessor accessor for the incoming STOMP message
+     * @param targetErrors        the client-correctable target errors
+     */
+    private void publishInvalidArgumentsError(
+            Exception exception,
             String description,
             StompHeaderAccessor stompHeaderAccessor,
             TargetError... targetErrors
@@ -269,7 +291,7 @@ public class GlobalWebSocketExceptionHandler {
 
         webSocketEventPublisher.sendError(
                 stompHeaderAccessor.getDestination(),
-                apiErrorCode,
+                ApiErrorCode.INVALID_ARGUMENTS,
                 description,
                 targetErrors,
                 stompHeaderAccessor.getSessionId(),

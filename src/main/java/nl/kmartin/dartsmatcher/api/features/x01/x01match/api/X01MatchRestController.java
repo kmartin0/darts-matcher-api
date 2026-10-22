@@ -13,6 +13,7 @@ import org.bson.types.ObjectId;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,7 +22,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 /**
@@ -40,13 +43,19 @@ public class X01MatchRestController {
      * Creates a new X01 match.
      *
      * @param createMatchRequest the match creation request
-     * @return the created match
+     * @return the created match with its resource URI in the Location header
      * @throws IllegalStateException when Dart Bot processing encounters invalid match state
      */
     @PostMapping(path = RestEndpoints.X01.MATCHES, consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(HttpStatus.CREATED)
-    public X01Match createMatch(@Valid @RequestBody X01CreateMatchRequest createMatchRequest) {
-        return matchService.createMatch(createMatchRequest);
+    public ResponseEntity<X01Match> createMatch(@Valid @RequestBody X01CreateMatchRequest createMatchRequest) {
+        X01Match match = matchService.createMatch(createMatchRequest);
+
+        URI location = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path(RestEndpoints.X01.MATCH)
+                .buildAndExpand(match.getId().toHexString())
+                .toUri();
+
+        return ResponseEntity.created(location).body(match);
     }
 
     /**
@@ -158,7 +167,7 @@ public class X01MatchRestController {
      * @throws OptimisticLockingFailureException when an affected match was modified concurrently
      */
     @DeleteMapping(path = RestEndpoints.X01.MATCH)
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteMatch(@PathVariable ObjectId matchId) {
         matchService.deleteMatch(matchId);
     }

@@ -357,14 +357,25 @@ Errors are delivered directly as the JSON body, without the `messageType` and `p
 
 String with one of the following values.
 
-| Value                    | HTTP status                  | Meaning                                                      |
-|--------------------------|------------------------------|--------------------------------------------------------------|
-| `INVALID_ARGUMENTS`      | `400 Bad Request`            | Request values fail validation.                              |
-| `MESSAGE_NOT_READABLE`   | `400 Bad Request`            | The request body or a parameter cannot be read or converted. |
-| `RESOURCE_NOT_FOUND`     | `404 Not Found`              | The requested resource does not exist.                       |
-| `URI_NOT_FOUND`          | `404 Not Found`              | The URL does not match an API route.                         |
-| `METHOD_NOT_ALLOWED`     | `405 Method Not Allowed`     | The HTTP method is not supported for the URL.                |
-| `CONFLICT`               | `409 Conflict`               | A concurrent update prevents the change from being saved.    |
-| `UNSUPPORTED_MEDIA_TYPE` | `415 Unsupported Media Type` | The request uses an unsupported media type.                  |
-| `INTERNAL`               | `500 Internal Server Error`  | An unexpected server error occurred.                         |
-| `UNAVAILABLE`            | `503 Service Unavailable`    | The database is unavailable.                                 |
+| Value                    | HTTP status                  | Meaning                                                                      |
+|--------------------------|------------------------------|------------------------------------------------------------------------------|
+| `INVALID_ARGUMENTS`      | `400 Bad Request`            | Request values fail validation.                                              |
+| `MESSAGE_NOT_READABLE`   | `400 Bad Request`            | The request body or a parameter cannot be read or converted.                 |
+| `RESOURCE_NOT_FOUND`     | `404 Not Found`              | The requested resource does not exist.                                       |
+| `URI_NOT_FOUND`          | `404 Not Found`              | The URL does not match an API route.                                         |
+| `METHOD_NOT_ALLOWED`     | `405 Method Not Allowed`     | The HTTP method is not supported for the URL.                                |
+| `NOT_ACCEPTABLE`         | `406 Not Acceptable`         | The `Accept` header requests a response format the operation cannot produce. |
+| `CONFLICT`               | `409 Conflict`               | A concurrent update prevents the change from being saved.                    |
+| `UNSUPPORTED_MEDIA_TYPE` | `415 Unsupported Media Type` | The `Content-Type` header specifies an unsupported request body format.      |
+| `INTERNAL`               | `500 Internal Server Error`  | An unexpected server error occurred.                                         |
+| `UNAVAILABLE`            | `503 Service Unavailable`    | The database is unavailable.                                                 |
+
+REST responses with status `406 Not Acceptable` return an `ErrorResponse` body as `application/json`, even when the request's `Accept` header excludes JSON.
+
+### REST error response headers
+
+REST responses with status `405 Method Not Allowed` include the following header:
+
+| Header  | Type     | Description                                                  |
+|---------|----------|--------------------------------------------------------------|
+| `Allow` | `String` | Comma-separated HTTP methods supported by the requested URL. |

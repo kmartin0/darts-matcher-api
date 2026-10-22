@@ -46,8 +46,9 @@ Produces `application/json` with an `ErrorResponse` body.
 | `400 Bad Request`            | `INVALID_ARGUMENTS`      | The request body fails validation or the turn cannot be applied to the current match state. `targetErrors` identifies the affected properties.   |
 | `400 Bad Request`            | `MESSAGE_NOT_READABLE`   | `matchId` cannot be converted to an `ObjectId`, or the body is missing, contains invalid JSON, or cannot be converted to `X01CreateTurnRequest`. |
 | `404 Not Found`              | `RESOURCE_NOT_FOUND`     | The match or its active set, leg or round cannot be found.                                                                                       |
+| `406 Not Acceptable`         | `NOT_ACCEPTABLE`         | The `Accept` header requests a response format the operation cannot produce.                                                                     |
 | `409 Conflict`               | `CONFLICT`               | A concurrent update prevents the match from being saved.                                                                                         |
-| `415 Unsupported Media Type` | `UNSUPPORTED_MEDIA_TYPE` | The request body uses an unsupported media type.                                                                                                 |
+| `415 Unsupported Media Type` | `UNSUPPORTED_MEDIA_TYPE` | The `Content-Type` header specifies a request body format the operation does not support.                                                        |
 | `500 Internal Server Error`  | `INTERNAL`               | An unexpected error occurs while processing the turn.                                                                                            |
 | `503 Service Unavailable`    | `UNAVAILABLE`            | The database is unavailable.                                                                                                                     |
 

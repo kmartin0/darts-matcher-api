@@ -30,6 +30,7 @@ The order of checkouts is not guaranteed.
 
 Produces `application/json` with an `ErrorResponse` body.
 
-| Status                      | Type       | Cause                                  |
-|-----------------------------|------------|----------------------------------------|
-| `500 Internal Server Error` | `INTERNAL` | An unexpected processing error occurs. |
+| Status                      | Type             | Cause                                                                        |
+|-----------------------------|------------------|------------------------------------------------------------------------------|
+| `406 Not Acceptable`        | `NOT_ACCEPTABLE` | The `Accept` header requests a response format the operation cannot produce. |
+| `500 Internal Server Error` | `INTERNAL`       | An unexpected processing error occurs.                                       |

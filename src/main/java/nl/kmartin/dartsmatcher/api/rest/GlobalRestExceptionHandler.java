@@ -15,9 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.web.HttpMediaTypeException;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -65,9 +68,8 @@ public class GlobalRestExceptionHandler {
     ) {
         ArrayList<TargetError> errors = TargetErrorUtil.extractFieldErrors(e);
 
-        return createErrorResponse(
+        return createInvalidArgumentsResponse(
                 e,
-                ApiErrorCode.INVALID_ARGUMENTS,
                 messageResolver.getMessage(MessageKeys.EXCEPTION_INVALID_ARGUMENTS),
                 errors.toArray(new TargetError[0])
         );
@@ -89,7 +91,7 @@ public class GlobalRestExceptionHandler {
     ) {
         // A controller return-value violation represents an API implementation error.
         if (e.isForReturnValue()) {
-            return createErrorResponse(
+            return createInvalidArgumentsResponse(
                     e,
                     ApiErrorCode.INTERNAL,
                     messageResolver.getMessage(MessageKeys.EXCEPTION_INTERNAL)
@@ -98,9 +100,8 @@ public class GlobalRestExceptionHandler {
 
         ArrayList<TargetError> errors = TargetErrorUtil.extractFieldErrors(e);
 
-        return createErrorResponse(
+        return createInvalidArgumentsResponse(
                 e,
-                ApiErrorCode.INVALID_ARGUMENTS,
                 messageResolver.getMessage(MessageKeys.EXCEPTION_INVALID_ARGUMENTS),
                 errors.toArray(new TargetError[0])
         );
@@ -116,9 +117,8 @@ public class GlobalRestExceptionHandler {
     public ResponseEntity<ErrorResponse> handleMissingServletRequestParameterException(
             MissingServletRequestParameterException e
     ) {
-        return createErrorResponse(
+        return createInvalidArgumentsResponse(
                 e,
-                ApiErrorCode.INVALID_ARGUMENTS,
                 messageResolver.getMessage(MessageKeys.EXCEPTION_INVALID_ARGUMENTS),
                 new TargetError(
                         e.getParameterName(),
@@ -135,9 +135,8 @@ public class GlobalRestExceptionHandler {
      */
     @ExceptionHandler({InvalidArgumentsException.class})
     public ResponseEntity<ErrorResponse> handleInvalidArgumentException(InvalidArgumentsException e) {
-        return createErrorResponse(
+        return createInvalidArgumentsResponse(
                 e,
-                ApiErrorCode.INVALID_ARGUMENTS,
                 messageResolver.getMessage(MessageKeys.EXCEPTION_INVALID_ARGUMENTS),
                 e.getErrors().toArray(new TargetError[0])
         );
@@ -158,7 +157,7 @@ public class GlobalRestExceptionHandler {
             ConversionFailedException.class
     })
     public ResponseEntity<ErrorResponse> handleRequestValueNotReadableException(Exception e) {
-        return createErrorResponse(
+        return createInvalidArgumentsResponse(
                 e,
                 ApiErrorCode.MESSAGE_NOT_READABLE,
                 messageResolver.getMessage(MessageKeys.EXCEPTION_BODY_NOT_READABLE)
@@ -166,17 +165,44 @@ public class GlobalRestExceptionHandler {
     }
 
     /**
-     * Handles requests using an unsupported HTTP media type.
+     * Handles request bodies using an unsupported media type.
      *
-     * @param e the HTTP media type exception
+     * @param e the unsupported request media type exception
      * @return the unsupported-media-type error response
      */
-    @ExceptionHandler({HttpMediaTypeException.class})
-    public ResponseEntity<ErrorResponse> handleHttpMediaTypeException(HttpMediaTypeException e) {
-        return createErrorResponse(
+    @ExceptionHandler({HttpMediaTypeNotSupportedException.class})
+    public ResponseEntity<ErrorResponse> handleHttpMediaTypeNotSupportedException(
+            HttpMediaTypeNotSupportedException e
+    ) {
+        return createInvalidArgumentsResponse(
                 e,
                 ApiErrorCode.UNSUPPORTED_MEDIA_TYPE,
-                e.getMessage()
+                e.getMessage(),
+                e.getHeaders()
+        );
+    }
+
+    /**
+     * Handles requests whose accepted media types cannot be produced.
+     *
+     * @param e the unacceptable response media type exception
+     * @return the not-acceptable error response in JSON format
+     */
+    @ExceptionHandler({HttpMediaTypeNotAcceptableException.class})
+    public ResponseEntity<ErrorResponse> handleHttpMediaTypeNotAcceptableException(
+            HttpMediaTypeNotAcceptableException e
+    ) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.putAll(e.getHeaders());
+
+        // Use JSON for the error even when the request's Accept header excludes it.
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        return createInvalidArgumentsResponse(
+                e,
+                ApiErrorCode.NOT_ACCEPTABLE,
+                e.getMessage(),
+                headers
         );
     }
 
@@ -190,10 +216,11 @@ public class GlobalRestExceptionHandler {
     public ResponseEntity<ErrorResponse> handleHttpRequestMethodNotSupportedException(
             HttpRequestMethodNotSupportedException e
     ) {
-        return createErrorResponse(
+        return createInvalidArgumentsResponse(
                 e,
                 ApiErrorCode.METHOD_NOT_ALLOWED,
-                e.getMessage()
+                e.getMessage(),
+                e.getHeaders()
         );
     }
 
@@ -215,7 +242,7 @@ public class GlobalRestExceptionHandler {
             requestUrl = "/" + requestUrl;
         }
 
-        return createErrorResponse(
+        return createInvalidArgumentsResponse(
                 e,
                 ApiErrorCode.URI_NOT_FOUND,
                 messageResolver.getMessage(MessageKeys.EXCEPTION_URI_NOT_FOUND, requestUrl)
@@ -236,7 +263,7 @@ public class GlobalRestExceptionHandler {
     public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException e) {
         String resourceSimpleName = e.getResourceClass().getSimpleName();
 
-        return createErrorResponse(
+        return createInvalidArgumentsResponse(
                 e,
                 ApiErrorCode.RESOURCE_NOT_FOUND,
                 messageResolver.getMessage(
@@ -257,7 +284,7 @@ public class GlobalRestExceptionHandler {
     public ResponseEntity<ErrorResponse> handleOptimisticLockingFailureException(
             OptimisticLockingFailureException e
     ) {
-        return createErrorResponse(
+        return createInvalidArgumentsResponse(
                 e,
                 ApiErrorCode.CONFLICT,
                 messageResolver.getMessage(MessageKeys.EXCEPTION_CONFLICT)
@@ -274,7 +301,7 @@ public class GlobalRestExceptionHandler {
     public ResponseEntity<ErrorResponse> handleDataAccessResourceFailureException(
             DataAccessResourceFailureException e
     ) {
-        return createErrorResponse(
+        return createInvalidArgumentsResponse(
                 e,
                 ApiErrorCode.UNAVAILABLE,
                 messageResolver.getMessage(MessageKeys.EXCEPTION_SERVICE_UNAVAILABLE)
@@ -294,7 +321,7 @@ public class GlobalRestExceptionHandler {
     public ResponseEntity<ErrorResponse> handleConstraintViolationException(
             ConstraintViolationException e
     ) {
-        return createErrorResponse(
+        return createInvalidArgumentsResponse(
                 e,
                 ApiErrorCode.INTERNAL,
                 messageResolver.getMessage(MessageKeys.EXCEPTION_INTERNAL)
@@ -309,7 +336,7 @@ public class GlobalRestExceptionHandler {
      */
     @ExceptionHandler({Exception.class})
     public ResponseEntity<ErrorResponse> handleUnhandledException(Exception e) {
-        return createErrorResponse(
+        return createInvalidArgumentsResponse(
                 e,
                 ApiErrorCode.INTERNAL,
                 messageResolver.getMessage(MessageKeys.EXCEPTION_INTERNAL)
@@ -324,10 +351,28 @@ public class GlobalRestExceptionHandler {
      * @param description  the human-readable error description
      * @return the error response with the corresponding HTTP status
      */
-    private ResponseEntity<ErrorResponse> createErrorResponse(
+    private ResponseEntity<ErrorResponse> createInvalidArgumentsResponse(
             Exception exception,
             ApiErrorCode apiErrorCode,
             String description
+    ) {
+        return createInvalidArgumentsResponse(exception, apiErrorCode, description, HttpHeaders.EMPTY);
+    }
+
+    /**
+     * Creates an API error response with additional response headers.
+     *
+     * @param exception    the exception being handled
+     * @param apiErrorCode the API error code
+     * @param description  the human-readable error description
+     * @param headers      the response headers
+     * @return the error response with the corresponding HTTP status and headers
+     */
+    private ResponseEntity<ErrorResponse> createInvalidArgumentsResponse(
+            Exception exception,
+            ApiErrorCode apiErrorCode,
+            String description,
+            HttpHeaders headers
     ) {
         logger.error(exception.getClass().getSimpleName(), exception);
 
@@ -335,32 +380,35 @@ public class GlobalRestExceptionHandler {
 
         return new ResponseEntity<>(
                 responseBody,
+                headers,
                 apiErrorCode.getHttpStatus()
         );
     }
 
     /**
-     * Creates an API error response with target-specific errors.
+     * Creates an invalid-arguments response with target-specific errors.
      *
      * @param exception    the exception being handled
-     * @param apiErrorCode the API error code
      * @param description  the human-readable error description
-     * @param targetErrors the target-specific errors
-     * @return the error response with the corresponding HTTP status
+     * @param targetErrors the client-correctable target errors
+     * @return the invalid-arguments error response
      */
-    private ResponseEntity<ErrorResponse> createErrorResponse(
+    private ResponseEntity<ErrorResponse> createInvalidArgumentsResponse(
             Exception exception,
-            ApiErrorCode apiErrorCode,
             String description,
             TargetError... targetErrors
     ) {
         logger.error(exception.getClass().getSimpleName(), exception);
 
-        ErrorResponse responseBody = new ErrorResponse(apiErrorCode, description, targetErrors);
+        ErrorResponse responseBody = new ErrorResponse(
+                ApiErrorCode.INVALID_ARGUMENTS,
+                description,
+                targetErrors
+        );
 
         return new ResponseEntity<>(
                 responseBody,
-                apiErrorCode.getHttpStatus()
+                ApiErrorCode.INVALID_ARGUMENTS.getHttpStatus()
         );
     }
 }

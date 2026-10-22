@@ -33,8 +33,9 @@ Object definitions are in the collection documentation.
 
 Produces `application/json` with an `ErrorResponse` body.
 
-| Status                      | Type                   | Cause                                                       |
-|-----------------------------|------------------------|-------------------------------------------------------------|
-| `400 Bad Request`           | `MESSAGE_NOT_READABLE` | `remaining` cannot be converted to a 32-bit signed integer. |
-| `404 Not Found`             | `RESOURCE_NOT_FOUND`   | No checkout exists for the remaining score.                 |
-| `500 Internal Server Error` | `INTERNAL`             | An unexpected processing error occurs.                      |
+| Status                      | Type                   | Cause                                                                        |
+|-----------------------------|------------------------|------------------------------------------------------------------------------|
+| `400 Bad Request`           | `MESSAGE_NOT_READABLE` | `remaining` cannot be converted to a 32-bit signed integer.                  |
+| `404 Not Found`             | `RESOURCE_NOT_FOUND`   | No checkout exists for the remaining score.                                  |
+| `406 Not Acceptable`        | `NOT_ACCEPTABLE`       | The `Accept` header requests a response format the operation cannot produce. |
+| `500 Internal Server Error` | `INTERNAL`             | An unexpected processing error occurs.                                       |

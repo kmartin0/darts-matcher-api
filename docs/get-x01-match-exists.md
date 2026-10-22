@@ -33,9 +33,9 @@ Object definitions are in the collection documentation.
 
 Produces `application/json` with an `ErrorResponse` body.
 
-| Status                      | Type                   | Cause                                                               |
-|-----------------------------|------------------------|---------------------------------------------------------------------|
-| `400 Bad Request`           | `MESSAGE_NOT_READABLE` | `matchId` cannot be converted to an `ObjectId`.                     |
-| `404 Not Found`             | `RESOURCE_NOT_FOUND`   | No match exists with the supplied ID.                               |
-| `500 Internal Server Error` | `INTERNAL`             | An unexpected error occurs while checking whether the match exists. |
-| `503 Service Unavailable`   | `UNAVAILABLE`          | The database is unavailable.                                        |
+| Status                      | Type                   | Cause                                                                        |
+|-----------------------------|------------------------|------------------------------------------------------------------------------|
+| `400 Bad Request`           | `MESSAGE_NOT_READABLE` | `matchId` cannot be converted to an `ObjectId`.                              |
+| `404 Not Found`             | `RESOURCE_NOT_FOUND`   | No match exists with the supplied ID.                                        |
+| `500 Internal Server Error` | `INTERNAL`             | An unexpected error occurs while checking whether the match exists.          |
+| `503 Service Unavailable`   | `UNAVAILABLE`          | The database is unavailable.                                                 |

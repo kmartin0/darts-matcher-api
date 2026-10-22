@@ -41,13 +41,14 @@ Returns the original match with `rematchId` identifying the rematch. Retrieve th
 
 Produces `application/json` with an `ErrorResponse` body.
 
-| Status                      | Type                   | Cause                                                    |
-|-----------------------------|------------------------|----------------------------------------------------------|
-| `400 Bad Request`           | `MESSAGE_NOT_READABLE` | `matchId` cannot be converted to an `ObjectId`.          |
-| `404 Not Found`             | `RESOURCE_NOT_FOUND`   | The original match does not exist.                       |
-| `409 Conflict`              | `CONFLICT`             | A concurrent update prevents the match from being saved. |
-| `500 Internal Server Error` | `INTERNAL`             | An unexpected processing error occurs.                   |
-| `503 Service Unavailable`   | `UNAVAILABLE`          | The database is unavailable.                             |
+| Status                      | Type                   | Cause                                                                        |
+|-----------------------------|------------------------|------------------------------------------------------------------------------|
+| `400 Bad Request`           | `MESSAGE_NOT_READABLE` | `matchId` cannot be converted to an `ObjectId`.                              |
+| `404 Not Found`             | `RESOURCE_NOT_FOUND`   | The original match does not exist.                                           |
+| `406 Not Acceptable`        | `NOT_ACCEPTABLE`       | The `Accept` header requests a response format the operation cannot produce. |
+| `409 Conflict`              | `CONFLICT`             | A concurrent update prevents the match from being saved.                     |
+| `500 Internal Server Error` | `INTERNAL`             | An unexpected processing error occurs.                                       |
+| `503 Service Unavailable`   | `UNAVAILABLE`          | The database is unavailable.                                                 |
 
 ## WebSocket
 
