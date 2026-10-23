@@ -54,6 +54,11 @@ public class X01BestOf {
      */
     @JsonIgnore
     public X01ClearByTwoRule getClearByTwoLegsRuleForSet(int setNumber) {
+        // Use the regular leg rule for legs-only matches or when the override is disabled.
+        if (getBestOfType() == X01BestOfType.LEGS || !getClearByTwoLegsInFinalSetRule().isEnabled()) {
+            return getClearByTwoLegsRule();
+        }
+
         int bestOfSets = getSets();
         boolean isBestOfSetsReached = setNumber >= bestOfSets;
 

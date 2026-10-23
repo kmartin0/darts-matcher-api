@@ -70,8 +70,8 @@ Includes all properties of [X01CreateTurnRequest](#x01createturnrequest), plus:
 | `legs`                         | Integer                                   | Yes      | Best-of leg count per set, from 1 to 49 inclusive.                                        |
 | `bestOfType`                   | String                                    | Yes      | `SETS` or `LEGS`.                                                                         |
 | `clearByTwoSetsRule`           | [`X01ClearByTwoRule`](#x01clearbytworule) | Yes      | Clear-by-two rule for sets.                                                               |
-| `clearByTwoLegsRule`           | [`X01ClearByTwoRule`](#x01clearbytworule) | Yes      | Clear-by-two rule for legs before the final set.                                          |
-| `clearByTwoLegsInFinalSetRule` | [`X01ClearByTwoRule`](#x01clearbytworule) | Yes      | Clear-by-two rule for legs in the final set and any additional sets.                      |
+| `clearByTwoLegsRule`           | [`X01ClearByTwoRule`](#x01clearbytworule) | Yes      | Clear-by-two rule for legs.                                                               |
+| `clearByTwoLegsInFinalSetRule` | [`X01ClearByTwoRule`](#x01clearbytworule) | Yes      | Clear-by-two rule for legs in the final set.                                              |
 
 ### X01ClearByTwoRule
 
