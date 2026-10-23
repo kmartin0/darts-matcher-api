@@ -21,7 +21,9 @@ public class CorsConfig {
             "http://127.0.0.1:*",
             "http://192.168.1.*:*",
             "https://jiangxy.github.io", // WebSocket debug tool: /websocket-debug-tool/
-            "https://dartsmatcher.kmartin.nl"
+            "https://dartsmatcher.kmartin.nl",
+            "https://dartsmatcher.com",
+            "https://www.dartsmatcher.com"
     );
 
     /**
