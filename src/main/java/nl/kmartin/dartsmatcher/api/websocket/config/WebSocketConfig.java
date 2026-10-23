@@ -65,7 +65,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     }
 
     /**
-     * Configures the STOMP application, user, broadcast and queue destination prefixes.
+     * Configures the STOMP destination prefixes, broker heartbeats and
+     * preserves broker publication order within each client session.
      *
      * @param config the message broker registry
      */
@@ -73,6 +74,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void configureMessageBroker(MessageBrokerRegistry config) {
         config.setApplicationDestinationPrefixes(APP_PREFIX);
         config.setUserDestinationPrefix(USER_PREFIX);
+        config.setPreservePublishOrder(true);
+
         config.enableSimpleBroker(BROADCAST_PREFIX, QUEUE_PREFIX)
                 .setTaskScheduler(webSocketHeartbeatTaskScheduler)
                 .setHeartbeatValue(new long[]{HEARTBEAT_INTERVAL_MS, HEARTBEAT_INTERVAL_MS});

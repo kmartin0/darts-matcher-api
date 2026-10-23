@@ -39,6 +39,8 @@ When a command supplies a `publish-id` header, its session response or applicati
 
 A client subscribed to both match updates and command responses can receive both a broadcast and a session response for its own command.
 
+Broker messages are delivered in publication order within each client session.
+
 ## Initial state and live updates
 
 Subscribe to session errors and match broadcasts before requesting the initial match state.
