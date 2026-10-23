@@ -73,26 +73,11 @@ public class X01StandingsServiceImpl implements IX01StandingsService {
             int bestOf,
             X01ClearByTwoRule clearByTwoRule
     ) {
-        // Empty standings cannot produce a winner.
-        if (standings.isEmpty()) return List.of();
-
-        // Calculate the current lead and how much of the configured best-of remains.
-        int leaderScore = standings.lastKey();
-        Integer runnerUpScore = standings.lowerKey(leaderScore);
-        int diff = leaderScore - (runnerUpScore != null ? runnerUpScore : leaderScore);
-        int bestOfRemaining = Math.max(0, bestOf - played);
-
-        // A single-player match concludes only after all configured legs or sets have been played.
-        if (rulesService.isSinglePlayerMatch(standings, leaderScore, runnerUpScore)) {
-            return bestOfRemaining == 0 ? List.copyOf(standings.get(leaderScore)) : List.of();
+        if (!rulesService.isWinnerConfirmed(standings, played, bestOf, clearByTwoRule)) {
+            return List.of();
         }
 
-        // Return the leaders once the current result can no longer be overturned.
-        if (rulesService.isWinnerConfirmed(diff, bestOfRemaining, played, bestOf, clearByTwoRule)) {
-            return List.copyOf(standings.get(leaderScore));
-        }
-
-        return List.of();
+        return List.copyOf(standings.lastEntry().getValue());
     }
 
     @Override

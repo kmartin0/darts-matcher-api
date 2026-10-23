@@ -1,6 +1,7 @@
 package nl.kmartin.dartsmatcher.api.features.x01.x01rules.service;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -36,18 +37,20 @@ public interface IX01RulesService {
     );
 
     /**
-     * Determines whether the current leader can be confirmed as the winner.
+     * Determines whether the leaders in the standings are confirmed winners.
      *
-     * @param diff            the score difference between the leader and runner-up
-     * @param bestOfRemaining the number remaining to be played
-     * @param played          the number already played
-     * @param bestOf          the best-of setting
-     * @param clearByTwoRule  the clear-by-two rule
-     * @return whether the winner can be confirmed
+     * Calculates the lead and remaining number of legs or sets from the standings
+     * and match progress. Tied leaders have a lead of zero. Single-player matches
+     * conclude once the configured best-of has been reached.
+     *
+     * @param standings      players grouped by their number of wins
+     * @param played         the number of legs or sets already played
+     * @param bestOf         the configured best-of value
+     * @param clearByTwoRule the clear-by-two rule to apply
+     * @return whether the result is confirmed, or false when the standings are empty
      */
     boolean isWinnerConfirmed(
-            @PositiveOrZero int diff,
-            @PositiveOrZero int bestOfRemaining,
+            @NotNull TreeMap<@PositiveOrZero Integer, @NotEmpty List<@NotNull ObjectId>> standings,
             @PositiveOrZero int played,
             @Positive int bestOf,
             @NotNull @Valid X01ClearByTwoRule clearByTwoRule

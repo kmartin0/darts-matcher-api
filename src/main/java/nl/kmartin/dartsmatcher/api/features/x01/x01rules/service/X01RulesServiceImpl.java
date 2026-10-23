@@ -38,26 +38,43 @@ public class X01RulesServiceImpl implements IX01RulesService {
 
     @Override
     public boolean isWinnerConfirmed(
-            int diff,
-            int bestOfRemaining,
+            TreeMap<Integer, List<ObjectId>> standings,
             int played,
             int bestOf,
             X01ClearByTwoRule clearByTwoRule
     ) {
-        // The leader must be impossible to catch and satisfy the configured clear-by-two rule.
-        return winnerCannotBeCaught(diff, bestOfRemaining)
-                && isClearByTwoSatisfied(diff, played, bestOf, clearByTwoRule);
+        // Empty standings cannot produce a winner.
+        if (standings.isEmpty()) return false;
+
+        int leaderScore = standings.lastKey();
+        List<ObjectId> leaders = standings.get(leaderScore);
+        Integer runnerUpScore = standings.lowerKey(leaderScore);
+        int bestOfRemaining = Math.max(0, bestOf - played);
+
+        // A single-player match concludes only after all configured legs or sets have been played.
+        if (isSinglePlayerMatch(standings, leaderScore, runnerUpScore)) {
+            return bestOfRemaining == 0;
+        }
+
+        // Tied leaders have no lead over one another.
+        int lead = leaders.size() == 1 && runnerUpScore != null
+                ? leaderScore - runnerUpScore
+                : 0;
+
+        // The result must be decided and satisfy the configured clear-by-two rule.
+        return winnerCannotBeCaught(lead, bestOfRemaining)
+                && isClearByTwoSatisfied(lead, played, bestOf, clearByTwoRule);
     }
 
     /**
      * Determines whether the leader can no longer be caught by the runner-up.
      *
-     * @param diff            the score difference between the leader and runner-up
+     * @param lead            the score difference between the leader and runner-up
      * @param bestOfRemaining the number remaining to be played
      * @return whether the leader can no longer be caught
      */
-    private boolean winnerCannotBeCaught(int diff, int bestOfRemaining) {
-        return bestOfRemaining == 0 || diff > bestOfRemaining;
+    private boolean winnerCannotBeCaught(int lead, int bestOfRemaining) {
+        return bestOfRemaining == 0 || lead > bestOfRemaining;
     }
 
     /**
@@ -66,14 +83,14 @@ public class X01RulesServiceImpl implements IX01RulesService {
      * The rule is satisfied when it is disabled, the leader is ahead by at least two,
      * or the maximum number allowed by the clear-by-two limit has been reached.
      *
-     * @param diff           the score difference between the leader and runner-up
+     * @param lead           the score difference between the leader and runner-up
      * @param played         the number already played
      * @param bestOf         the best-of setting
      * @param clearByTwoRule the clear-by-two rule
      * @return whether the clear-by-two rule is satisfied
      */
     private boolean isClearByTwoSatisfied(
-            int diff,
+            int lead,
             int played,
             int bestOf,
             X01ClearByTwoRule clearByTwoRule
@@ -82,7 +99,7 @@ public class X01RulesServiceImpl implements IX01RulesService {
         if (!clearByTwoRule.isEnabled()) return true;
 
         // A lead of two or more satisfies the clear-by-two requirement.
-        if (diff >= 2) return true;
+        if (lead >= 2) return true;
 
         // The match must also end when the configured maximum is reached.
         int maxToPlay = getMaxToPlay(bestOf, clearByTwoRule);
