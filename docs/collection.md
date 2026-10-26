@@ -33,6 +33,7 @@ Player composition rules:
 | `checkoutDoublesMissed` | `Integer` | No             | Missed attempts at a finishing double. From `0` to `3` inclusive. When `trackDoubles` is enabled, defaults to `0` when omitted or `null`; otherwise stored as `null`.                                                                                                                            |
 | `openingDoublesMissed`  | `Integer` | No             | Missed attempts at an opening double. From `0` to `3` inclusive. When `trackDoubles` is enabled and `format` is `DIDO`, defaults to `0` when omitted or `null`; otherwise stored as `null`.                                                                                                      |
 | `checkoutDartsUsed`     | `Integer` | For a checkout | Darts used to finish the leg. From `1` to `3` inclusive and at least the minimum needed for the checkout. Ignored when the turn does not finish the leg. If omitted or `null` when the score would reach zero, the turn is recorded with a score of `0` and the remaining score stays unchanged. |
+| `matchVersion`          | `Integer` | No             | Match version against which the turn was prepared. Must be zero or greater. When supplied, must match the current `X01Match.version`; otherwise returns `CONFLICT`. Omitted or `null` skips this version check.                                                                                  |
 
 ### X01EditTurnRequest
 
@@ -357,18 +358,18 @@ Errors are delivered directly as the JSON body, without the `messageType` and `p
 
 String with one of the following values.
 
-| Value                    | HTTP status                  | Meaning                                                                      |
-|--------------------------|------------------------------|------------------------------------------------------------------------------|
-| `INVALID_ARGUMENTS`      | `400 Bad Request`            | Request values fail validation.                                              |
-| `MESSAGE_NOT_READABLE`   | `400 Bad Request`            | The request body or a parameter cannot be read or converted.                 |
-| `RESOURCE_NOT_FOUND`     | `404 Not Found`              | The requested resource does not exist.                                       |
-| `URI_NOT_FOUND`          | `404 Not Found`              | The URL does not match an API route.                                         |
-| `METHOD_NOT_ALLOWED`     | `405 Method Not Allowed`     | The HTTP method is not supported for the URL.                                |
-| `NOT_ACCEPTABLE`         | `406 Not Acceptable`         | The `Accept` header requests a response format the operation cannot produce. |
-| `CONFLICT`               | `409 Conflict`               | A concurrent update prevents the change from being saved.                    |
-| `UNSUPPORTED_MEDIA_TYPE` | `415 Unsupported Media Type` | The `Content-Type` header specifies an unsupported request body format.      |
-| `INTERNAL`               | `500 Internal Server Error`  | An unexpected server error occurred.                                         |
-| `UNAVAILABLE`            | `503 Service Unavailable`    | The database is unavailable.                                                 |
+| Value                    | HTTP status                  | Meaning                                                                                                                   |
+|--------------------------|------------------------------|---------------------------------------------------------------------------------------------------------------------------|
+| `INVALID_ARGUMENTS`      | `400 Bad Request`            | Request values fail validation.                                                                                           |
+| `MESSAGE_NOT_READABLE`   | `400 Bad Request`            | The request body or a parameter cannot be read or converted.                                                              |
+| `RESOURCE_NOT_FOUND`     | `404 Not Found`              | The requested resource does not exist.                                                                                    |
+| `URI_NOT_FOUND`          | `404 Not Found`              | The URL does not match an API route.                                                                                      |
+| `METHOD_NOT_ALLOWED`     | `405 Method Not Allowed`     | The HTTP method is not supported for the URL.                                                                             |
+| `NOT_ACCEPTABLE`         | `406 Not Acceptable`         | The `Accept` header requests a response format the operation cannot produce.                                              |
+| `CONFLICT`               | `409 Conflict`               | The supplied match version differs from the current version, or a concurrent update prevents the change from being saved. |
+| `UNSUPPORTED_MEDIA_TYPE` | `415 Unsupported Media Type` | The `Content-Type` header specifies an unsupported request body format.                                                   |
+| `INTERNAL`               | `500 Internal Server Error`  | An unexpected server error occurred.                                                                                      |
+| `UNAVAILABLE`            | `503 Service Unavailable`    | The database is unavailable.                                                                                              |
 
 REST responses with status `406 Not Acceptable` return an `ErrorResponse` body as `application/json`, even when the request's `Accept` header excludes JSON.
 

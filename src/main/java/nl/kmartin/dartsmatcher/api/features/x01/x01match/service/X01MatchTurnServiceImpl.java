@@ -71,7 +71,8 @@ public class X01MatchTurnServiceImpl implements IX01MatchTurnService {
                 turn.score(),
                 turn.checkoutDoublesMissed(),
                 turn.openingDoublesMissed(),
-                turn.checkoutDartsUsed()
+                turn.checkoutDartsUsed(),
+                match.getVersion()
         ));
 
         return true;

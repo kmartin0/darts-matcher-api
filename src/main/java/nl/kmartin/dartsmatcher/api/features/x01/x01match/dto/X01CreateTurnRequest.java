@@ -35,4 +35,7 @@ public class X01CreateTurnRequest {
     @Positive
     @Max(X01Turn.MAXIMUM_DARTS_PER_TURN)
     private Integer checkoutDartsUsed;
+
+    @PositiveOrZero
+    private Integer matchVersion;
 }

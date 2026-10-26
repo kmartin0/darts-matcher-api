@@ -8,6 +8,14 @@ A turn that leaves a remaining score below zero or equal to one, or reaches zero
 
 Supplying too few darts for an otherwise valid checkout produces an `INVALID_ARGUMENTS` error targeting `checkoutDartsUsed`.
 
+## Match version
+
+Supply `matchVersion` using the `X01Match.version` against which the request was prepared. If the match version has changed, the request is rejected with `CONFLICT` and the turn is not applied.
+
+When `matchVersion` is omitted or `null`, this version check is skipped. Database optimistic locking still applies.
+
+This behavior applies to both REST requests and WebSocket commands.
+
 ## REST
 
 ### Request

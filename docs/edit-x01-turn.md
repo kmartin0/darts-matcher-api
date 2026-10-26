@@ -14,6 +14,14 @@ Supplying too few darts for an otherwise valid checkout produces an `INVALID_ARG
 
 Recalculation removes history that can no longer apply, including later legs or sets when an earlier leg or set becomes unfinished.
 
+## Match version
+
+Supply `matchVersion` using the `X01Match.version` against which the request was prepared. If the match version has changed, the request is rejected with `CONFLICT` and the turn is not applied.
+
+When `matchVersion` is omitted or `null`, this version check is skipped. Database optimistic locking still applies.
+
+This behavior applies to both REST requests and WebSocket commands.
+
 ## REST
 
 ### Request
@@ -53,7 +61,7 @@ Produces `application/json` with an `ErrorResponse` body.
 | `400 Bad Request`            | `MESSAGE_NOT_READABLE`   | An ID cannot be converted to an `ObjectId`, or the body is missing, malformed, or contains a value that cannot be converted to its expected type.                                       |
 | `404 Not Found`              | `RESOURCE_NOT_FOUND`     | The match, set, leg, round, or player's turn does not exist.                                                                                                                            |
 | `406 Not Acceptable`         | `NOT_ACCEPTABLE`         | The `Accept` header requests a response format the operation cannot produce.                                                                                                            |
-| `409 Conflict`               | `CONFLICT`               | A concurrent update prevents the match from being saved.                                                                                                                                |
+| `409 Conflict`               | `CONFLICT`               | The supplied match version differs from the current version, or a concurrent update prevents the match from being saved.                                                                |
 | `415 Unsupported Media Type` | `UNSUPPORTED_MEDIA_TYPE` | The `Content-Type` header specifies a request body format the operation does not support.                                                                                               |
 | `500 Internal Server Error`  | `INTERNAL`               | An unexpected processing error occurs.                                                                                                                                                  |
 | `503 Service Unavailable`    | `UNAVAILABLE`            | The database is unavailable.                                                                                                                                                            |
@@ -106,7 +114,7 @@ Delivered to the requesting session through `/user/queue/errors` as a STOMP `MES
 | `400`  | `INVALID_ARGUMENTS`    | A body property fails validation, the selected player is not the winner of a concluded leg, or too few checkout darts are supplied. `targetErrors` identifies the affected properties. |
 | `400`  | `MESSAGE_NOT_READABLE` | An ID cannot be converted to an `ObjectId`, or the message body cannot be read as `X01EditTurnRequest`.                                                                                |
 | `404`  | `RESOURCE_NOT_FOUND`   | The match, set, leg, round, or player's turn does not exist.                                                                                                                           |
-| `409`  | `CONFLICT`             | A concurrent update prevents the match from being saved.                                                                                                                               |
+| `409`  | `CONFLICT`             | The supplied match version differs from the current version, or a concurrent update prevents the match from being saved.                                                               |
 | `500`  | `INTERNAL`             | An unexpected processing error occurs.                                                                                                                                                 |
 | `503`  | `UNAVAILABLE`          | The database is unavailable.                                                                                                                                                           |
 

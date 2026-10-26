@@ -141,6 +141,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
     @Transactional
     public X01Match addTurn(ObjectId matchId, X01CreateTurnRequest turnRequest) {
         X01Match match = getMatch(matchId);
+        validateMatchVersion(match, turnRequest.getMatchVersion());
 
         try {
             matchTurnService.addTurnToCurrentThrower(match, turnRequest);
@@ -155,6 +156,7 @@ public class X01MatchServiceImpl implements IX01MatchService {
     @Transactional
     public X01Match editTurn(ObjectId matchId, X01EditTurnRequest turnRequest) {
         X01Match match = getMatch(matchId);
+        validateMatchVersion(match, turnRequest.getMatchVersion());
 
         try {
             matchTurnService.replaceTurn(match, turnRequest);
@@ -207,6 +209,23 @@ public class X01MatchServiceImpl implements IX01MatchService {
         matchRematchService.validateAndUpdateRematchId(match);
 
         return saveMatchAndProcessBotTurns(match, X01MatchMessage.ProcessMatch::new);
+    }
+
+    /**
+     * Validates the supplied match version when present.
+     *
+     * @param match        the loaded match
+     * @param matchVersion the expected match version, or null to skip this check
+     * @throws OptimisticLockingFailureException when the supplied version does not match
+     */
+    private void validateMatchVersion(X01Match match, Integer matchVersion) {
+        if (matchVersion != null && !Objects.equals(match.getVersion(), matchVersion)) {
+            throw new OptimisticLockingFailureException(
+                    "Match version conflict (matchId=" + match.getId()
+                            + ", matchVersion=" + matchVersion
+                            + ", actualVersion=" + match.getVersion() + ")"
+            );
+        }
     }
 
     /**
