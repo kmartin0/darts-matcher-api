@@ -82,26 +82,26 @@ public class X01MatchServiceTests {
                 match.getId(),
                 List.of(
                         // Leg 1: missed doubles before checkout.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(101, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(0, 3, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(40, 0, null, 1)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(101, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(0, 3, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(40, 0, null, 1, null)),
 
                         // Leg 2: bust is normalized to a zero-score turn.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(145, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, 0, null, 3)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(145, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, 0, null, 3, null)),
 
                         // Leg 3: edit an earlier turn and remove the latest turn.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, null, null)),
-                        new X01ScenarioStep.EditTurn(new X01EditTurnRequest(120, 0, null, null, playerOneId, 1, 3, 2)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, null, null, null)),
+                        new X01ScenarioStep.EditTurn(new X01EditTurnRequest(120, 0, null, null, null, playerOneId, 1, 3, 2)),
                         new X01ScenarioStep.DeleteLastHumanTurn(),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(101, 0, null, 3))
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(101, 0, null, 3, null))
                 )
         );
 
@@ -148,36 +148,36 @@ public class X01MatchServiceTests {
                 match.getId(),
                 List.of(
                         // Leg 1: Player 2 wins after Player 1 misses three doubles.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(101, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(101, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(0, 3, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(40, 0, null, 1)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(101, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(101, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(0, 3, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(40, 0, null, 1, null)),
 
                         // Leg 2: Player 2 busts from 141 and Player 1 checks out.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(145, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, 0, null, 3)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(145, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, 0, null, 3, null)),
 
                         // Leg 3: edit Player 1's second turn and replace Player 2's deleted latest turn.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, null, null)),
-                        new X01ScenarioStep.EditTurn(new X01EditTurnRequest(120, 0, null, null, playerOneId, 1, 3, 2)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, null, null, null)),
+                        new X01ScenarioStep.EditTurn(new X01EditTurnRequest(120, 0, null, null, null, playerOneId, 1, 3, 2)),
                         new X01ScenarioStep.DeleteLastHumanTurn(),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(120, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(140, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(140, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(41, 0, null, 2))
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(120, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(140, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(140, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(41, 0, null, 2, null))
                 )
         );
 
@@ -227,63 +227,63 @@ public class X01MatchServiceTests {
                 match.getId(),
                 List.of(
                         // Set 1, leg 1: Player 1 starts and wins.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, null, null, 3)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, null, null, 3, null)),
 
                         // Set 1, leg 2: Player 2 starts and wins.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, null, null, 3)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, null, null, 3, null)),
 
                         // Set 1, leg 3: Player 3 starts, Player 1 wins.
                         // The set is 2-1 after the configured best of 3 and must continue.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, null, null, 3)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, null, null, 3, null)),
 
                         // Set 1, leg 4: starter wraps back to Player 1, who wins 3-1.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, null, null, 3)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, null, null, 3, null)),
 
                         // Set 2, leg 1: set starter rotates to Player 2, Player 1 wins.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, null, null, 3)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, null, null, 3, null)),
 
                         // Set 2, leg 2: Player 3 starts, Player 1 wins and concludes the match.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, null, null, 3))
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, null, null, 3, null))
                 )
         );
 
@@ -341,145 +341,145 @@ public class X01MatchServiceTests {
                 match.getId(),
                 List.of(
                         // Set 1, leg 1: Player 1 wins after missing two doubles.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
 
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
 
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(101, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(101, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
 
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(0, 2, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(0, 2, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
 
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(40, 0, null, 1)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(40, 0, null, 1, null)),
 
                         // Set 1, leg 2: Player 2 busts from 141 and Player 3 wins.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
 
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
 
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(145, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, 0, null, 3)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(145, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, 0, null, 3, null)),
 
                         // Set 1, leg 3: edit Player 1's second turn and replace the deleted latest turn.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
 
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
 
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
 
-                        new X01ScenarioStep.EditTurn(new X01EditTurnRequest(120, 0, null, null, playerOneId, 1, 3, 2)),
+                        new X01ScenarioStep.EditTurn(new X01EditTurnRequest(120, 0, null, null, null, playerOneId, 1, 3, 2)),
                         new X01ScenarioStep.DeleteLastHumanTurn(),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(80, 0, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(80, 0, null, null, null)),
 
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(140, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(140, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
 
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(41, 0, null, 2)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(41, 0, null, 2, null)),
 
                         // Set 2, leg 1: Player 4 wins.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
 
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
 
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, 0, null, 3)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, 0, null, 3, null)),
 
                         // Set 2, leg 2: Player 2 wins.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null, null)),
 
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null, null)),
 
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, 0, null, 3)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, 0, null, 3, null)),
 
                         // Set 2, leg 3: Player 2 wins the set.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
 
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
 
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, 0, null, 3)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, 0, null, 3, null)),
 
                         // Set 3, leg 1: Player 1 wins.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
 
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
 
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, 0, null, 3)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, 0, null, 3, null)),
 
                         // Set 3, leg 2: Player 1 wins again and concludes the match.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
 
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
 
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, 0, null, 3))
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, 0, null, 3, null))
                 )
         );
 
@@ -528,34 +528,34 @@ public class X01MatchServiceTests {
                 match.getId(),
                 List.of(
                         // Leg 1: Player 1 wins.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, null, null, 3)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, null, null, 3, null)),
 
                         // Leg 2: Player 2 wins.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, null, null, 3)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, null, null, 3, null)),
 
                         // Leg 3: Player 2 wins.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, null, null, 3)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, null, null, 3, null)),
 
                         // Leg 4: Player 1 wins and the match concludes 2-2.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, null, null, 3))
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, null, null, 3, null))
                 )
         );
 
@@ -604,16 +604,16 @@ public class X01MatchServiceTests {
                 match.getId(),
                 List.of(
                         // Set 1, leg 1: Player 1 wins.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, null, null, 3)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(141, null, null, 3, null)),
 
                         // Set 1, leg 2: stop midway through round 2.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, null, null, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null))
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, null, null, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, null, null, null, null))
                 )
         );
 
@@ -783,7 +783,7 @@ public class X01MatchServiceTests {
         runScenario(
                 match.getId(),
                 List.of(
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, null, null, null))
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, null, null, null, null))
                 )
         );
 
@@ -830,27 +830,27 @@ public class X01MatchServiceTests {
                 match.getId(),
                 List.of(
                         // Round 1: Player 1 misses all opening attempts; Player 2 opens on dart 3.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(0, 0, 3, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(40, 0, 2, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(0, 0, 3, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(40, 0, 2, null, null)),
 
                         // Round 2: Player 1 misses once, then scores D20 and T20.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, 1, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, 0, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(100, 0, 1, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, 0, null, null)),
 
                         // Round 3: both players are already open.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, 0, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, 0, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, 0, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, 0, null, null)),
 
                         // Round 4: both players leave 41.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, 0, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, 0, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(180, 0, 0, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(60, 0, 0, null, null)),
 
                         // Round 5: both players miss checkout doubles.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(0, 3, 0, null)),
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(0, 2, 0, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(0, 3, 0, null, null)),
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(0, 2, 0, null, null)),
 
                         // Round 6: Player 1 checks out and wins the match.
-                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(41, 0, 0, 2))
+                        new X01ScenarioStep.AddTurn(new X01CreateTurnRequest(41, 0, 0, 2, null))
                 )
         );
 

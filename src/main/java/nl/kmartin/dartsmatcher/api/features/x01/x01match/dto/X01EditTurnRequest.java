@@ -34,11 +34,11 @@ public class X01EditTurnRequest extends X01CreateTurnRequest {
             Integer checkoutDoublesMissed,
             Integer openingDoublesMissed,
             Integer checkoutDartsUsed,
+            Integer matchVersion,
             ObjectId playerId,
             int set,
             int leg,
-            int round,
-            Integer matchVersion
+            int round
     ) {
         super(score, checkoutDoublesMissed, openingDoublesMissed, checkoutDartsUsed, matchVersion);
         this.playerId = playerId;
