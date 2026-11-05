@@ -72,5 +72,11 @@
         <root level="INFO">
             <appender-ref ref="FILE_JSON"/>
         </root>
+
+        <!-- Temporary diagnostics for WebSocket transport errors and connection closures. -->
+        <logger name="org.springframework.web.socket.handler.LoggingWebSocketHandlerDecorator"
+                level="DEBUG"/>
+        <logger name="org.springframework.web.socket.messaging.SubProtocolWebSocketHandler"
+                level="DEBUG"/>
     </springProfile>
 </configuration>
